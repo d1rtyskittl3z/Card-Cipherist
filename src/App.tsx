@@ -4,9 +4,14 @@
  */
 
 import { CardCreatorLayout } from './components/CardCreatorLayout';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
-  return <CardCreatorLayout />;
+  return (
+    <ErrorBoundary>
+      <CardCreatorLayout />
+    </ErrorBoundary>
+  );
 }
 
 export default App;

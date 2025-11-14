@@ -5,6 +5,7 @@
 
 import { Box, Heading, HStack, Accordion } from '@chakra-ui/react';
 import { CardCanvas } from './CardCanvas';
+import { CanvasErrorBoundary } from './CanvasErrorBoundary';
 import { ScryfallImportTab } from './tabs/ScryfallImportTab';
 import { FrameTab } from './tabs/FrameTab';
 import { TextTab } from './tabs/TextTab';
@@ -63,7 +64,9 @@ export const CardCreatorLayout = () => {
           h="100%"
           position="relative"
         >
-          <CardCanvas />
+          <CanvasErrorBoundary>
+            <CardCanvas />
+          </CanvasErrorBoundary>
         </Box>
 
         {/* Controls Panel */}
