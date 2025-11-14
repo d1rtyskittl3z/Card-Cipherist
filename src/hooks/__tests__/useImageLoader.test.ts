@@ -5,7 +5,7 @@ import { useImageLoader } from '../useImageLoader';
 describe('useImageLoader', () => {
   it('should initialize with default state', () => {
     const { result } = renderHook(() => useImageLoader());
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
   });
 

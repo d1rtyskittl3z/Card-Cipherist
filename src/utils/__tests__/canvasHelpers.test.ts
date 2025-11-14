@@ -37,7 +37,7 @@ describe('canvasHelpers', () => {
     it('should handle margin offset', () => {
       const cardWithMargin = { ...mockCard, marginY: 0.1 };
       const result = scaleY(cardWithMargin as Card, 0.5);
-      expect(result).toBe(1688.4); // (0.5 + 0.1) * 2814
+      expect(result).toBe(1688); // Math.round((0.5 + 0.1) * 2814)
     });
   });
 
@@ -57,7 +57,7 @@ describe('canvasHelpers', () => {
   describe('scaleHeight', () => {
     it('should scale normalized height to pixels', () => {
       const result = scaleHeight(mockCard as Card, 0.6);
-      expect(result).toBe(1688.4); // 0.6 * 2814
+      expect(result).toBe(1688); // Math.round(0.6 * 2814)
     });
   });
 });
