@@ -20,6 +20,7 @@ import { useTextFieldRenderer } from './useTextFieldRenderer';
 import { drawSagaLayer } from '../utils/sagaHelpers';
 import { drawPlaneswalkerPreLayer, drawPlaneswalkerPostLayer, ensurePlaneswalkerAssets, } from '../utils/planeswalkerHelpers';
 import { getStationImage, shouldUseStationLayers } from '../utils/stationHelpers';
+import { ALL_CANVAS_LAYERS, STANDARD_TEXT_FIELDS } from '../constants';
 
 export const useCanvasRender = () => {
   const card = useCardStore((state) => state.card);
@@ -60,24 +61,7 @@ export const useCanvasRender = () => {
 
     // console.log(`Initializing canvases: ${width}x${height}, Margins: ${currentCard.marginX}, ${currentCard.marginY}`);
 
-    const canvasNames = [
-      'card',
-      'frame',
-      'frameMasking',
-      'frameCompositing',
-      'saga',
-      'planeswalkerPre',
-      'planeswalkerPost',
-      'stationPre',
-      'stationPost',
-      'text',
-      'paragraph',
-      'line',
-      'watermark',
-      'bottomInfo',
-      'guidelines',
-      'prePT',
-    ] as const;
+    const canvasNames = ALL_CANVAS_LAYERS;
 
     canvasNames.forEach((name) => {
       const existingCanvas = canvasRefs.current[name];
@@ -597,7 +581,7 @@ export const useCanvasRender = () => {
     textContext.clearRect(0, 0, textCanvas.width, textCanvas.height);
 
     // Render all standard text fields using the new renderer
-    const standardFields = ['mana', 'title', 'type', 'rules', 'pt'];
+    const standardFields = STANDARD_TEXT_FIELDS;
 
     for (const fieldKey of standardFields) {
       // Check if field exists in card text or pack text config

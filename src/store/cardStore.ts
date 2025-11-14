@@ -35,6 +35,7 @@ import {
   createStationDefaults,
   mergeStationDefaults,
 } from '../utils/stationDefaults';
+import { TABS, CARD_VERSIONS, TEXT_FIELDS } from '../constants';
 
 const BASE_WIDTH = 2010;
 const BASE_HEIGHT = 2814;
@@ -383,7 +384,7 @@ export const useCardStore = create<CardState>()(
         selectedMaskIndex: 0,
         selectedTextIndex: 0,
         availableFrames: [],
-        currentTab: 'frame',
+        currentTab: TABS.FRAME,
   planeswalker: null,
         showGuidelines: false,
         showTransparencies: false,
@@ -656,9 +657,9 @@ export const useCardStore = create<CardState>()(
           });
 
           const store = useCardStore.getState();
-          if (store.card.version === 'neoBasics' && store.card.text?.title) {
+          if (store.card.version === CARD_VERSIONS.NEO_BASICS && store.card.text?.[TEXT_FIELDS.TITLE]) {
             const change = computeNeoBasicsChange(NEO_BASICS_MIN_TITLE_HEIGHT);
-            store.updateText('title', {
+            store.updateText(TEXT_FIELDS.TITLE, {
               height: change[1] + NEO_BASICS_BASE_TITLE_HEIGHT,
             });
           }
@@ -673,9 +674,9 @@ export const useCardStore = create<CardState>()(
           set({ neoBasicsTitleHeight: clamped });
 
           const store = useCardStore.getState();
-          if (store.card.version === 'neoBasics' && store.card.text?.title) {
+          if (store.card.version === CARD_VERSIONS.NEO_BASICS && store.card.text?.[TEXT_FIELDS.TITLE]) {
             const change = computeNeoBasicsChange(clamped);
-            store.updateText('title', {
+            store.updateText(TEXT_FIELDS.TITLE, {
               height: change[1] + NEO_BASICS_BASE_TITLE_HEIGHT,
             });
           }
@@ -897,7 +898,7 @@ export const useCardStore = create<CardState>()(
 
 async function refreshNeoBasicsFrames(): Promise<void> {
   const state = useCardStore.getState();
-  if (state.card.version !== 'neoBasics') {
+  if (state.card.version !== CARD_VERSIONS.NEO_BASICS) {
     return;
   }
 

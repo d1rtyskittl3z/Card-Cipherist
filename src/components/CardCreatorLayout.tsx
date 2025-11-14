@@ -20,6 +20,7 @@ import { SaveImportTab } from './tabs/SaveImportTab';
 // import { TutorialTab } from './tabs/TutorialTab'; //  Hidden for now --DSKZ
 import { Toaster } from './ui/toaster';
 import { useCardStore } from '../store/cardStore';
+import { TABS } from '../constants';
 
 export const CardCreatorLayout = () => {
   const hasShownSagaTab = useCardStore((state) => state.hasShownSagaTab);
@@ -93,7 +94,7 @@ export const CardCreatorLayout = () => {
             }}
           >
             <Accordion.Root multiple variant="enclosed">
-              <Accordion.Item value="scryfall">
+              <Accordion.Item value={TABS.SCRYFALL}>
                 <Accordion.ItemTrigger
                   fontSize="md"
                   fontWeight="semibold"
@@ -111,7 +112,7 @@ export const CardCreatorLayout = () => {
                 </Accordion.ItemContent>
               </Accordion.Item>
 
-              <Accordion.Item value="frame">
+              <Accordion.Item value={TABS.FRAME}>
                 <Accordion.ItemTrigger
                   fontSize="md"
                   fontWeight="semibold"
@@ -132,7 +133,7 @@ export const CardCreatorLayout = () => {
 
               {/* Conditionally show Saga accordion item */}
               {hasShownSagaTab && (
-                <Accordion.Item value="saga">
+                <Accordion.Item value={TABS.SAGA}>
                   <Accordion.ItemTrigger
                     fontSize="md"
                     fontWeight="semibold"
@@ -153,7 +154,7 @@ export const CardCreatorLayout = () => {
 
               {/* Conditionally show Planeswalker accordion item */}
               {hasShownPlaneswalkerTab && (
-                <Accordion.Item value="planeswalker">
+                <Accordion.Item value={TABS.PLANESWALKER}>
                   <Accordion.ItemTrigger
                     fontSize="md"
                     fontWeight="semibold"
@@ -174,7 +175,7 @@ export const CardCreatorLayout = () => {
 
               {/* Conditionally show Kamigawa accordion item */}
               {hasShownKamigawaTab && (
-                <Accordion.Item value="kamigawa">
+                <Accordion.Item value={TABS.KAMIGAWA}>
                   <Accordion.ItemTrigger
                     fontSize="md"
                     fontWeight="semibold"
@@ -195,7 +196,7 @@ export const CardCreatorLayout = () => {
 
               {/* Conditionally show Stations accordion item */}
               {hasShownStationsTab && (
-                <Accordion.Item value="stations">
+                <Accordion.Item value={TABS.STATIONS}>
                   <Accordion.ItemTrigger
                     fontSize="md"
                     fontWeight="semibold"
@@ -214,7 +215,7 @@ export const CardCreatorLayout = () => {
                 </Accordion.Item>
               )}
 
-              <Accordion.Item value="text">
+              <Accordion.Item value={TABS.TEXT}>
                 <Accordion.ItemTrigger
                   fontSize="md"
                   fontWeight="semibold"
@@ -232,7 +233,7 @@ export const CardCreatorLayout = () => {
                 </Accordion.ItemContent>
               </Accordion.Item>              
 
-              <Accordion.Item value="art">
+              <Accordion.Item value={TABS.ART}>
                 <Accordion.ItemTrigger
                   fontSize="md"
                   fontWeight="semibold"
@@ -250,7 +251,7 @@ export const CardCreatorLayout = () => {
                 </Accordion.ItemContent>
               </Accordion.Item>
 
-              <Accordion.Item value="setSymbol">
+              <Accordion.Item value={TABS.SET_SYMBOL}>
                 <Accordion.ItemTrigger
                   fontSize="md"
                   fontWeight="semibold"
@@ -268,7 +269,7 @@ export const CardCreatorLayout = () => {
                 </Accordion.ItemContent>
               </Accordion.Item>
 
-              <Accordion.Item value="watermark">
+              <Accordion.Item value={TABS.WATERMARK}>
                 <Accordion.ItemTrigger
                   fontSize="md"
                   fontWeight="semibold"
@@ -286,7 +287,7 @@ export const CardCreatorLayout = () => {
                 </Accordion.ItemContent>
               </Accordion.Item>
 
-              <Accordion.Item value="collector">
+              <Accordion.Item value={TABS.COLLECTOR}>
                 <Accordion.ItemTrigger
                   fontSize="md"
                   fontWeight="semibold"
@@ -304,7 +305,7 @@ export const CardCreatorLayout = () => {
                 </Accordion.ItemContent>
               </Accordion.Item>
 
-              <Accordion.Item value="save">
+              <Accordion.Item value={TABS.SAVE}>
                 <Accordion.ItemTrigger
                   fontSize="md"
                   fontWeight="semibold"
