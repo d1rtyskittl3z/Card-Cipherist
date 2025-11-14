@@ -2,7 +2,7 @@
  * Error Boundary Component
  * Catches React errors and prevents full app crashes
  */
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { Box, Heading, Text, Button, VStack } from '@chakra-ui/react';
 
 interface Props {

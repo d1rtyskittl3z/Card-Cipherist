@@ -2,7 +2,7 @@
  * Canvas-specific Error Boundary
  * Handles canvas rendering errors gracefully
  */
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { Box, Text, VStack, Button } from '@chakra-ui/react';
 
 interface Props {

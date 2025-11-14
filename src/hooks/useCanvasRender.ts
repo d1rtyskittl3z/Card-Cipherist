@@ -593,7 +593,7 @@ export const useCanvasRender = () => {
     // Render any additional custom fields (like nickname)
     if (card.text) {
       for (const fieldKey of Object.keys(card.text)) {
-        if (!standardFields.includes(fieldKey)) {
+        if (!(standardFields as readonly string[]).includes(fieldKey)) {
           renderTextField(textContext, fieldKey);
         }
       }
