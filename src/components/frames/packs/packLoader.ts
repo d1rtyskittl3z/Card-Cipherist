@@ -83,6 +83,14 @@ import NeoBasics from './NeoBasics';
 import StationRegular from './StationRegular';
 import StationBorderless from './StationBorderless';
 import Elemental from './Elemental';
+import Classicshifted from './Classicshifted';
+import ClassicshiftedNickname from './ClassicshiftedNickname';
+import ClassicshiftedLands from './ClassicshiftedLands';
+import ClassicshiftedCIPips from './ClassicshiftedCIPips';
+import ClassicshiftedPlaneswalker from './ClassicshiftedPlaneswalker';
+import ClassicshiftedPlaneswalkerTransform from './ClassicshiftedPlaneswalkerTransform';
+import ClassicshiftedDFC from './ClassicshiftedDFC';
+import ClassicshiftedTransform from './ClassicshiftedTransform';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -170,6 +178,14 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'StationRegular': StationRegular,
   'StationBorderless': StationBorderless,
   'Elemental': Elemental,
+  'Classicshifted': Classicshifted,
+  'ClassicshiftedNickname': ClassicshiftedNickname,
+  'ClassicshiftedLands': ClassicshiftedLands,
+  'ClassicshiftedCIPips': ClassicshiftedCIPips,
+  'ClassicshiftedPlaneswalker': ClassicshiftedPlaneswalker,
+  'ClassicshiftedPlaneswalkerTransform': ClassicshiftedPlaneswalkerTransform,
+  'ClassicshiftedDFC': ClassicshiftedDFC,
+  'ClassicshiftedTransform': ClassicshiftedTransform,
   // Add more packs here as you create them
 };
 
