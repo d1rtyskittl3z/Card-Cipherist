@@ -31,3 +31,7 @@ src/.TMP_Files
 docs
 scripts
 CLAUDE.md
+src/components/PerformanceProfiler.tsx
+src/utils/perfHelpers.ts
+src/utils/performance.ts
+public/test-scenarios.js
