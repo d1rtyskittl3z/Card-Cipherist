@@ -3,22 +3,25 @@
  * Controls placement and chapter counts for Saga cards
  */
 
-import { useMemo } from 'react';
-import { Box, Button, Grid, Heading, HStack, Input, Text, VStack } from '@chakra-ui/react';
-import { Field } from '../ui/field';
+import { useMemo, memo } from 'react';
+import { Box, Button, Grid, Heading, HStack, Text, VStack } from '@chakra-ui/react';
+import { LabeledInput } from '../ui';
 import { useCardStore } from '../../store/cardStore';
-import { applySagaHeights, calculateSagaAbilityHeights, SAGA_ABILITY_KEYS } from '../../utils/sagaHelpers';
+import { useSagaInfo, useCardText, useLoadedPack, useIsSagaCard } from '../../store/selectors';
+import { applySagaHeights, calculateSagaAbilityHeights } from '../../utils/sagaHelpers';
+import { SAGA_ABILITY_KEYS } from '../../constants';
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
-export const SagaTab = () => {
-  const card = useCardStore((state) => state.card);
-  const loadedPack = useCardStore((state) => state.loadedPack);
+const SagaTabComponent = () => {
+  // Use fine-grained selectors
+  const sagaInfo = useSagaInfo();
+  // const version = useCardVersion(); // Unused - removed in Phase 8
+  const text = useCardText();
+  const loadedPack = useLoadedPack();
+  const isSagaCard = useIsSagaCard();
 
-  const sagaInfo = card.saga;
-  const isSagaCard = Boolean(card.version?.toLowerCase().includes('saga') && sagaInfo);
-
-  const maxHeightNormalized = Math.max((card.text?.type?.y ?? 1) - (card.text?.ability0?.y ?? 0), 0);
+  const maxHeightNormalized = Math.max((text?.type?.y ?? 1) - (text?.ability0?.y ?? 0), 0);
 
   const abilityData = useMemo(
     () =>
@@ -26,11 +29,11 @@ export const SagaTab = () => {
         key,
         index,
         label: `Ability ${index + 1}`,
-        height: card.text?.[key]?.height ?? 0,
+        height: text?.[key]?.height ?? 0,
         chapters: sagaInfo?.abilities?.[index] ?? 0,
-        text: card.text?.[key]?.text ?? '',
+        text: text?.[key]?.text ?? '',
       })),
-    [card.text, sagaInfo?.abilities]
+    [text, sagaInfo?.abilities]
   );
 
   if (!isSagaCard) {
@@ -133,37 +136,35 @@ export const SagaTab = () => {
               {ability.label}
             </Heading>
             <VStack align="stretch" gap={3}>
-              <Field label="Ability Height (normalized)">
-                <Input
-                  type="number"
-                  step={0.005}
-                  min={0}
-                  max={1}
-                  value={ability.height.toFixed(4)}
-                  onChange={(event) => {
-                    const next = Number(event.currentTarget.value);
-                    if (!Number.isNaN(next)) {
-                      handleHeightChange(ability.index, next);
-                    }
-                  }}
-                />
-              </Field>
+              <LabeledInput
+                label="Ability Height (normalized)"
+                type="number"
+                step={0.005}
+                min={0}
+                max={1}
+                value={ability.height.toFixed(4)}
+                onChange={(val) => {
+                  const next = Number(val);
+                  if (!Number.isNaN(next)) {
+                    handleHeightChange(ability.index, next);
+                  }
+                }}
+              />
 
-              <Field label="Lore Counters">
-                <Input
-                  type="number"
-                  min={0}
-                  max={6}
-                  step={1}
-                  value={ability.chapters}
-                  onChange={(event) => {
-                    const next = Number(event.currentTarget.value);
-                    if (!Number.isNaN(next)) {
-                      handleChapterChange(ability.index, next);
-                    }
-                  }}
-                />
-              </Field>
+              <LabeledInput
+                label="Lore Counters"
+                type="number"
+                min={0}
+                max={6}
+                step={1}
+                value={ability.chapters}
+                onChange={(val) => {
+                  const next = Number(val);
+                  if (!Number.isNaN(next)) {
+                    handleChapterChange(ability.index, next);
+                  }
+                }}
+              />
 
               {ability.text && (
                 <Box
@@ -194,3 +195,6 @@ export const SagaTab = () => {
     </VStack>
   );
 };
+
+SagaTabComponent.displayName = 'SagaTab';
+export const SagaTab = memo(SagaTabComponent);

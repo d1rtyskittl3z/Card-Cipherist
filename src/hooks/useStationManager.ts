@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useCardStore } from '../store/cardStore';
 import { computeStationTextLayout, deriveStationState, shouldUseStationLayers } from '../utils/stationHelpers';
 import { areStationsEqual } from '../utils/stationDefaults';
+import { TEXT_FIELDS, isStationVersion } from '../constants';
 
 export const useStationManager = (): void => {
   const card = useCardStore((state) => state.card);
@@ -10,7 +11,7 @@ export const useStationManager = (): void => {
   const updateText = useCardStore((state) => state.updateText);
 
   useEffect(() => {
-    if (card.version?.toLowerCase().includes('station')) {
+    if (isStationVersion(card.version)) {
       initializeStation(card.version);
     }
   }, [card.version, initializeStation]);
@@ -32,7 +33,7 @@ export const useStationManager = (): void => {
       const ability = card.text.ability1;
       const { x, y, width, height } = layout.ability1;
       if (ability.x !== x || ability.y !== y || ability.width !== width || ability.height !== height) {
-        updateText('ability1', { x, y, width, height });
+        updateText(TEXT_FIELDS.STATION_ABILITY_1, { x, y, width, height });
       }
     }
 
@@ -40,7 +41,7 @@ export const useStationManager = (): void => {
       const ability = card.text.ability2;
       const { x, y, width, height } = layout.ability2;
       if (ability.x !== x || ability.y !== y || ability.width !== width || ability.height !== height) {
-        updateText('ability2', { x, y, width, height });
+        updateText(TEXT_FIELDS.STATION_ABILITY_2, { x, y, width, height });
       }
     }
   }, [

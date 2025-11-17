@@ -1,4 +1,5 @@
 import type { StationState } from '../types/card.types';
+import { CARD_VERSIONS } from '../constants';
 
 export const LEGACY_CARD_HEIGHT = 2100;
 
@@ -142,7 +143,7 @@ export const applyStationVersionPreset = (station: StationState, version?: strin
 
   const next = cloneStationState(station);
 
-  if (version === 'stationBorderless') {
+  if (version === CARD_VERSIONS.STATION_BORDERLESS) {
     next.borderlessXOffset = 1;
     next.squares[1] = { ...next.squares[1], width: 1712, x: 1 };
     next.squares[2] = { ...next.squares[2], width: 1712, x: 1 };

@@ -8,6 +8,7 @@ import { Field } from './ui/field';
 import { Slider } from './ui/slider';
 import { useCardStore } from '../store/cardStore';
 import { useMemo } from 'react';
+import { COLOR_BLACK, DEFAULT_OPACITY, OVERLAY_DARK_30 } from '../constants';
 
 interface FrameLayerEditorProps {
   isOpen: boolean;
@@ -30,11 +31,11 @@ export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEdit
       (frame.width ?? frame.ogWidth) === frame.ogWidth &&
       (frame.height ?? frame.ogHeight) === frame.ogHeight &&
       (frame.scale ?? frame.ogScale ?? 1) === (frame.ogScale ?? 1) &&
-      (frame.opacity ?? frame.ogOpacity ?? 100) === (frame.ogOpacity ?? 100) &&
+      (frame.opacity ?? frame.ogOpacity ?? DEFAULT_OPACITY) === (frame.ogOpacity ?? DEFAULT_OPACITY) &&
       (frame.hslHue ?? frame.ogHslHue ?? 0) === (frame.ogHslHue ?? 0) &&
       (frame.hslSaturation ?? frame.ogHslSaturation ?? 0) === (frame.ogHslSaturation ?? 0) &&
       (frame.hslLightness ?? frame.ogHslLightness ?? 0) === (frame.ogHslLightness ?? 0) &&
-      (frame.colorOverlay ?? frame.ogColorOverlay ?? '#000000') === (frame.ogColorOverlay ?? '#000000') &&
+      (frame.colorOverlay ?? frame.ogColorOverlay ?? COLOR_BLACK) === (frame.ogColorOverlay ?? COLOR_BLACK) &&
       (frame.colorOverlayCheck ?? frame.ogColorOverlayCheck ?? false) === (frame.ogColorOverlayCheck ?? false) &&
       (frame.visible ?? frame.ogVisible ?? true) === (frame.ogVisible ?? true) &&
       !frame.locked
@@ -49,11 +50,11 @@ export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEdit
       width: frame.ogWidth,
       height: frame.ogHeight,
       scale: frame.ogScale ?? 1,
-      opacity: frame.ogOpacity ?? 100,
+      opacity: frame.ogOpacity ?? DEFAULT_OPACITY,
       hslHue: frame.ogHslHue ?? 0,
       hslSaturation: frame.ogHslSaturation ?? 0,
       hslLightness: frame.ogHslLightness ?? 0,
-      colorOverlay: frame.ogColorOverlay ?? '#000000',
+      colorOverlay: frame.ogColorOverlay ?? COLOR_BLACK,
       colorOverlayCheck: frame.ogColorOverlayCheck ?? false,
       visible: frame.ogVisible ?? true,
       locked: false,
@@ -124,14 +125,14 @@ export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEdit
                     <HStack gap={3}>
                       <Slider
                         flex={1}
-                        value={[frame.opacity ?? 100]}
+                        value={[frame.opacity ?? DEFAULT_OPACITY]}
                         onValueChange={(e: { value: number[] }) => updateFrame(frameIndex, { opacity: e.value[0] })}
                         min={0}
-                        max={100}
+                        max={DEFAULT_OPACITY}
                         step={1}
                       />
                       <Box minW="50px" textAlign="right" fontSize="sm">
-                        {frame.opacity ?? 100}%
+                        {frame.opacity ?? DEFAULT_OPACITY}%
                       </Box>
                     </HStack>
                   </Field>
@@ -266,7 +267,7 @@ export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEdit
                     </Box>
                     <Input
                       type="color"
-                      value={frame.colorOverlay ?? '#000000'}
+                      value={frame.colorOverlay ?? COLOR_BLACK}
                       onChange={(e) => updateFrame(frameIndex, { colorOverlay: e.target.value })}
                       disabled={!frame.colorOverlayCheck}
                       w="60px"
@@ -280,7 +281,7 @@ export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEdit
               {/* Applied Masks Display */}
               <Field label="Applied Masks">
                 <Box
-                  bg="rgba(0, 0, 0, 0.3)"
+                  bg={OVERLAY_DARK_30}
                   borderRadius="md"
                   p={3}
                   minH="60px"

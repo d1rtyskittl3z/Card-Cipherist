@@ -3,10 +3,14 @@
  * Neo Basics-specific controls for stretchable SVG frames and color overrides.
  */
 
-import { ChangeEvent, useMemo } from 'react';
+import { ChangeEvent, useMemo, memo } from 'react';
 import { Box, Button, Heading, Input, SimpleGrid, Text, VStack, chakra } from '@chakra-ui/react';
 import { Field } from '../ui/field';
+import { LabeledInput } from '../ui';
 import { useCardStore } from '../../store/cardStore';
+import { useCardVersion } from '../../store/selectors';
+// Unused selectors - commented out in Phase 8
+// import { useNeoBasicsTitleHeight, useNeoBasicsElements, useNeoBasicsColorOverrides, useIsNeoBasicsCard } from '../../store/selectors';
 import {
   DEFAULT_COLOR_OVERRIDE,
   NEO_BASICS_MAX_TITLE_HEIGHT,
@@ -46,8 +50,13 @@ const formatElementLabel = (name: string): string => {
   return name.charAt(0).toUpperCase() + name.slice(1);
 };
 
-export const KamigawaTab = () => {
-  const cardVersion = useCardStore((state) => state.card.version?.toLowerCase() ?? '');
+const KamigawaTabComponent = () => {
+  const cardVersion = useCardVersion()?.toLowerCase() ?? '';
+  // Unused selector variables - removed in Phase 8
+  // const isNeoBasicsCard = useIsNeoBasicsCard();
+  // const neoTitleHeight = useNeoBasicsTitleHeight();
+  // const neoElements = useNeoBasicsElements();
+  // const neoColorOverrides = useNeoBasicsColorOverrides();
   const neoBasicsTitleHeight = useCardStore((state) => state.neoBasicsTitleHeight);
   const setNeoBasicsTitleHeight = useCardStore((state) => state.setNeoBasicsTitleHeight);
   const neoBasicsElements = useCardStore((state) => state.neoBasicsElements);
@@ -104,21 +113,20 @@ export const KamigawaTab = () => {
           Adjust the Neo Basics title bar stretch. Increasing the value raises the top frame elements
           and adds room for the vertical title treatment.
         </Text>
-        <Field label="Title Bar Height (px)">
-          <Input
-            type="number"
-            min={NEO_BASICS_MIN_TITLE_HEIGHT}
-            max={NEO_BASICS_MAX_TITLE_HEIGHT}
-            step={10}
-            value={neoBasicsTitleHeight}
-            onChange={(event) => {
-              const nextValue = Number(event.currentTarget.value);
-              if (!Number.isNaN(nextValue)) {
-                setNeoBasicsTitleHeight(nextValue);
-              }
-            }}
-          />
-        </Field>
+        <LabeledInput
+          label="Title Bar Height (px)"
+          type="number"
+          min={NEO_BASICS_MIN_TITLE_HEIGHT}
+          max={NEO_BASICS_MAX_TITLE_HEIGHT}
+          step={10}
+          value={neoBasicsTitleHeight}
+          onChange={(val) => {
+            const nextValue = Number(val);
+            if (!Number.isNaN(nextValue)) {
+              setNeoBasicsTitleHeight(nextValue);
+            }
+          }}
+        />
       </Box>
 
       <Box p={4} bg="rgba(0, 0, 0, 0.35)" borderRadius="md">
@@ -202,3 +210,6 @@ export const KamigawaTab = () => {
     </VStack>
   );
 };
+
+KamigawaTabComponent.displayName = 'KamigawaTab';
+export const KamigawaTab = memo(KamigawaTabComponent);

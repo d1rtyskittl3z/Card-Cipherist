@@ -1,10 +1,16 @@
 /**
  * Canvas Helper Utilities
  * Port from creator-23.js drawing functions
+ *
+ * Provides coordinate conversion between normalized (0-1) and pixel coordinates,
+ * canvas initialization, image loading, and drawing helpers.
  */
 
 import type { Card, Frame, CardBounds } from '../types/card.types';
 import type { FramePackTemplate } from '../components/frames/packs/types';
+import type { NormalizedCoord, PixelCoord } from '../types/coordinates';
+import { toNormalized, toPixel } from '../types/coordinates';
+import { createError, ErrorType, logError } from './errors';
 
 /**
  * Calculate auto-fit art transformation to cover artBounds
@@ -82,6 +88,9 @@ export const calculateAutoFitWatermark = (
 
 /**
  * Scaling functions based on card dimensions
+ * These convert normalized coordinates (0-1) to pixel coordinates on canvas
+ *
+ * Note: scaleX and scaleY add margins, scaleWidth and scaleHeight do not
  */
 export const scaleX = (card: Card, input: number): number => {
   return Math.round((input + card.marginX) * card.width);
@@ -100,6 +109,74 @@ export const scaleHeight = (card: Card, input: number): number => {
 };
 
 /**
+ * Type-safe coordinate scaling functions using branded types
+ * Prefer these when working with explicit coordinate types
+ */
+
+/**
+ * Converts normalized X coordinate to pixel coordinate with margin
+ * @param card - Card with dimensions and margins
+ * @param normalizedX - Normalized X coordinate (0-1)
+ * @returns Pixel X coordinate
+ */
+export const normalizedToPixelX = (card: Card, normalizedX: NormalizedCoord): PixelCoord => {
+  return toPixel(Math.round((normalizedX + card.marginX) * card.width));
+};
+
+/**
+ * Converts normalized Y coordinate to pixel coordinate with margin
+ * @param card - Card with dimensions and margins
+ * @param normalizedY - Normalized Y coordinate (0-1)
+ * @returns Pixel Y coordinate
+ */
+export const normalizedToPixelY = (card: Card, normalizedY: NormalizedCoord): PixelCoord => {
+  return toPixel(Math.round((normalizedY + card.marginY) * card.height));
+};
+
+/**
+ * Converts normalized width to pixel width (no margin)
+ * @param card - Card with dimensions
+ * @param normalizedWidth - Normalized width (0-1)
+ * @returns Pixel width
+ */
+export const normalizedToPixelWidth = (card: Card, normalizedWidth: NormalizedCoord): PixelCoord => {
+  return toPixel(Math.round(normalizedWidth * card.width));
+};
+
+/**
+ * Converts normalized height to pixel height (no margin)
+ * @param card - Card with dimensions
+ * @param normalizedHeight - Normalized height (0-1)
+ * @returns Pixel height
+ */
+export const normalizedToPixelHeight = (
+  card: Card,
+  normalizedHeight: NormalizedCoord
+): PixelCoord => {
+  return toPixel(Math.round(normalizedHeight * card.height));
+};
+
+/**
+ * Converts pixel X coordinate back to normalized (without margin)
+ * @param card - Card with dimensions
+ * @param pixelX - Pixel X coordinate
+ * @returns Normalized X coordinate
+ */
+export const pixelToNormalizedX = (card: Card, pixelX: PixelCoord): NormalizedCoord => {
+  return toNormalized(pixelX / card.width - card.marginX, true);
+};
+
+/**
+ * Converts pixel Y coordinate back to normalized (without margin)
+ * @param card - Card with dimensions
+ * @param pixelY - Pixel Y coordinate
+ * @returns Normalized Y coordinate
+ */
+export const pixelToNormalizedY = (card: Card, pixelY: PixelCoord): NormalizedCoord => {
+  return toNormalized(pixelY / card.height - card.marginY, true);
+};
+
+/**
  * Initialize a canvas with proper dimensions
  */
 export const initializeCanvas = (
@@ -110,7 +187,18 @@ export const initializeCanvas = (
   canvas.width = width;
   canvas.height = height;
   const context = canvas.getContext('2d');
-  if (!context) throw new Error('Could not get 2D context');
+  
+  if (!context) {
+    const error = createError(
+      ErrorType.CANVAS_ERROR,
+      'Failed to get 2D canvas context',
+      { width, height },
+      false
+    );
+    logError(error, 'initializeCanvas');
+    throw new Error('Could not get 2D context - canvas rendering is not available');
+  }
+  
   return { canvas, context };
 };
 

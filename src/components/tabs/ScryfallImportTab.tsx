@@ -3,15 +3,26 @@
  * Import card data from Scryfall API
  */
 
-import { Box, Button, Heading, HStack, Input, VStack, Text } from '@chakra-ui/react';
-import { Field } from '../ui/field';
-import { NativeSelectRoot, NativeSelectField } from '../ui/native-select';
+import { memo } from 'react';
+import { Box, Button, Heading, HStack, VStack, Text } from '@chakra-ui/react';
 import { Checkbox } from '../ui/checkbox';
-import { toaster } from '../ui/toaster';
+import { toaster } from '../ui/toaster-instance';
+import { LabeledInput, LabeledSelect } from '../ui';
 import { useCardStore } from '../../store/cardStore';
+import { useMediaStore } from '../../store/mediaStore';
 import { useImageLoader } from '../../hooks/useImageLoader';
 import { useState, useMemo, useEffect } from 'react';
 import { convertToSmartQuotes } from '../../utils/smartQuotes';
+import {
+  retryAsync,
+  isNetworkError,
+  isRateLimitError,
+  isNotFoundError,
+  createError,
+  ErrorType,
+  logError,
+} from '../../utils/errors';
+import { TEXT_FIELDS } from '../../constants';
 
 const languages = [
   { label: 'English', value: 'en' },                                          
@@ -75,7 +86,7 @@ interface ScryfallApiResponse {
   [key: string]: unknown;
 }
 
-export const ScryfallImportTab = () => {
+const ScryfallImportTabComponent = () => {
   const [cardName, setCardName] = useState('');
   const [language, setLanguage] = useState('en');
   const [apiResponseData, setApiResponseData] = useState<ScryfallApiResponse | null>(null);
@@ -83,9 +94,9 @@ export const ScryfallImportTab = () => {
   const [selectedCard, setSelectedCard] = useState('');
 
   // Get actions from card store
+  const updateCard = useCardStore((state) => state.updateCard);
   const updateText = useCardStore((state) => state.updateText);
   const updateSetSymbol = useCardStore((state) => state.updateSetSymbol);
-  const updateCard = useCardStore((state) => state.updateCard);
   const setSetCode = useCardStore((state) => state.setSetCode);
   const setRarity = useCardStore((state) => state.setRarity);
   const setCollectorSetCode = useCardStore((state) => state.setCollectorSetCode);
@@ -94,6 +105,9 @@ export const ScryfallImportTab = () => {
   const setCollectorRarity = useCardStore((state) => state.setCollectorRarity);
   const setCollectorDigits = useCardStore((state) => state.setCollectorDigits);
   const loadedPack = useCardStore((state) => state.loadedPack);
+
+  // Get media actions from media store
+  const updateArt = useMediaStore((state) => state.updateArt);
 
   // Get image loader hook
   const { loadSetSymbol, loadArt } = useImageLoader();
@@ -121,16 +135,16 @@ export const ScryfallImportTab = () => {
     if (!card) return;
 
     // Update the title field with the card name
-    updateText('title', { text: card.name });
+    updateText(TEXT_FIELDS.TITLE, { text: card.name });
 
     // Update the mana field with the mana cost (if it exists)
     if (card.mana_cost) {
-      updateText('mana', { text: card.mana_cost });
+      updateText(TEXT_FIELDS.MANA, { text: card.mana_cost });
     }
 
     // Update the type field with the type line (if it exists)
     if (card.type_line) {
-      updateText('type', { text: card.type_line });
+      updateText(TEXT_FIELDS.TYPE, { text: card.type_line });
     }
 
     // Update the rules text field with oracle text and flavor text
@@ -158,7 +172,7 @@ export const ScryfallImportTab = () => {
 
     // Update the rules text field if we have any text
     if (rulesText) {
-      updateText('rules', { text: rulesText });
+      updateText(TEXT_FIELDS.RULES, { text: rulesText });
     }
 
     // Update the set symbol automatically using Card Cipherist source
@@ -265,7 +279,8 @@ export const ScryfallImportTab = () => {
         const artX = (boundsCenterX - 0.5) * currentCard.width;
         const artY = (boundsCenterY - 0.5) * currentCard.height;
 
-        updateCard({
+        // Update art position and zoom using mediaStore
+        updateArt({
           artX,
           artY,
           artZoom: zoom,
@@ -295,15 +310,63 @@ export const ScryfallImportTab = () => {
       // Build Scryfall API URL
       const url = `https://api.scryfall.com/cards/search?order=released&include_extras=true&unique=art&q=name%3D${cardNameFormatted}&lang%3D${language}`;
 
-      // Make API call
-      const response = await fetch(url);
+      // Make API call with retry logic for network errors
+      const response = await retryAsync(
+        () => fetch(url),
+        {
+          maxRetries: 3,
+          initialDelay: 1000,
+          shouldRetry: (error) => {
+            // Retry on network errors, but not on HTTP errors
+            return isNetworkError(error);
+          },
+        }
+      );
+
+      // Handle HTTP errors
+      if (!response.ok) {
+        if (isRateLimitError(response.status)) {
+          logError(
+            createError(
+              ErrorType.NETWORK_ERROR,
+              'Scryfall API rate limit exceeded',
+              { status: response.status }
+            ),
+            'ScryfallImportTab'
+          );
+          
+          toaster.create({
+            title: 'Rate Limit Exceeded',
+            description: 'Too many requests to Scryfall API. Please wait a moment and try again.',
+            type: 'warning',
+            duration: 5000,
+          });
+          return;
+        }
+
+        if (isNotFoundError(response.status)) {
+          toaster.create({
+            title: 'No Results',
+            description: "Your query didn't match any cards.",
+            type: 'error',
+            duration: 5000,
+          });
+          setApiResponseData(null);
+          setSelectedCard('');
+          return;
+        }
+
+        // Other HTTP errors
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       // Check if the API returned an error or no results
       if (data.object === 'error' || !data.data || data.data.length === 0) {
         toaster.create({
           title: 'No Results',
-          description: "Your query didn't match any cards.",
+          description: data.details || "Your query didn't match any cards.",
           type: 'error',
           duration: 5000,
         });
@@ -320,17 +383,32 @@ export const ScryfallImportTab = () => {
         setSelectedCard(data.data[0].id);
       }
     } catch (error) {
-      console.error('Error fetching from Scryfall:', error);
+      // const errorMessage = error instanceof Error ? error.message : 'Unknown error'; // Unused - removed in Phase 8
 
-      // Show error toast
+      logError(
+        createError(
+          ErrorType.NETWORK_ERROR,
+          'Failed to fetch from Scryfall API',
+          { error, cardName, language }
+        ),
+        'ScryfallImportTab'
+      );
+
+      // Show error toast with more helpful message
+      let description = "Failed to search Scryfall. Please check your connection and try again.";
+      if (isNetworkError(error)) {
+        description = "Network error. Please check your internet connection.";
+      }
+
       toaster.create({
         title: 'Search Error',
-        description: "Your query didn't match any cards.",
+        description,
         type: 'error',
         duration: 5000,
       });
 
       // Clear selection
+      setApiResponseData(null);
       setSelectedCard('');
     }
   };
@@ -346,30 +424,27 @@ export const ScryfallImportTab = () => {
         <Box mb={4}>
           <HStack gap={2}>
             <Box flex="2">
-              <Field label="Card Name:">
-                <Input
-                  placeholder="E.g. Sol Ring"
-                  bg="rgba(0, 0, 0, 0.3)"
-                  value={cardName}
-                  onChange={(e) => setCardName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && cardName.trim()) {
-                      handleSearch();
-                    }
-                  }}
-                />
-              </Field>
+              <LabeledInput
+                label="Card Name:"
+                placeholder="E.g. Sol Ring"
+                bg="rgba(0, 0, 0, 0.3)"
+                value={cardName}
+                onChange={setCardName}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && cardName.trim()) {
+                    handleSearch();
+                  }
+                }}
+              />
             </Box>
             <Box flex="1">
-              <Field label="Language:">
-                <NativeSelectRoot size="sm">
-                  <NativeSelectField
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    items={languages}
-                  />
-                </NativeSelectRoot>
-              </Field>
+              <LabeledSelect
+                label="Language:"
+                size="sm"
+                value={language}
+                onChange={setLanguage}
+                items={languages}
+              />
             </Box>
             <Button
               colorPalette="blue"
@@ -397,18 +472,19 @@ export const ScryfallImportTab = () => {
 
         {/* Select specific card menu */}
         <Box mb={4}>
-          <Field label="Select a specific card to import">
-            <NativeSelectRoot size="sm">
-              <NativeSelectField
-                value={selectedCard}
-                onChange={(e) => setSelectedCard(e.target.value)}
-                items={cardOptions}
-                placeholder="Search for a card first"
-              />
-            </NativeSelectRoot>
-          </Field>
+          <LabeledSelect
+            label="Select a specific card to import"
+            size="sm"
+            value={selectedCard}
+            onChange={setSelectedCard}
+            items={cardOptions}
+            placeholder="Search for a card first"
+          />
         </Box>
       </Box>
     </VStack>
   );
 };
+
+ScryfallImportTabComponent.displayName = 'ScryfallImportTab';
+export const ScryfallImportTab = memo(ScryfallImportTabComponent);

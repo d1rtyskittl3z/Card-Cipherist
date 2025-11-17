@@ -1,7 +1,7 @@
 import type { Card, PlaneswalkerInfo, TextObject } from '../types/card.types';
 import { loadImage, scaleHeight, scaleWidth, scaleX, scaleY } from './canvasHelpers';
+import { PLANESWALKER_ABILITY_KEYS } from '../constants';
 
-export const PLANESWALKER_ABILITY_KEYS = ['ability0', 'ability1', 'ability2', 'ability3'] as const;
 export type PlaneswalkerAbilityKey = (typeof PLANESWALKER_ABILITY_KEYS)[number];
 
 const DEFAULT_X = 0.1167;

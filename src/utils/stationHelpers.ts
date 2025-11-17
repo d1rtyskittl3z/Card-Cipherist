@@ -2,6 +2,7 @@ import type { Card, StationState, TextObject } from '../types/card.types';
 import type { StationColorMode } from '../types/card.types';
 import { loadImage, scaleHeight, scaleY } from './canvasHelpers';
 import { LEGACY_CARD_HEIGHT, cloneStationState } from './stationDefaults';
+import { isStationVersion } from '../constants';
 
 const STATION_IMAGE_CACHE: Record<string, Promise<HTMLImageElement>> = {};
 
@@ -21,7 +22,7 @@ const MODE_TO_COLOR_KEY: Record<Exclude<StationColorMode, 'custom'>, string> = {
 const DEFAULT_VARIANT = 'a';
 
 export const shouldUseStationLayers = (card: Card): boolean => {
-  return Boolean(card.version?.toLowerCase().includes('station') && card.station);
+  return Boolean(isStationVersion(card.version) && card.station);
 };
 
 export const extractManaSymbols = (manaText: string): string[] => {
@@ -103,15 +104,15 @@ export const deriveStationState = (card: Card, station: StationState): StationSt
   if (square2Set) {
     next.squares[2].color = square2Set.square1;
 
+    // Only recalculate opacity in 'auto' mode
+    // For other modes (including non-auto, non-custom), preserve user's manual opacity setting
     if (square2Mode === 'auto') {
       const offset = square2Set.square2OpacityOffset ?? 0.2;
       next.squares[2].opacity = next.disableFirstAbility
         ? next.squares[1].opacity
         : Math.min(1, next.squares[1].opacity + offset);
-    } else if (square2Mode !== 'custom') {
-      const offset = square2Set.square2OpacityOffset ?? 0.2;
-      next.squares[2].opacity = next.disableFirstAbility ? 0.2 : Math.min(1, 0.2 + offset);
     }
+    // Removed the else-if block that was recalculating opacity for non-auto, non-custom modes
   }
 
   const badgeVariant = mapModeToVariant(next.badgeColorMode ?? 'auto', autoColorKey);

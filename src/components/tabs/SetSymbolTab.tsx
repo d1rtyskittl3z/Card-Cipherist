@@ -3,15 +3,19 @@
  * Set symbol upload and positioning interface
  */
 
-import { Box, Button, Heading, Input, VStack, HStack, Text, Drawer, Portal, CloseButton } from '@chakra-ui/react';
+import { memo } from 'react';
+import { Box, Button, Heading, Input, VStack, HStack, Drawer, Portal, CloseButton, Text, Spinner } from '@chakra-ui/react';
 import { Field } from '../ui/field';
-import { NativeSelectRoot, NativeSelectField } from '../ui/native-select';
-import { Switch } from '../ui/switch';
-import { useCardStore } from '../../store/cardStore';
+import { LabeledInput, LabeledSelect, ActionButtonGroup, LabeledSwitch, FileUploadZone } from '../ui';
+// import { useCardStore } from '../../store/cardStore'; // Unused - removed in Phase 8
+import { useMediaStore } from '../../store/mediaStore';
+import { usePreviewCanvasRef, useSetSymbolState } from '../../store/selectors';
 import { useImageLoader } from '../../hooks/useImageLoader';
 import { useCanvasDrag } from '../../hooks/useCanvasDrag';
 import { useRef, useState, useEffect } from 'react';
-import { toaster } from '../ui/toaster';
+import { toaster } from '../ui/toaster-instance';
+import { useDebouncedCallback } from '../../hooks/useDebounce';
+import { SLIDER_DEBOUNCE_MS } from '../../constants/canvas';
 
 // // Set codes that use PNG instead of SVG
 // const PNG_SET_CODES = [
@@ -26,21 +30,18 @@ const symbolSources = [
   { label: 'Community Symbols', value: 'community' },
 ];
 
-export const SetSymbolTab = () => {
-  const setSymbolX = useCardStore((state) => state.card.setSymbolX);
-  const setSymbolY = useCardStore((state) => state.card.setSymbolY);
-  const setSymbolZoom = useCardStore((state) => state.card.setSymbolZoom);
-  const updateSetSymbol = useCardStore((state) => state.updateSetSymbol);
-  const setSetSymbolImage = useCardStore((state) => state.setSetSymbolImage);
-  const previewCanvasRef = useCardStore((state) => state.previewCanvasRef);
-  // Get setCode and rarity from store
-  const setCode = useCardStore((state) => state.setCode);
-  const rarity = useCardStore((state) => state.rarity);
-  const setSetCode = useCardStore((state) => state.setSetCode);
-  const setRarity = useCardStore((state) => state.setRarity);
+const SetSymbolTabComponent = () => {
+  // Use fine-grained selectors
+  const previewCanvasRef = usePreviewCanvasRef();
+  const { setSymbolX, setSymbolY, setSymbolZoom, setCode, rarity } = useSetSymbolState();
+  const updateSetSymbol = useMediaStore((state) => state.updateSetSymbol);
+  const setSetSymbolImage = useMediaStore((state) => state.setSetSymbolImage);
+  const setSetCode = useMediaStore((state) => state.setSetCode);
+  const setRarity = useMediaStore((state) => state.setRarity);
+  const setSymbolImageLoading = useMediaStore((state) => state.setSymbolImageLoading);
+  const setSymbolImageError = useMediaStore((state) => state.setSymbolImageError);
 
   const { loadSetSymbol, loadFromFile, loading, error } = useImageLoader();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [urlInputValue, setUrlInputValue] = useState('');
   const [selectedSource, setSelectedSource] = useState('cardcipherist');
   const [dragEnabled, setDragEnabled] = useState(false);
@@ -49,6 +50,22 @@ export const SetSymbolTab = () => {
   const [loadingCommunitySymbols, setLoadingCommunitySymbols] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Debounced update callbacks for slider inputs
+  const debouncedUpdateX = useDebouncedCallback(
+    (val: number) => updateSetSymbol({ setSymbolX: val }),
+    SLIDER_DEBOUNCE_MS
+  );
+
+  const debouncedUpdateY = useDebouncedCallback(
+    (val: number) => updateSetSymbol({ setSymbolY: val }),
+    SLIDER_DEBOUNCE_MS
+  );
+
+  const debouncedUpdateZoom = useDebouncedCallback(
+    (val: number) => updateSetSymbol({ setSymbolZoom: val }),
+    SLIDER_DEBOUNCE_MS
+  );
 
   // Update canvas ref when preview canvas changes
   useEffect(() => {
@@ -89,36 +106,11 @@ export const SetSymbolTab = () => {
     await loadFromFile(file, 'setSymbol');
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileUpload(file);
-    }
-    // Reset input so same file can be uploaded again
-    e.target.value = '';
-  };
-
   const handleUrlUpload = () => {
     if (!urlInputValue.trim()) return;
 
     loadSetSymbol(urlInputValue);
     setUrlInputValue(''); // Clear input after upload
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFileUpload(file);
-    }
-  };
-
-  const handleFileInputClick = () => {
-    fileInputRef.current?.click();
   };
 
   // Handle symbol lookup
@@ -256,32 +248,11 @@ export const SetSymbolTab = () => {
         </Heading>
 
         {/* Drag and drop zone */}
-        <Box
-          border="2px dashed"
-          borderColor="gray.600"
-          borderRadius="md"
-          p={6}
-          textAlign="center"
-          color="gray.400"
-          cursor="pointer"
-          _hover={{ borderColor: 'gray.500', bg: 'rgba(255, 255, 255, 0.05)' }}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={handleFileInputClick}
-          mb={4}
-        >
-          Drag & Drop or Click to Upload Set Symbol
-          <Box fontSize="xs" mt={1} color="gray.500">
-            Accepts PNG, SVG
-          </Box>
-        </Box>
-
-        <input
-          ref={fileInputRef}
-          type="file"
+        <FileUploadZone
+          label="Drag & Drop or Click to Upload Set Symbol"
+          helperText="Accepts PNG, SVG"
+          onFileSelect={handleFileUpload}
           accept="image/png,image/svg+xml"
-          style={{ display: 'none' }}
-          onChange={handleFileInputChange}
         />
 
         {/* URL Input */}
@@ -315,15 +286,12 @@ export const SetSymbolTab = () => {
 
         {/* Symbol Source Selection */}
         <Box mb={4}>
-          <Field label="Symbol Source:">
-            <NativeSelectRoot size="sm">
-              <NativeSelectField
-                value={selectedSource}
-                onChange={(e) => setSelectedSource(e.target.value)}
-                items={symbolSources}
-              />
-            </NativeSelectRoot>
-          </Field>
+          <LabeledSelect
+            label="Symbol Source:"
+            value={selectedSource}
+            onChange={setSelectedSource}
+            items={symbolSources}
+          />
         </Box>
 
         {/* Set Code and Rarity Inputs */}
@@ -380,6 +348,20 @@ export const SetSymbolTab = () => {
             )}
           </HStack>
         </Box>
+
+        {/* Loading/Error States */}
+        {setSymbolImageLoading && (
+          <HStack p={3} bg="blue.900" color="blue.100" borderRadius="md" mb={4}>
+            <Spinner size="sm" />
+            <Box>Loading set symbol...</Box>
+          </HStack>
+        )}
+
+        {setSymbolImageError && (
+          <Box p={3} bg="red.900" color="red.100" borderRadius="md" mb={4}>
+            <strong>Set Symbol Loading Error:</strong> {setSymbolImageError}
+          </Box>
+        )}
       </Box>
 
       <Box>
@@ -387,53 +369,43 @@ export const SetSymbolTab = () => {
           Set Symbol Position
         </Heading>
 
-        <Box mb={4}>
-          <Switch
-            checked={dragEnabled}
-            onCheckedChange={(e) => setDragEnabled(e.checked)}
-            colorPalette="blue"
-          >
-            <Text fontSize="sm">Drag to move set symbol (hold shift to zoom)</Text>
-          </Switch>
-        </Box>
+        <LabeledSwitch
+          label="Drag to move set symbol (hold shift to zoom)"
+          checked={dragEnabled}
+          onCheckedChange={setDragEnabled}
+        />
 
         <VStack align="stretch" gap={3}>
           <HStack gap={2}>
-            <Box flex="1">
-              <Field label="X Position">
-                <Input
-                  type="number"
-                  value={setSymbolX}
-                  onChange={(e) => updateSetSymbol({ setSymbolX: Number(e.target.value) })}
-                />
-              </Field>
-            </Box>
+            <LabeledInput
+              label="X Position"
+              type="number"
+              value={setSymbolX}
+              onChange={(val) => debouncedUpdateX(Number(val))}
+              flex="1"
+            />
 
-            <Box flex="1">
-              <Field label="Y Position">
-                <Input
-                  type="number"
-                  value={setSymbolY}
-                  onChange={(e) => updateSetSymbol({ setSymbolY: Number(e.target.value) })}
-                />
-              </Field>
-            </Box>
+            <LabeledInput
+              label="Y Position"
+              type="number"
+              value={setSymbolY}
+              onChange={(val) => debouncedUpdateY(Number(val))}
+              flex="1"
+            />
 
-            <Box flex="1">
-              <Field label="Zoom">
-                <Input
-                  type="number"
-                  step={0.01}
-                  min={0.1}
-                  max={5}
-                  value={setSymbolZoom}
-                  onChange={(e) => updateSetSymbol({ setSymbolZoom: Number(e.target.value) })}
-                />
-              </Field>
-            </Box>
+            <LabeledInput
+              label="Zoom"
+              type="number"
+              step={0.01}
+              min={0.1}
+              max={5}
+              value={setSymbolZoom}
+              onChange={(val) => debouncedUpdateZoom(Number(val))}
+              flex="1"
+            />
           </HStack>
 
-          <HStack gap={2}>
+          <ActionButtonGroup layout="hstack" gap={2}>
             <Button
               onClick={() =>
                 updateSetSymbol({
@@ -462,7 +434,7 @@ export const SetSymbolTab = () => {
             >
               Remove Set Symbol
             </Button>
-          </HStack>
+          </ActionButtonGroup>
         </VStack>
       </Box>
 
@@ -531,3 +503,6 @@ export const SetSymbolTab = () => {
     </VStack>
   );
 };
+
+SetSymbolTabComponent.displayName = 'SetSymbolTab';
+export const SetSymbolTab = memo(SetSymbolTabComponent);

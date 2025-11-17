@@ -1,4 +1,6 @@
 import type { FramePackTemplate } from './types';
+import { validateFramePack } from '../../../types/validation';
+import { createError, ErrorType, logError, type Result, Ok, Err } from '../../../utils/errors';
 
 // Import all pack modules statically
 import M15Regular1 from './M15Regular-1';
@@ -191,15 +193,76 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
 
 /**
  * Pack Loader
- * Loads frame pack data based on pack ID
+ * Loads frame pack data based on pack ID with validation
+ * 
+ * @param packId - The ID of the pack to load
+ * @param skipValidation - Skip validation (for performance in production, default: false)
+ * @returns Result with pack data or error message
  */
-export async function loadFramePack(packId: string): Promise<FramePackTemplate | null> {
+export async function loadFramePack(
+  packId: string,
+  skipValidation = false
+): Promise<Result<FramePackTemplate>> {
+  // Check if pack exists in registry
   const pack = PACK_REGISTRY[packId];
   if (!pack) {
-    console.error(`Frame pack not found: ${packId}`);
-    return null;
+    const error = createError(
+      ErrorType.FRAME_PACK_ERROR,
+      `Frame pack not found: ${packId}`,
+      { packId, availablePacks: AVAILABLE_PACKS },
+      false
+    );
+    logError(error, 'loadFramePack');
+    return Err(`Frame pack "${packId}" not found`);
   }
-  return pack;
+
+  // Skip validation in production for performance (packs are static and pre-validated)
+  if (skipValidation || !import.meta.env.DEV) {
+    return Ok(pack);
+  }
+
+  // Validate pack structure in dev mode
+  const validationResult = validateFramePack(pack);
+
+  if (!validationResult.success) {
+    const error = createError(
+      ErrorType.VALIDATION_ERROR,
+      `Invalid frame pack structure: ${packId}`,
+      {
+        packId,
+        validationErrors: validationResult.errorMessage,
+      },
+      false
+    );
+    logError(error, 'loadFramePack');
+    return Err(validationResult.errorMessage || 'Invalid frame pack structure');
+  }
+
+  return Ok(validationResult.data as FramePackTemplate);
+}
+
+/**
+ * Validates all packs in the registry
+ * Useful for development/testing to catch issues early
+ * 
+ * @returns Array of validation errors (empty if all valid)
+ */
+export function validateAllPacks(): Array<{ packId: string; errors: string }> {
+  const errors: Array<{ packId: string; errors: string }> = [];
+
+  for (const packId of AVAILABLE_PACKS) {
+    const pack = PACK_REGISTRY[packId];
+    const validationResult = validateFramePack(pack);
+
+    if (!validationResult.success) {
+      errors.push({
+        packId,
+        errors: validationResult.errorMessage || 'Unknown validation error',
+      });
+    }
+  }
+
+  return errors;
 }
 
 // Export available pack IDs

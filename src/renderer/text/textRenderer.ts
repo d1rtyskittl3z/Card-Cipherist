@@ -13,8 +13,8 @@ import type { SymbolAtlas } from './symbols';
 import { preprocessFieldText, tokenize } from './tokenizer';
 import { layoutText } from './layout';
 import { drawLayout } from './draw';
-
-const CANVAS_MARGIN = 300;
+import { trySync, ErrorType, logError, createError, type Result } from '../../utils/errors';
+import { CANVAS_MARGIN } from '../../constants';
 
 /**
  * Render a text field to canvas
@@ -31,6 +31,7 @@ const CANVAS_MARGIN = 300;
  * @param atlas - Symbol atlas for mana icons
  * @param tempCanvases - Temporary canvases for rendering
  * @param options - Render options (hide reminder text, etc.)
+ * @returns Result indicating success or failure with error details
  */
 export function renderField(
   ctx: CanvasRenderingContext2D,
@@ -39,100 +40,103 @@ export function renderField(
   atlas: SymbolAtlas,
   tempCanvases: TextCanvasRefs,
   options: RenderOptions = {}
-): void {
-  // Calculate dimensions
-  const textWidth = packMetrics.scaleWidth(fieldSpec.width);
-  const textHeight = packMetrics.scaleHeight(fieldSpec.height);
-  const startingTextSize = packMetrics.scaleHeight(fieldSpec.size);
+): Result<void> {
+  // Wrap everything in error handling
+  return trySync(() => {
+    // Calculate dimensions
+    const textWidth = packMetrics.scaleWidth(fieldSpec.width);
+    const textHeight = packMetrics.scaleHeight(fieldSpec.height);
+    const startingTextSize = packMetrics.scaleHeight(fieldSpec.size);
 
-  // Size temp canvases
-  const arcRadius = packMetrics.scaleHeight(fieldSpec.arcRadius || 0);
-  const canvasMargin = arcRadius > 0 ? CANVAS_MARGIN + arcRadius : CANVAS_MARGIN;
+    // Size temp canvases
+    const arcRadius = packMetrics.scaleHeight(fieldSpec.arcRadius || 0);
+    const canvasMargin = arcRadius > 0 ? CANVAS_MARGIN + arcRadius : CANVAS_MARGIN;
 
-  // When manaPlacement is active the field width/height can be 0, but symbols use
-  // absolute card coordinates. Ensure the temp canvases are large enough so those
-  // symbols are not clipped off the canvas bounds.
-  const usesManaPlacement = !!(fieldSpec.manaPlacement && fieldSpec.manaPlacement.x?.length);
-  const effectiveTextWidth = usesManaPlacement ? packMetrics.cardWidth : textWidth;
-  const effectiveTextHeight = usesManaPlacement ? packMetrics.cardHeight : textHeight;
+    // When manaPlacement is active the field width/height can be 0, but symbols use
+    // absolute card coordinates. Ensure the temp canvases are large enough so those
+    // symbols are not clipped off the canvas bounds.
+    const usesManaPlacement = !!(fieldSpec.manaPlacement && fieldSpec.manaPlacement.x?.length);
+    const effectiveTextWidth = usesManaPlacement ? packMetrics.cardWidth : textWidth;
+    const effectiveTextHeight = usesManaPlacement ? packMetrics.cardHeight : textHeight;
 
-  tempCanvases.paragraph.width = effectiveTextWidth + 2 * canvasMargin;
-  tempCanvases.paragraph.height = Math.max(effectiveTextHeight, startingTextSize) + 2 * canvasMargin;
-  tempCanvases.line.width = effectiveTextWidth + 2 * canvasMargin;
-  tempCanvases.line.height = startingTextSize + 2 * canvasMargin;
+    tempCanvases.paragraph.width = effectiveTextWidth + 2 * canvasMargin;
+    tempCanvases.paragraph.height = Math.max(effectiveTextHeight, startingTextSize) + 2 * canvasMargin;
+    tempCanvases.line.width = effectiveTextWidth + 2 * canvasMargin;
+    tempCanvases.line.height = startingTextSize + 2 * canvasMargin;
 
-  // Preprocess text
-  const processedText = preprocessFieldText(fieldSpec.text, {
-    cardName: options.cardName,
-    cardNickname: options.cardNickname,
-    hideReminderText: options.hideReminderText,
-    italicizeReminderText: options.italicizeReminderText,
-    allCaps: fieldSpec.allCaps,
-    showsFlavorBar: options.showsFlavorBar,
-    version: options.version,
-  });
+    // Preprocess text
+    const processedText = preprocessFieldText(fieldSpec.text, {
+      cardName: options.cardName,
+      cardNickname: options.cardNickname,
+      hideReminderText: options.hideReminderText,
+      italicizeReminderText: options.italicizeReminderText,
+      allCaps: fieldSpec.allCaps,
+      showsFlavorBar: options.showsFlavorBar,
+      version: options.version,
+    });
 
-  // Tokenize
-  const tokens = tokenize(processedText, {
-    filterSpaces: fieldSpec.manaCost,
-    vertical: !!fieldSpec.vertical,  // Convert string | boolean to boolean
-    manaCost: fieldSpec.manaCost,
-    startingTextSize,
-  });
+    // Tokenize
+    const tokens = tokenize(processedText, {
+      filterSpaces: fieldSpec.manaCost,
+      vertical: !!fieldSpec.vertical,  // Convert string | boolean to boolean
+      manaCost: fieldSpec.manaCost,
+      startingTextSize,
+    });
 
-  // Layout with shrink-to-fit loop
-  let currentTextSize = startingTextSize;
-  let layout = layoutText(
-    tokens,
-    { ...fieldSpec, size: currentTextSize / packMetrics.cardHeight },
-    packMetrics,
-    atlas,
-    tempCanvases.line,
-    options
-  );
+    // Layout with shrink-to-fit loop
+    let currentTextSize = startingTextSize;
+    let layout = layoutText(
+      tokens,
+      { ...fieldSpec, size: currentTextSize / packMetrics.cardHeight },
+      packMetrics,
+      atlas,
+      tempCanvases.line,
+      options
+    );
 
-  // Shrink-to-fit loop for bounded text
-  const bounded = usesManaPlacement ? false : (fieldSpec.bounded ?? true);
-  if (!usesManaPlacement) {
-    while (
-      layout.overflow &&
-      !fieldSpec.oneLine &&
-      currentTextSize > 1 &&
-      bounded &&
-      arcRadius === 0
-    ) {
-      currentTextSize -= 1;
-      layout = layoutText(
-        tokens,
-        { ...fieldSpec, size: currentTextSize / packMetrics.cardHeight },
-        packMetrics,
-        atlas,
-        tempCanvases.line,
-        options
-      );
+    // Shrink-to-fit loop for bounded text
+    const bounded = usesManaPlacement ? false : (fieldSpec.bounded ?? true);
+    if (!usesManaPlacement) {
+      while (
+        layout.overflow &&
+        !fieldSpec.oneLine &&
+        currentTextSize > 1 &&
+        bounded &&
+        arcRadius === 0
+      ) {
+        currentTextSize -= 1;
+        layout = layoutText(
+          tokens,
+          { ...fieldSpec, size: currentTextSize / packMetrics.cardHeight },
+          packMetrics,
+          atlas,
+          tempCanvases.line,
+          options
+        );
+      }
     }
-  }
 
-  // Single-line shrink-to-fit
-  if (!usesManaPlacement) {
-    while (fieldSpec.oneLine && layout.overflow && currentTextSize > 1) {
-      currentTextSize -= 1;
-      layout = layoutText(
-        tokens,
-        { ...fieldSpec, size: currentTextSize / packMetrics.cardHeight },
-        packMetrics,
-        atlas,
-        tempCanvases.line,
-        options
-      );
+    // Single-line shrink-to-fit
+    if (!usesManaPlacement) {
+      while (fieldSpec.oneLine && layout.overflow && currentTextSize > 1) {
+        currentTextSize -= 1;
+        layout = layoutText(
+          tokens,
+          { ...fieldSpec, size: currentTextSize / packMetrics.cardHeight },
+          packMetrics,
+          atlas,
+          tempCanvases.line,
+          options
+        );
+      }
     }
-  }
 
-  // Draw final layout
-  drawLayout(ctx, layout, fieldSpec, packMetrics, tempCanvases, {
-    // Note: ptShift, permaShift, rotation are handled within layout
-    // and stored in the layout result if needed
-  });
+    // Draw final layout
+    drawLayout(ctx, layout, fieldSpec, packMetrics, tempCanvases, {
+      // Note: ptShift, permaShift, rotation are handled within layout
+      // and stored in the layout result if needed
+    });
+  }, ErrorType.TEXT_RENDER_ERROR);
 }
 
 /**
@@ -170,6 +174,7 @@ export function createTempCanvases(
  * Render multiple fields to a canvas
  *
  * Convenience method for rendering common card fields.
+ * Continues rendering other fields even if one fails.
  *
  * @param ctx - Target canvas context
  * @param fields - Map of field name to FieldSpec
@@ -177,6 +182,7 @@ export function createTempCanvases(
  * @param atlas - Symbol atlas
  * @param tempCanvases - Temp canvases
  * @param options - Render options
+ * @returns Object with errors array (empty if all successful)
  */
 export function renderFields(
   ctx: CanvasRenderingContext2D,
@@ -185,14 +191,30 @@ export function renderFields(
   atlas: SymbolAtlas,
   tempCanvases: TextCanvasRefs,
   options: RenderOptions = {}
-): void {
+): { errors: Array<{ field: string; error: string }> } {
   // Clear target canvas
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  // Render each field
-  for (const fieldSpec of Object.values(fields)) {
+  const errors: Array<{ field: string; error: string }> = [];
+
+  // Render each field, collecting errors but continuing on failure
+  for (const [fieldName, fieldSpec] of Object.entries(fields)) {
     if (fieldSpec.text) {
-      renderField(ctx, fieldSpec, packMetrics, atlas, tempCanvases, options);
+      const result = renderField(ctx, fieldSpec, packMetrics, atlas, tempCanvases, options);
+      
+      if (!result.success) {
+        errors.push({ field: fieldName, error: result.error });
+        logError(
+          createError(
+            ErrorType.TEXT_RENDER_ERROR,
+            `Failed to render field "${fieldName}": ${result.error}`,
+            { fieldName, fieldSpec }
+          ),
+          'renderFields'
+        );
+      }
     }
   }
+
+  return { errors };
 }

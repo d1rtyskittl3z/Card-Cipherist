@@ -3,10 +3,12 @@
  * Frame selection and management interface
  */
 
+import { memo } from 'react';
 import { Box, Heading, Input, VStack, HStack, Button, SimpleGrid, Checkbox, Collapsible, Image, IconButton, RadioCard } from '@chakra-ui/react';
 import { Field } from '../ui/field';
 import { NativeSelectRoot, NativeSelectField } from '../ui/native-select';
-import { toaster } from '../ui/toaster';
+import { FileUploadZone } from '../ui';
+import { toaster } from '../ui/toaster-instance';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import type { LegacyGroup } from '../frames/groups/types';
 import type { Card, TextObject, PlaneswalkerInfo, FrameColorOverride } from '../../types/card.types';
@@ -18,11 +20,17 @@ import { FrameLayerEditor } from '../FrameLayerEditor';
 import { useCardStore } from '../../store/cardStore';
 import { applySagaHeights, calculateSagaAbilityHeights } from '../../utils/sagaHelpers';
 import {
+  useShowGuidelines,
+  useShowTransparencies,
+  useIsFrameEditorOpen,
+  useEditingFrameIndex,
+} from '../../store/selectors';
+import {
   adjustPlaneswalkerTextBounds,
   applyPlaneswalkerLayout,
   computePlaneswalkerCount,
-  PLANESWALKER_ABILITY_KEYS,
 } from '../../utils/planeswalkerHelpers';
+import { PLANESWALKER_ABILITY_KEYS } from '../../constants';
 import { DEFAULT_COLOR_OVERRIDE } from '../../utils/neoBasics';
 
 // Import all frame groups
@@ -70,15 +78,16 @@ type SearchResult =
   | { type: 'group'; groupId: string; groupLabel: string }
   | { type: 'pack'; groupId: string; packId: string; packLabel: string; groupLabel: string };
 
-export const FrameTab = () => {
+const FrameTabComponent = () => {
   const addFrame = useCardStore((state) => state.addFrame);
-  const showGuidelines = useCardStore((state) => state.showGuidelines);
+  // Use fine-grained selectors for UI state
+  const showGuidelines = useShowGuidelines();
   const setShowGuidelinesStore = useCardStore((state) => state.setShowGuidelines);
-  const showTransparencies = useCardStore((state) => state.showTransparencies);
+  const showTransparencies = useShowTransparencies();
   const setShowTransparenciesStore = useCardStore((state) => state.setShowTransparencies);
   const setLoadedPackStore = useCardStore((state) => state.setLoadedPack);
-  const isFrameEditorOpen = useCardStore((state) => state.isFrameEditorOpen);
-  const editingFrameIndex = useCardStore((state) => state.editingFrameIndex);
+  const isFrameEditorOpen = useIsFrameEditorOpen();
+  const editingFrameIndex = useEditingFrameIndex();
   const closeFrameEditor = useCardStore((state) => state.closeFrameEditor);
   const setHasShownSagaTab = useCardStore((state) => state.setHasShownSagaTab);
   const setHasShownPlaneswalkerTab = useCardStore((state) => state.setHasShownPlaneswalkerTab);
@@ -207,7 +216,21 @@ export const FrameTab = () => {
       return;
     }
 
-    loadFramePack(selectedPackId).then((pack) => {
+    loadFramePack(selectedPackId).then((result) => {
+      // Handle load failure
+      if (!result.success) {
+        toaster.create({
+          title: 'Error Loading Frame Pack',
+          description: result.error,
+          type: 'error',
+          duration: 5000,
+        });
+        setLoadedPack(null);
+        setLoadedPackStore(null);
+        return;
+      }
+
+      const pack = result.data;
       const store = useCardStore.getState();
       setLoadedPack(pack);
       setLoadedPackStore(pack); // Update store for guidelines
@@ -688,33 +711,14 @@ export const FrameTab = () => {
     }
   };
 
-  // Handle drag and drop (unified for both frames and masks)
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (!dragDropType) return; // Don't allow drop if no type selected
-
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      if (dragDropType === 'frame') {
-        handleFileUpload(file);
-      } else if (dragDropType === 'mask') {
-        handleMaskFileUpload(file);
-      }
-    }
-  };
-
-  // Handle file input click (unified)
-  const handleFileInputClick = () => {
+  // Unified drag-and-drop handler for FileUploadZone
+  const handleDragDropFileSelect = (file: File) => {
     if (!dragDropType) return;
 
     if (dragDropType === 'frame') {
-      fileInputRef.current?.click();
+      handleFileUpload(file);
     } else if (dragDropType === 'mask') {
-      maskFileInputRef.current?.click();
+      handleMaskFileUpload(file);
     }
   };
 
@@ -1635,19 +1639,15 @@ export const FrameTab = () => {
 
                 {/* Drag and drop zone */}
                 <Box mt={3}>
-                  <Box
-                    border="2px dashed"
+                  <FileUploadZone
+                    label=""
+                    onFileSelect={handleDragDropFileSelect}
+                    accept="image/png,image/jpeg,image/jpg"
+                    disabled={!dragDropType}
                     borderColor={dragDropType ? 'gray.600' : 'gray.700'}
-                    borderRadius="md"
-                    p={6}
-                    textAlign="center"
-                    color={dragDropType ? 'gray.400' : 'gray.600'}
-                    cursor={dragDropType ? 'pointer' : 'not-allowed'}
-                    opacity={dragDropType ? 1 : 0.5}
-                    _hover={dragDropType ? { borderColor: 'gray.500', bg: 'rgba(255, 255, 255, 0.05)' } : {}}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                    onClick={handleFileInputClick}
+                    textColor={dragDropType ? 'gray.400' : 'gray.600'}
+                    helperTextColor={dragDropType ? 'gray.500' : 'gray.600'}
+                    mb={0}
                   >
                     {dragDropType === 'frame' && 'Drag & Drop or Click to Upload a Custom Frame'}
                     {dragDropType === 'mask' && 'Drag & Drop or Click to Upload a Custom Mask'}
@@ -1655,12 +1655,7 @@ export const FrameTab = () => {
                     <Box fontSize="xs" mt={1} color={dragDropType ? 'gray.500' : 'gray.600'}>
                       {dragDropType ? 'Accepts PNG, JPG, JPEG' : ''}
                     </Box>
-                  </Box>
-                  {/* {dragDropType === 'mask' && (
-                    <Box fontSize="xs" color="gray.500" mt={2} textAlign="center">
-                      Custom masks are tied to the current frame pack and will be removed when changing packs
-                    </Box>
-                  )} */}
+                  </FileUploadZone>
                 </Box>
               </Box>
 
@@ -1802,3 +1797,6 @@ export const FrameTab = () => {
     </VStack>
   );
 };
+
+FrameTabComponent.displayName = 'FrameTab';
+export const FrameTab = memo(FrameTabComponent);

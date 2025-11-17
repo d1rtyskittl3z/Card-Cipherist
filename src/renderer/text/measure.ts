@@ -52,10 +52,11 @@ export function applyFontStyle(ctx: CanvasRenderingContext2D, style: TextStyle):
   ctx.fillStyle = style.color;
 
   // Letter spacing (kerning override)
+  // Note: letterSpacing is supported in modern browsers but not in CanvasRenderingContext2D type
   if (style.kerning !== 0) {
-    (ctx as any).letterSpacing = `${style.kerning}px`;
+    (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${style.kerning}px`;
   } else {
-    (ctx as any).letterSpacing = '0px';
+    (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = '0px';
   }
 
   // Shadow

@@ -3,30 +3,52 @@
  * Watermark upload and configuration interface
  */
 
-import { Box, Button, Grid, Heading, Input, VStack, HStack, Accordion } from '@chakra-ui/react';
+import { memo } from 'react';
+import { Box, Button, Grid, Heading, Input, VStack, HStack, Accordion, Spinner } from '@chakra-ui/react';
 import { Field } from '../ui/field';
 import { NativeSelectRoot, NativeSelectField } from '../ui/native-select';
-import { useCardStore } from '../../store/cardStore';
+import { LabeledInput, LabeledSelect, ControlGrid, ActionButtonGroup, FileUploadZone } from '../ui';
+import { useMediaStore } from '../../store/mediaStore';
+import { useWatermarkState } from '../../store/selectors';
 import { useImageLoader } from '../../hooks/useImageLoader';
-import { useRef, useState } from 'react';
-import { toaster } from '../ui/toaster';
+import { useState } from 'react';
+import { toaster } from '../ui/toaster-instance';
+import { useDebouncedCallback } from '../../hooks/useDebounce';
+import { SLIDER_DEBOUNCE_MS } from '../../constants/canvas';
 
-export const WatermarkTab = () => {
-  const watermarkX = useCardStore((state) => state.card.watermarkX);
-  const watermarkY = useCardStore((state) => state.card.watermarkY);
-  const watermarkZoom = useCardStore((state) => state.card.watermarkZoom);
-  const watermarkOpacity = useCardStore((state) => state.card.watermarkOpacity);
-  const watermarkLeft = useCardStore((state) => state.card.watermarkLeft);
-  const watermarkRight = useCardStore((state) => state.card.watermarkRight);
-  const watermarkSource = useCardStore((state) => state.card.watermarkSource);
-  const updateWatermark = useCardStore((state) => state.updateWatermark);
-  const setWatermarkImage = useCardStore((state) => state.setWatermarkImage);
+const WatermarkTabComponent = () => {
+  // Use fine-grained watermark selector
+  const { watermarkX, watermarkY, watermarkZoom, watermarkOpacity, watermarkLeft, watermarkRight, watermarkSource } = useWatermarkState();
+  const updateWatermark = useMediaStore((state) => state.updateWatermark);
+  const setWatermarkImage = useMediaStore((state) => state.setWatermarkImage);
+  const watermarkImageLoading = useMediaStore((state) => state.watermarkImageLoading);
+  const watermarkImageError = useMediaStore((state) => state.watermarkImageError);
 
   const { loadWatermark, loadWatermarkFromKeyrune, loadFromFile, loading, error } = useImageLoader();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [urlInputValue, setUrlInputValue] = useState('');
   const [setCodeInputValue, setSetCodeInputValue] = useState('');
   const [nativeSelectValue, setNativeSelectValue] = useState('');
+
+  // Debounced update callbacks for slider inputs
+  const debouncedUpdateX = useDebouncedCallback(
+    (val: number) => updateWatermark({ watermarkX: val }),
+    SLIDER_DEBOUNCE_MS
+  );
+
+  const debouncedUpdateY = useDebouncedCallback(
+    (val: number) => updateWatermark({ watermarkY: val }),
+    SLIDER_DEBOUNCE_MS
+  );
+
+  const debouncedUpdateZoom = useDebouncedCallback(
+    (val: number) => updateWatermark({ watermarkZoom: val }),
+    SLIDER_DEBOUNCE_MS
+  );
+
+  const debouncedUpdateOpacity = useDebouncedCallback(
+    (val: number) => updateWatermark({ watermarkOpacity: val }),
+    SLIDER_DEBOUNCE_MS
+  );
 
   const handleFileUpload = async (file: File) => {
     // Validate file type
@@ -44,15 +66,6 @@ export const WatermarkTab = () => {
     await loadFromFile(file, 'watermark');
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileUpload(file);
-    }
-    // Reset input so same file can be uploaded again
-    e.target.value = '';
-  };
-
   const handleUrlUpload = () => {
     if (!urlInputValue.trim()) return;
 
@@ -67,22 +80,6 @@ export const WatermarkTab = () => {
     setSetCodeInputValue(''); // Clear input after upload
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFileUpload(file);
-    }
-  };
-
-  const handleFileInputClick = () => {
-    fileInputRef.current?.click();
-  };
-
   return (
     <VStack align="stretch" gap={4}>
       <Box>
@@ -93,27 +90,13 @@ export const WatermarkTab = () => {
         {/* Upload Section - Landing Zone + Inputs Side by Side */}
         <Grid templateColumns="1fr 1fr" gap={4} mb={4}>
           {/* Left: Drag and drop zone */}
-          <Box
-            border="2px dashed"
-            borderColor="gray.600"
-            borderRadius="md"
-            p={6}
-            textAlign="center"
-            color="gray.400"
-            cursor="pointer"
-            _hover={{ borderColor: 'gray.500', bg: 'rgba(255, 255, 255, 0.05)' }}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            onClick={handleFileInputClick}
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-          >
-            Drag & Drop or Click to Upload Watermark
-            <Box fontSize="xs" mt={1} color="gray.500">
-              Accepts PNG, JPG, SVG
-            </Box>
-          </Box>
+          <FileUploadZone
+            label="Drag & Drop or Click to Upload Watermark"
+            helperText="Accepts PNG, JPG, SVG"
+            onFileSelect={handleFileUpload}
+            accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+            mb={0}
+          />
 
           {/* Right: URL and Set Code Inputs */}
           <VStack align="stretch" gap={3}>
@@ -173,13 +156,19 @@ export const WatermarkTab = () => {
           </VStack>
         </Grid>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/jpg,image/svg+xml"
-          style={{ display: 'none' }}
-          onChange={handleFileInputChange}
-        />
+        {/* Loading/Error States */}
+        {watermarkImageLoading && (
+          <HStack p={3} bg="blue.900" color="blue.100" borderRadius="md" mb={4}>
+            <Spinner size="sm" />
+            <Box>Loading watermark...</Box>
+          </HStack>
+        )}
+
+        {watermarkImageError && (
+          <Box p={3} bg="red.900" color="red.100" borderRadius="md" mb={4}>
+            <strong>Watermark Loading Error:</strong> {watermarkImageError}
+          </Box>
+        )}
 
         {error && (
           <Box p={3} bg="red.900" color="red.100" borderRadius="md" mb={4}>
@@ -295,71 +284,63 @@ export const WatermarkTab = () => {
             <Accordion.ItemTrigger>Color Options</Accordion.ItemTrigger>
             <Accordion.ItemContent>
               <VStack align="stretch" gap={3} p={3}>
-                <Grid templateColumns="repeat(2, 1fr)" gap={3}>
+                <ControlGrid columns={2} gap={3}>
                   {/* Left Color Preset */}
-                  <Field label="Left Color Preset">
-                    <NativeSelectRoot>
-                      <NativeSelectField
-                        value={watermarkLeft || 'none'}
-                        onChange={(e) => updateWatermark({ watermarkLeft: e.target.value })}
-                      >
-                        <option value="none">None</option>
-                        <option value="default">Default</option>
-                        <option value="#b79d58">White</option>
-                        <option value="#8cacc5">Blue</option>
-                        <option value="#5e5e5e">Black</option>
-                        <option value="#c66d39">Red</option>
-                        <option value="#598c52">Green</option>
-                        <option value="#cab34d">Gold</option>
-                        <option value="#647d86">Artifact</option>
-                        <option value="#5e5448">Land</option>
-                        <option value="#ffffff">True White</option>
-                        <option value="#000000">True Black</option>
-                      </NativeSelectField>
-                    </NativeSelectRoot>
-                  </Field>
+                  <LabeledSelect
+                    label="Left Color Preset"
+                    value={watermarkLeft || 'none'}
+                    onChange={(val) => updateWatermark({ watermarkLeft: val })}
+                  >
+                    <option value="none">None</option>
+                    <option value="default">Default</option>
+                    <option value="#b79d58">White</option>
+                    <option value="#8cacc5">Blue</option>
+                    <option value="#5e5e5e">Black</option>
+                    <option value="#c66d39">Red</option>
+                    <option value="#598c52">Green</option>
+                    <option value="#cab34d">Gold</option>
+                    <option value="#647d86">Artifact</option>
+                    <option value="#5e5448">Land</option>
+                    <option value="#ffffff">True White</option>
+                    <option value="#000000">True Black</option>
+                  </LabeledSelect>
 
                   {/* Right Color Preset */}
-                  <Field label="Right Color Preset">
-                    <NativeSelectRoot>
-                      <NativeSelectField
-                        value={watermarkRight || 'none'}
-                        onChange={(e) => updateWatermark({ watermarkRight: e.target.value })}
-                      >
-                        <option value="none">None</option>
-                        <option value="default">Default</option>
-                        <option value="#b79d58">White</option>
-                        <option value="#8cacc5">Blue</option>
-                        <option value="#5e5e5e">Black</option>
-                        <option value="#c66d39">Red</option>
-                        <option value="#598c52">Green</option>
-                        <option value="#cab34d">Gold</option>
-                        <option value="#647d86">Artifact</option>
-                        <option value="#5e5448">Land</option>
-                        <option value="#ffffff">True White</option>
-                        <option value="#000000">True Black</option>
-                      </NativeSelectField>
-                    </NativeSelectRoot>
-                  </Field>
+                  <LabeledSelect
+                    label="Right Color Preset"
+                    value={watermarkRight || 'none'}
+                    onChange={(val) => updateWatermark({ watermarkRight: val })}
+                  >
+                    <option value="none">None</option>
+                    <option value="default">Default</option>
+                    <option value="#b79d58">White</option>
+                    <option value="#8cacc5">Blue</option>
+                    <option value="#5e5e5e">Black</option>
+                    <option value="#c66d39">Red</option>
+                    <option value="#598c52">Green</option>
+                    <option value="#cab34d">Gold</option>
+                    <option value="#647d86">Artifact</option>
+                    <option value="#5e5448">Land</option>
+                    <option value="#ffffff">True White</option>
+                    <option value="#000000">True Black</option>
+                  </LabeledSelect>
 
                   {/* Left Color Picker */}
-                  <Field label="Left Custom Color">
-                    <Input
-                      type="color"
-                      value={watermarkLeft?.startsWith('#') ? watermarkLeft : '#ffffff'}
-                      onChange={(e) => updateWatermark({ watermarkLeft: e.target.value })}
-                    />
-                  </Field>
+                  <LabeledInput
+                    label="Left Custom Color"
+                    type="color"
+                    value={watermarkLeft?.startsWith('#') ? watermarkLeft : '#ffffff'}
+                    onChange={(val) => updateWatermark({ watermarkLeft: val })}
+                  />
 
                   {/* Right Color Picker */}
-                  <Field label="Right Custom Color">
-                    <Input
-                      type="color"
-                      value={watermarkRight?.startsWith('#') ? watermarkRight : '#ffffff'}
-                      onChange={(e) => updateWatermark({ watermarkRight: e.target.value })}
-                    />
-                  </Field>
-                </Grid>
+                  <LabeledInput
+                    label="Right Custom Color"
+                    type="color"
+                    value={watermarkRight?.startsWith('#') ? watermarkRight : '#ffffff'}
+                    onChange={(val) => updateWatermark({ watermarkRight: val })}
+                  />
+                </ControlGrid>
               </VStack>
             </Accordion.ItemContent>
           </Accordion.Item>
@@ -368,47 +349,43 @@ export const WatermarkTab = () => {
 
       <Box>
         <VStack align="stretch" gap={3}>
-          <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-            <Field label="X Position">
-              <Input
-                type="number"
-                value={watermarkX}
-                onChange={(e) => updateWatermark({ watermarkX: Number(e.target.value) })}
-              />
-            </Field>
+          <ControlGrid columns={2} gap={3}>
+            <LabeledInput
+              label="X Position"
+              type="number"
+              value={watermarkX}
+              onChange={(val) => debouncedUpdateX(Number(val))}
+            />
 
-            <Field label="Y Position">
-              <Input
-                type="number"
-                value={watermarkY}
-                onChange={(e) => updateWatermark({ watermarkY: Number(e.target.value) })}
-              />
-            </Field>
+            <LabeledInput
+              label="Y Position"
+              type="number"
+              value={watermarkY}
+              onChange={(val) => debouncedUpdateY(Number(val))}
+            />
 
-            <Field label="Zoom">
-              <Input
-                type="number"
-                step={0.1}
-                min={0.1}
-                max={30}
-                value={watermarkZoom}
-                onChange={(e) => updateWatermark({ watermarkZoom: Number(e.target.value) })}
-              />
-            </Field>
+            <LabeledInput
+              label="Zoom"
+              type="number"
+              step={0.1}
+              min={0.1}
+              max={30}
+              value={watermarkZoom}
+              onChange={(val) => debouncedUpdateZoom(Number(val))}
+            />
 
-            <Field label="Opacity">
-              <Input
-                type="number"
-                step={0.01}
-                min={0}
-                max={1}
-                value={watermarkOpacity}
-                onChange={(e) => updateWatermark({ watermarkOpacity: Number(e.target.value) })}
-              />
-            </Field>
-          </Grid>
+            <LabeledInput
+              label="Opacity"
+              type="number"
+              step={0.01}
+              min={0}
+              max={1}
+              value={watermarkOpacity}
+              onChange={(val) => debouncedUpdateOpacity(Number(val))}
+            />
+          </ControlGrid>
 
-          <Grid templateColumns="repeat(2, 1fr)" gap={3}>
+          <ActionButtonGroup layout="grid" columns={2} gap={3}>
             <Button
               onClick={() => {
                 // Reset colors to default first
@@ -417,7 +394,7 @@ export const WatermarkTab = () => {
                   watermarkRight: 'none',
                   watermarkOpacity: 0.4,
                 });
-                
+
                 // Reload the current watermark to recalculate auto-fit position
                 if (watermarkSource && watermarkSource !== '/img/blank.png') {
                   loadWatermark(watermarkSource);
@@ -454,9 +431,12 @@ export const WatermarkTab = () => {
             >
               Remove Watermark
             </Button>
-          </Grid>
+          </ActionButtonGroup>
         </VStack>
       </Box>
     </VStack>
   );
 };
+
+WatermarkTabComponent.displayName = 'WatermarkTab';
+export const WatermarkTab = memo(WatermarkTabComponent);

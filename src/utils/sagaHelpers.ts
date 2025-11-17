@@ -1,10 +1,9 @@
 import type { Card, TextObject } from '../types/card.types';
 import { scaleHeight, scaleWidth, scaleX, scaleY } from './canvasHelpers';
+import { SAGA_ABILITY_KEYS, isSagaVersion } from '../constants';
 
 const SAGA_DIVIDER_SRC = '/img/frames/saga/sagaDivider.png';
 const SAGA_CHAPTER_SRC = '/img/frames/saga/sagaChapter.png';
-
-export const SAGA_ABILITY_KEYS = ['ability0', 'ability1', 'ability2', 'ability3'] as const;
 
 interface SagaAssets {
   divider: HTMLImageElement;
@@ -161,7 +160,7 @@ export const drawSagaLayer = async (
 ): Promise<void> => {
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-  if (!card.version?.toLowerCase().includes('saga')) {
+  if (!isSagaVersion(card.version)) {
     return;
   }
 

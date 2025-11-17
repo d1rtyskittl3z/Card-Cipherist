@@ -9,6 +9,7 @@ import type { FramePackTemplate } from '../components/frames/packs/types';
 import type { PackMetrics, RenderOptions, TextCanvasRefs } from '../renderer/text/types';
 import { SymbolAtlas, createStandardManaAtlas } from '../renderer/text/symbols';
 import { renderField, createTempCanvases } from '../renderer/text/textRenderer';
+import { useUIStore } from '../store/uiStore';
 
 /**
  * Hook for rendering text fields
@@ -24,6 +25,10 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
   const [symbolAtlas, setSymbolAtlas] = useState<SymbolAtlas | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const tempCanvasesRef = useRef<TextCanvasRefs | null>(null);
+
+  // Error handling from UI store
+  const setTextRenderError = useUIStore((state) => state.setTextRenderError);
+  const clearTextRenderError = useUIStore((state) => state.clearTextRenderError);
 
   // Initialize symbol atlas on mount
   useEffect(() => {
@@ -160,9 +165,9 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
 
       // Validate required fields exist
       // NOTE: For manaPlacement fields, width/height/y can be 0, so check for undefined/null instead
-      if (!fieldSpec.name || fieldSpec.y === undefined || fieldSpec.y === null || 
-          fieldSpec.width === undefined || fieldSpec.width === null || 
-          fieldSpec.height === undefined || fieldSpec.height === null || 
+      if (!fieldSpec.name || fieldSpec.y === undefined || fieldSpec.y === null ||
+          fieldSpec.width === undefined || fieldSpec.width === null ||
+          fieldSpec.height === undefined || fieldSpec.height === null ||
           !fieldSpec.size) {
         return;
       }
@@ -178,7 +183,7 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
       };
 
       // Render the field - TypeScript is satisfied because we validated required fields above
-      renderField(
+      const result = renderField(
         ctx,
         fieldSpec as { name: string; text: string; y: number; width: number; height: number; size: number; [key: string]: unknown },
         packMetrics,
@@ -186,8 +191,15 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
         tempCanvasesRef.current,
         renderOptions
       );
+
+      // Handle render errors
+      if (!result.success) {
+        setTextRenderError(fieldKey, result.error);
+      } else {
+        clearTextRenderError(fieldKey);
+      }
     },
-  [symbolAtlas, pack, card, packMetrics, shouldSwapTitleNickname]
+  [symbolAtlas, pack, card, packMetrics, shouldSwapTitleNickname, setTextRenderError, clearTextRenderError]
   );
 
   return {

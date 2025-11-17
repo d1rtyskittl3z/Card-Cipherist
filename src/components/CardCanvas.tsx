@@ -1,30 +1,34 @@
 /**
  * CardCanvas Component
  * Main canvas display for card preview
+ * Now uses CanvasProvider to eliminate prop drilling in rendering hooks
  */
 
 import { Box } from '@chakra-ui/react';
-import { useCanvasRender } from '../hooks/useCanvasRender';
 import { useCardStore } from '../store/cardStore';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useStationManager } from '../hooks/useStationManager';
+import { PerformanceProfiler } from './PerformanceProfiler';
+import { CanvasProvider } from '../contexts/CanvasContext';
+import { useCanvasManager } from '../hooks/canvas/useCanvasManager';
+import { CardCanvasRenderer } from './CardCanvasRenderer';
 
 export const CardCanvas = () => {
-  const { previewRef, render } = useCanvasRender();
   const showTransparencies = useCardStore((state) => state.showTransparencies);
   const setPreviewCanvasRef = useCardStore((state) => state.setPreviewCanvasRef);
+  const previewRef = useRef<HTMLCanvasElement>(null);
+
+  // Initialize canvas manager (provides refs for context)
+  const { canvasRefs, contextRefs, canvasesReady } = useCanvasManager();
+
   useStationManager();
+
   // CARD SIZE CONFIGURATION:
   // Height: 800px (modify this value to change card height)
   // Width: Calculated as height / 1.4 (aspect ratio 1.4:1 height to width; this is the aspect ratio of MTG Cards.)
   // Formula: width = height / 1.4
   const HEIGHT = 800;
-  const ASPECT_RATIO = 1.4; // 
-
-  useEffect(() => {
-    // Initial render
-    render();
-  }, [render]);
+  const ASPECT_RATIO = 1.4;
 
   // Set canvas ref in store when available
   useEffect(() => {
@@ -70,16 +74,23 @@ export const CardCanvas = () => {
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      p={8}
-    >
-      <canvas
-        ref={previewRef}
-        style={getCanvasStyle()}
-      />
-    </Box>
+    <PerformanceProfiler id="CardCanvas">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        p={8}
+      >
+        {/* Wrap rendering logic with CanvasProvider to eliminate prop drilling */}
+        <CanvasProvider value={{ canvasRefs, contextRefs, canvasesReady }}>
+          <CardCanvasRenderer previewRef={previewRef} />
+        </CanvasProvider>
+
+        <canvas
+          ref={previewRef}
+          style={getCanvasStyle()}
+        />
+      </Box>
+    </PerformanceProfiler>
   );
 };

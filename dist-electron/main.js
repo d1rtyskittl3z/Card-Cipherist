@@ -1,6 +1,7 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import fs from "node:fs/promises";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -36,6 +37,17 @@ app.on("activate", () => {
   }
 });
 app.whenReady().then(createWindow);
+ipcMain.handle("read-custom-symbol-folders", async () => {
+  try {
+    const customSymbolsPath = path.join(process.env.VITE_PUBLIC || "", "img", "setSymbols", "custom");
+    const entries = await fs.readdir(customSymbolsPath, { withFileTypes: true });
+    const folders = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+    return folders;
+  } catch (error) {
+    console.error("Error reading custom symbol folders:", error);
+    return [];
+  }
+});
 export {
   MAIN_DIST,
   RENDERER_DIST,

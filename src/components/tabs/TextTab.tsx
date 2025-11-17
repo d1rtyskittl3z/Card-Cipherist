@@ -3,11 +3,18 @@
  * Text editing interface with MTG formatting
  */
 
-import { Box, Heading, Textarea, VStack, Tabs, Button, HStack, Table, DrawerRoot, DrawerBackdrop, DrawerContent, DrawerHeader, DrawerBody, DrawerCloseTrigger, Drawer, Portal, CloseButton, Input } from '@chakra-ui/react';
+import { memo } from 'react';
+import { Box, Heading, Textarea, VStack, Tabs, Button, HStack, Table, DrawerRoot, DrawerBackdrop, DrawerContent, DrawerHeader, DrawerBody, DrawerCloseTrigger, Input } from '@chakra-ui/react';
 import { Field } from '../ui/field';
+import { LabeledInput } from '../ui';
 import { useCardStore } from '../../store/cardStore';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { convertTypedQuote } from '../../utils/smartQuotes';
+import { useCardText, useLoadedPack } from '../../store/selectors';
+import { useUIStore } from '../../store/uiStore';
+import { formatTextRenderError } from '../../utils/textRenderErrors';
+import { useDebouncedCallback } from '../../hooks/useDebounce';
+import { TEXT_INPUT_DEBOUNCE_MS, SLIDER_DEBOUNCE_MS } from '../../constants/canvas';
 
 /**
  * Standard field display order and labels
@@ -78,27 +85,58 @@ const MANA_CODES = [
  { code: "Notes", result: "Hybrid/Phyrexian mana only works with WUBRG" },
 ];
 
-export const TextTab = () => {
-  const text = useCardStore((state) => state.card.text || {});
+const TextTabComponent = () => {
+  // Use fine-grained selectors to prevent unnecessary re-renders
+  const text = useCardText();
   const updateText = useCardStore((state) => state.updateText);
-  const loadedPack = useCardStore((state) => state.loadedPack);
+  const loadedPack = useLoadedPack();
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [editBoundsOpen, setEditBoundsOpen] = useState(false);
   const [codeReferenceOpen, setCodeReferenceOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Text render errors from UI store
+  const textRenderErrors = useUIStore((state) => state.textRenderErrors);
   
+  // Local state for immediate UI feedback (prevents input lag)
+  const [localText, setLocalText] = useState<Record<string, string>>({});
+
   // Bounds input state
   const [boundsX, setBoundsX] = useState<number | ''>('');
   const [boundsY, setBoundsY] = useState<number | ''>('');
   const [boundsWidth, setBoundsWidth] = useState<number | ''>('');
   const [boundsHeight, setBoundsHeight] = useState<number | ''>('');
-  
+
   // Font size adjustment state
   const [fontSizeAdjustment, setFontSizeAdjustment] = useState<number>(0);
-  
+
   // Store selection state before button click
   const [selectionStart, setSelectionStart] = useState(0);
   const [selectionEnd, setSelectionEnd] = useState(0);
+
+  // Debounced update callbacks for text input
+  const debouncedUpdateText = useDebouncedCallback(
+    (fieldKey: string, newText: string) => {
+      updateText(fieldKey, { text: newText });
+    },
+    TEXT_INPUT_DEBOUNCE_MS
+  );
+
+  // Debounced update callbacks for bounds inputs
+  const debouncedUpdateBounds = useDebouncedCallback(
+    (fieldKey: string, updates: Record<string, number | undefined>) => {
+      updateText(fieldKey, updates);
+    },
+    SLIDER_DEBOUNCE_MS
+  );
+
+  // Debounced update callback for font size adjustment
+  const debouncedUpdateFontSize = useDebouncedCallback(
+    (fieldKey: string, value: number) => {
+      updateText(fieldKey, { fontSizeAdjustment: value });
+    },
+    SLIDER_DEBOUNCE_MS
+  );
 
   /**
    * Dynamically build TEXT_FIELDS from available text fields in the card
@@ -106,13 +144,15 @@ export const TextTab = () => {
    * Uses the 'name' property from text config, with FIELD_LABELS as fallback
    */
   const TEXT_FIELDS = useMemo(() => {
+    if (!text) return [];
+
     const fieldOrder = ['mana', 'title', 'type', 'rules', 'pt'];
     const availableFields = Object.keys(text);
-    
+
     // Build ordered list based on standard order, then add any extras
     const orderedFields = fieldOrder.filter(key => availableFields.includes(key));
     const extraFields = availableFields.filter(key => !fieldOrder.includes(key));
-    
+
     return [...orderedFields, ...extraFields].map(key => ({
       key,
       label: text[key]?.name || FIELD_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1),
@@ -128,8 +168,22 @@ export const TextTab = () => {
     return TEXT_FIELDS.length > 0 ? TEXT_FIELDS[0].key : '';
   }, [selectedField, TEXT_FIELDS]);
 
+  // Sync local text state from store when text changes or field switches
+  useEffect(() => {
+    if (!text) return;
+
+    // Initialize local text state from store for all fields
+    const newLocalText: Record<string, string> = {};
+    Object.keys(text).forEach(key => {
+      newLocalText[key] = text[key]?.text || '';
+    });
+    setLocalText(newLocalText);
+  }, [text]);
+
   // Load bounds when currentField changes
   useEffect(() => {
+    if (!text) return;
+
     const fieldConfig = text[currentField];
     if (fieldConfig) {
       setBoundsX(fieldConfig.x ?? '');
@@ -143,9 +197,9 @@ export const TextTab = () => {
   const wrapSelectedText = (prefix: string, suffix: string) => {
     const start = selectionStart;
     const end = selectionEnd;
-    
-    // Get the current text from the store, not from textarea (which might be stale)
-    const currentText = text[currentField]?.text || '';
+
+    // Get the current text from local state for immediate feedback
+    const currentText = localText[currentField] || '';
     const selectedText = currentText.substring(start, end);
 
     // Only apply if there's selected text
@@ -154,6 +208,9 @@ export const TextTab = () => {
         currentText.substring(0, start) +
         prefix + selectedText + suffix +
         currentText.substring(end);
+
+      // Update local state immediately
+      setLocalText(prev => ({ ...prev, [currentField]: newText }));
 
       // Update the store with the new text
       updateText(currentField, { text: newText });
@@ -178,11 +235,11 @@ export const TextTab = () => {
   const handleBold = () => wrapSelectedText('{bold}', '{/bold}');
 
   /**
-   * Handle bounds update - persist changes to store
+   * Handle bounds update - persist changes to store (debounced)
    */
   const handleBoundsChange = (field: 'x' | 'y' | 'width' | 'height', value: number | '') => {
     const updates: Record<string, number | undefined> = {};
-    
+
     if (field === 'x') {
       setBoundsX(value);
       updates.x = value !== '' ? value : undefined;
@@ -196,16 +253,18 @@ export const TextTab = () => {
       setBoundsHeight(value);
       updates.height = value !== '' ? value : undefined;
     }
-    
-    updateText(currentField, updates);
+
+    // Use debounced update for smooth slider experience
+    debouncedUpdateBounds(currentField, updates);
   };
 
   /**
-   * Handle font size adjustment changes
+   * Handle font size adjustment changes (debounced)
    */
   const handleFontSizeAdjustmentChange = (value: number) => {
     setFontSizeAdjustment(value);
-    updateText(currentField, { fontSizeAdjustment: value });
+    // Use debounced update for smooth slider experience
+    debouncedUpdateFontSize(currentField, value);
   };
 
   /**
@@ -231,15 +290,24 @@ export const TextTab = () => {
 
   /**
    * Handle text change with smart quote conversion for rules field
+   * Uses local state for immediate feedback, debounced store update
    */
   const handleTextChange = (fieldKey: string, newText: string, cursorPos: number) => {
+    // Update local state immediately for instant feedback
+    setLocalText(prev => ({ ...prev, [fieldKey]: newText }));
+
     // Only apply smart quotes to the rules field
     if (fieldKey === 'rules') {
-      const oldText = text[fieldKey]?.text || '';
+      const oldText = localText[fieldKey] || '';
 
       // Check if user just typed a quote
       if (newText.length > oldText.length && newText.charAt(cursorPos - 1) === '"') {
         const { text: convertedText, cursorOffset } = convertTypedQuote(newText, cursorPos);
+
+        // Update local state with converted text
+        setLocalText(prev => ({ ...prev, [fieldKey]: convertedText }));
+
+        // Update store immediately for smart quotes (no debounce)
         updateText(fieldKey, { text: convertedText });
 
         // Restore cursor position after conversion
@@ -253,8 +321,8 @@ export const TextTab = () => {
       }
     }
 
-    // Default: just update the text normally
-    updateText(fieldKey, { text: newText });
+    // Default: debounced update to store
+    debouncedUpdateText(fieldKey, newText);
   };
 
   return (
@@ -299,19 +367,33 @@ export const TextTab = () => {
         {TEXT_FIELDS.map((field) => (
           <Tabs.Content key={field.key} value={field.key}>
             <VStack align="stretch" gap={3} mt={4}>
+                {/* Error display for this field */}
+                {textRenderErrors[field.key] && (
+                  <Box
+                    p={3}
+                    bg="red.900"
+                    color="red.100"
+                    borderRadius="md"
+                    borderLeft="4px solid"
+                    borderColor="red.500"
+                  >
+                    <Box fontWeight="bold" mb={1}>
+                      Rendering Error
+                    </Box>
+                    <Box fontSize="sm">
+                      {formatTextRenderError(field.key, textRenderErrors[field.key])}
+                    </Box>
+                  </Box>
+                )}
+
                 <Textarea
                   ref={textareaRef}
-                  value={text[field.key]?.text || ''}
+                  value={localText[field.key] || ''}
                   onChange={(e) => {
                     const target = e.target as HTMLTextAreaElement;
                     handleTextChange(field.key, e.target.value, target.selectionStart);
                   }}
-                  onMouseUp={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    setSelectionStart(target.selectionStart);
-                    setSelectionEnd(target.selectionEnd);
-                  }}
-                  onKeyUp={(e) => {
+                  onSelect={(e) => {
                     const target = e.target as HTMLTextAreaElement;
                     setSelectionStart(target.selectionStart);
                     setSelectionEnd(target.selectionEnd);
@@ -385,56 +467,48 @@ export const TextTab = () => {
       <DrawerRoot open={editBoundsOpen} onOpenChange={(e) => setEditBoundsOpen(e.open)} placement="end" size="md">
         <DrawerBackdrop />
         <DrawerContent>
-          <DrawerHeader>Edit Bounds - {text[currentField]?.name || currentField}</DrawerHeader>
+          <DrawerHeader>Edit Bounds - {text?.[currentField]?.name || currentField}</DrawerHeader>
           <DrawerCloseTrigger />
           <DrawerBody>
             <VStack align="stretch" gap={4}>
               <HStack gap={3}>
-                <Box flex={1}>
-                  <Field label="X">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={boundsX}
-                      onChange={(e) => handleBoundsChange('x', e.target.value === '' ? '' : Number(e.target.value))}
-                    />
-                  </Field>
-                </Box>
+                <LabeledInput
+                  label="X"
+                  type="number"
+                  step={0.01}
+                  value={boundsX}
+                  onChange={(val) => handleBoundsChange('x', val === '' ? '' : Number(val))}
+                  flex={1}
+                />
 
-                <Box flex={1}>
-                  <Field label="Y">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={boundsY}
-                      onChange={(e) => handleBoundsChange('y', e.target.value === '' ? '' : Number(e.target.value))}
-                    />
-                  </Field>
-                </Box>
+                <LabeledInput
+                  label="Y"
+                  type="number"
+                  step={0.01}
+                  value={boundsY}
+                  onChange={(val) => handleBoundsChange('y', val === '' ? '' : Number(val))}
+                  flex={1}
+                />
               </HStack>
 
               <HStack gap={3}>
-                <Box flex={1}>
-                  <Field label="Width">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={boundsWidth}
-                      onChange={(e) => handleBoundsChange('width', e.target.value === '' ? '' : Number(e.target.value))}
-                    />
-                  </Field>
-                </Box>
+                <LabeledInput
+                  label="Width"
+                  type="number"
+                  step={0.01}
+                  value={boundsWidth}
+                  onChange={(val) => handleBoundsChange('width', val === '' ? '' : Number(val))}
+                  flex={1}
+                />
 
-                <Box flex={1}>
-                  <Field label="Height">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={boundsHeight}
-                      onChange={(e) => handleBoundsChange('height', e.target.value === '' ? '' : Number(e.target.value))}
-                    />
-                  </Field>
-                </Box>
+                <LabeledInput
+                  label="Height"
+                  type="number"
+                  step={0.01}
+                  value={boundsHeight}
+                  onChange={(val) => handleBoundsChange('height', val === '' ? '' : Number(val))}
+                  flex={1}
+                />
               </HStack>
 
               <Button
@@ -452,20 +526,15 @@ export const TextTab = () => {
       </DrawerRoot>
 
       {/* Code Reference Drawer */}
-      <Drawer.Root open={codeReferenceOpen} onOpenChange={(e) => !e.open && setCodeReferenceOpen(false)} placement="end" size="lg">
-        <Portal>
-          <Drawer.Positioner>
-            <Drawer.Content>
-              <Drawer.Header borderBottomWidth="1px">
-                <HStack justify="space-between" w="full">
-                  <Heading size="md">Code Reference</Heading>
-                  <Drawer.CloseTrigger asChild>
-                    <CloseButton size="sm" />
-                  </Drawer.CloseTrigger>
-                </HStack>
-              </Drawer.Header>
+      <DrawerRoot open={codeReferenceOpen} onOpenChange={(e) => setCodeReferenceOpen(e.open)} placement="end" size="lg">
+        <DrawerBackdrop />
+        <DrawerContent>
+          <DrawerHeader>
+            Code Reference
+          </DrawerHeader>
+          <DrawerCloseTrigger />
 
-              <Drawer.Body>
+          <DrawerBody>
                 <VStack align="stretch" gap={6} py={4}>
                   <Box>
                     <Heading size="md" mb={3}>Text Codes</Heading>
@@ -507,12 +576,13 @@ export const TextTab = () => {
                     </Table.Root>
                   </Box>
                 </VStack>
-              </Drawer.Body>
-            </Drawer.Content>
-          </Drawer.Positioner>
-        </Portal>
-      </Drawer.Root>
+              </DrawerBody>
+        </DrawerContent>
+      </DrawerRoot>
 
     </VStack>
   );
 };
+
+TextTabComponent.displayName = 'TextTab';
+export const TextTab = memo(TextTabComponent);

@@ -3,9 +3,10 @@
  * Help and documentation interface
  */
 
+import { memo } from 'react';
 import { Box, Heading, VStack, Accordion } from '@chakra-ui/react';
 
-export const TutorialTab = () => {
+const TutorialTabComponent = () => {
   return (
     <VStack align="stretch" gap={4}>
       <Box>
@@ -214,3 +215,6 @@ export const TutorialTab = () => {
     </VStack>
   );
 };
+
+TutorialTabComponent.displayName = 'TutorialTab';
+export const TutorialTab = memo(TutorialTabComponent);

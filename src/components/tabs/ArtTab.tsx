@@ -3,16 +3,31 @@
  * Art upload and manipulation interface
  */
 
-import { Box, Button, Grid, Heading, Input, VStack, Text, HStack } from '@chakra-ui/react';
+import { memo } from 'react';
+import { Box, Button, Heading, Input, VStack, HStack, Spinner } from '@chakra-ui/react';
 import { Field } from '../ui/field';
 import { NativeSelectRoot, NativeSelectField } from '../ui/native-select';
-import { Switch } from '../ui/switch';
+import { LabeledInput, ControlGrid, ActionButtonGroup, LabeledSwitch, FileUploadZone } from '../ui';
 import { useCardStore } from '../../store/cardStore';
+import { useMediaStore } from '../../store/mediaStore';
+import { useUIStore } from '../../store/uiStore';
+import { useFrameStore } from '../../store/frameStore';
 import { useImageLoader } from '../../hooks/useImageLoader';
 import { useCanvasDrag } from '../../hooks/useCanvasDrag';
 import { calculateAutoFitArt } from '../../utils/canvasHelpers';
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { toaster } from '../ui/toaster';
+import { toaster } from '../ui/toaster-instance';
+import type { Card } from '../../types/card.types';
+import { useDebouncedCallback } from '../../hooks/useDebounce';
+import { SLIDER_DEBOUNCE_MS } from '../../constants/canvas';
+import {
+  useCardDimensions,
+  useArtGrayscale,
+  usePreviewCanvasRef,
+  useArtState,
+  useAutoFitArt,
+  // useLoadedPack, // Unused - removed in Phase 8
+} from '../../store/selectors';
 
 interface ScryfallCard {
   name: string;
@@ -33,27 +48,33 @@ interface ScryfallApiResponse {
   [key: string]: unknown;
 }
 
-export const ArtTab = () => {
-  const card = useCardStore((state) => state.card);
-  const artImage = useCardStore((state) => state.artImage);
-  const loadedPack = useCardStore((state) => state.loadedPack);
-  const artX = useCardStore((state) => state.card.artX);
-  const artY = useCardStore((state) => state.card.artY);
-  const artZoom = useCardStore((state) => state.card.artZoom);
-  const artRotate = useCardStore((state) => state.card.artRotate);
-  const updateArt = useCardStore((state) => state.updateArt);
-  const setArtImage = useCardStore((state) => state.setArtImage);
-  const autoFitArt = useCardStore((state) => state.autoFitArt);
-  const setAutoFitArt = useCardStore((state) => state.setAutoFitArt);
-  const previewCanvasRef = useCardStore((state) => state.previewCanvasRef);
-  const setCollectorArtist = useCardStore((state) => state.setCollectorArtist);
+const ArtTabComponent = () => {
+  // Use fine-grained selectors to prevent unnecessary re-renders
+  const { width: cardWidth, height: cardHeight, marginX: cardMarginX, marginY: cardMarginY } = useCardDimensions();
+  const artGrayscale = useArtGrayscale();
   const updateCard = useCardStore((state) => state.updateCard);
+  const setCollectorArtist = useCardStore((state) => state.setCollectorArtist);
+  const previewCanvasRef = usePreviewCanvasRef();
+
+  // Media store - use fine-grained art selector
+  const { artX, artY, artZoom, artRotate, artImage } = useArtState();
+  const updateArt = useMediaStore((state) => state.updateArt);
+  const resetArt = useMediaStore((state) => state.resetArt);
+  const artImageLoading = useMediaStore((state) => state.artImageLoading);
+  const artImageError = useMediaStore((state) => state.artImageError);
+
+  // UI store - use fine-grained selector
+  const autoFitArt = useAutoFitArt();
+  const setAutoFitArt = useUIStore((state) => state.setAutoFitArt);
+
+  // Frame store - use fine-grained selector with fallback
+  const loadedPackFromFrameStore = useFrameStore((state) => state.loadedPack);
+  const loadedPackFromCardStore = useCardStore((state) => state.loadedPack);
+  const loadedPack = loadedPackFromFrameStore || loadedPackFromCardStore;
 
   const { loadArt, loadFromFile, loadFromClipboard, loading, error } = useImageLoader();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [urlInputValue, setUrlInputValue] = useState('');
   const [dragEnabled, setDragEnabled] = useState(false);
-  const artGrayscale = useCardStore((state) => state.card.artGrayscale ?? false);
 
   // Scryfall search state
   const [cardName, setCardName] = useState('');
@@ -61,6 +82,28 @@ export const ArtTab = () => {
   const [selectedCard, setSelectedCard] = useState('');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Debounced update callbacks for slider inputs
+  // Provides smooth UI updates without laggy re-renders
+  const debouncedUpdateArtX = useDebouncedCallback(
+    (val: number) => updateArt({ artX: val }),
+    SLIDER_DEBOUNCE_MS
+  );
+
+  const debouncedUpdateArtY = useDebouncedCallback(
+    (val: number) => updateArt({ artY: val }),
+    SLIDER_DEBOUNCE_MS
+  );
+
+  const debouncedUpdateArtZoom = useDebouncedCallback(
+    (val: number) => updateArt({ artZoom: val }),
+    SLIDER_DEBOUNCE_MS
+  );
+
+  const debouncedUpdateArtRotate = useDebouncedCallback(
+    (val: number) => updateArt({ artRotate: val }),
+    SLIDER_DEBOUNCE_MS
+  );
 
   // Format card options for the menu
   const cardOptions = useMemo(() => {
@@ -82,10 +125,17 @@ export const ArtTab = () => {
   // Auto-fit art when pack changes (if auto-fit is enabled)
   useEffect(() => {
     if (autoFitArt && artImage && loadedPack?.artBounds) {
+      // Create minimal card object for auto-fit calculation
+      const cardForAutoFit = {
+        width: cardWidth,
+        height: cardHeight,
+        marginX: cardMarginX,
+        marginY: cardMarginY
+      };
       const { artX: newX, artY: newY, artZoom: newZoom } = calculateAutoFitArt(
         artImage,
         loadedPack.artBounds,
-        card
+        cardForAutoFit as Card
       );
       updateArt({ artX: newX, artY: newY, artZoom: newZoom, artRotate: 0 });
     }
@@ -97,18 +147,18 @@ export const ArtTab = () => {
     if (!selectedCard || !apiResponseData?.data) return;
 
     // Find the selected card in the API response
-    const card = apiResponseData.data.find((c) => c.id === selectedCard);
-    if (!card) return;
+    const apiCard = apiResponseData.data.find((c) => c.id === selectedCard);
+    if (!apiCard) return;
 
     // Hydrate artist field and enable collector info
-    if (card.artist) {
-      setCollectorArtist(card.artist);
+    if (apiCard.artist) {
+      setCollectorArtist(apiCard.artist);
       updateCard({ showCollectorInfo: true });
     }
 
     // Load art from art_crop
-    if (card.image_uris?.art_crop) {
-      loadArt(card.image_uris.art_crop);
+    if (apiCard.image_uris?.art_crop) {
+      loadArt(apiCard.image_uris.art_crop);
     } else {
       // Show toast notification if art_crop is not available
       toaster.create({
@@ -159,36 +209,11 @@ export const ArtTab = () => {
     await loadFromFile(file, 'art');
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileUpload(file);
-    }
-    // Reset input so same file can be uploaded again
-    e.target.value = '';
-  };
-
   const handleUrlUpload = () => {
     if (!urlInputValue.trim()) return;
 
     loadArt(urlInputValue);
     setUrlInputValue(''); // Clear input after upload
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFileUpload(file);
-    }
-  };
-
-  const handleFileInputClick = () => {
-    fileInputRef.current?.click();
   };
 
   const handleClipboard = async () => {
@@ -253,32 +278,11 @@ export const ArtTab = () => {
         </Heading>
 
         {/* Drag and drop zone */}
-        <Box
-          border="2px dashed"
-          borderColor="gray.600"
-          borderRadius="md"
-          p={6}
-          textAlign="center"
-          color="gray.400"
-          cursor="pointer"
-          _hover={{ borderColor: 'gray.500', bg: 'rgba(255, 255, 255, 0.05)' }}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={handleFileInputClick}
-          mb={4}
-        >
-          Drag & Drop or Click to Upload Art
-          <Box fontSize="xs" mt={1} color="gray.500">
-            Accepts PNG, JPG, SVG
-          </Box>
-        </Box>
-
-        <input
-          ref={fileInputRef}
-          type="file"
+        <FileUploadZone
+          label="Drag & Drop or Click to Upload Art"
+          helperText="Accepts PNG, JPG, SVG"
+          onFileSelect={handleFileUpload}
           accept="image/png,image/jpeg,image/jpg,image/svg+xml"
-          style={{ display: 'none' }}
-          onChange={handleFileInputChange}
         />
 
         {/* URL Input */}
@@ -352,6 +356,20 @@ export const ArtTab = () => {
           </HStack>
         </Box>
 
+        {/* Loading/Error States */}
+        {artImageLoading && (
+          <HStack p={3} bg="blue.900" color="blue.100" borderRadius="md" mb={4}>
+            <Spinner size="sm" />
+            <Box>Loading art image...</Box>
+          </HStack>
+        )}
+
+        {artImageError && (
+          <Box p={3} bg="red.900" color="red.100" borderRadius="md" mb={4}>
+            <strong>Art Loading Error:</strong> {artImageError}
+          </Box>
+        )}
+
         {error && (
           <Box p={3} bg="red.900" color="red.100" borderRadius="md" mb={4}>
             {error}
@@ -361,99 +379,110 @@ export const ArtTab = () => {
 
       <Box>
 
-        <Box mb={4}>
-          <Switch
-            checked={autoFitArt}
-            onCheckedChange={(e) => setAutoFitArt(e.checked)}
-            colorPalette="blue"
-          >
-            <Text fontSize="sm">Auto Fit Art</Text>
-          </Switch>
-        </Box>
+        <LabeledSwitch
+          label="Auto Fit Art"
+          checked={autoFitArt}
+          onCheckedChange={setAutoFitArt}
+        />
 
-        <Box mb={4}>
-          <Switch
-            checked={dragEnabled}
-            onCheckedChange={(e) => setDragEnabled(e.checked)}
-            colorPalette="blue"
-          >
-            <Text fontSize="sm">Drag to move art (hold shift to zoom, ctrl to rotate)</Text>
-          </Switch>
-        </Box>
+        <LabeledSwitch
+          label="Drag to move art (hold shift to zoom, ctrl to rotate)"
+          checked={dragEnabled}
+          onCheckedChange={setDragEnabled}
+        />
 
-        <Box mb={4}>
-          <Switch
-            checked={artGrayscale}
-            onCheckedChange={(e) => updateCard({ artGrayscale: e.checked })}
-            colorPalette="blue"
-          >
-            <Text fontSize="sm">Make the art grayscale</Text>
-          </Switch>
-        </Box>
+        <LabeledSwitch
+          label="Make the art grayscale"
+          checked={artGrayscale}
+          onCheckedChange={(checked) => updateArt({ artGrayscale: checked })}
+        />
 
         <VStack align="stretch" gap={3}>
-          <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-            <Field label="X Position">
-              <Input
-                type="number"
-                value={artX}
-                onChange={(e) => updateArt({ artX: Number(e.target.value) })}
-              />
-            </Field>
+          <ControlGrid columns={2} gap={3}>
+            <LabeledInput
+              label="X Position"
+              type="number"
+              value={artX}
+              onChange={(val) => debouncedUpdateArtX(Number(val))}
+            />
 
-            <Field label="Y Position">
-              <Input
-                type="number"
-                value={artY}
-                onChange={(e) => updateArt({ artY: Number(e.target.value) })}
-              />
-            </Field>
+            <LabeledInput
+              label="Y Position"
+              type="number"
+              value={artY}
+              onChange={(val) => debouncedUpdateArtY(Number(val))}
+            />
 
-            <Field label="Zoom">
-              <Input
-                type="number"
-                step={0.01}
-                min={0.1}
-                max={5}
-                value={artZoom}
-                onChange={(e) => updateArt({ artZoom: Number(e.target.value) })}
-              />
-            </Field>
+            <LabeledInput
+              label="Zoom"
+              type="number"
+              step={0.01}
+              min={0.1}
+              max={5}
+              value={artZoom}
+              onChange={(val) => debouncedUpdateArtZoom(Number(val))}
+            />
 
-            <Field label="Rotation (degrees)">
-              <Input
-                type="number"
-                value={artRotate}
-                onChange={(e) => updateArt({ artRotate: Number(e.target.value) })}
-              />
-            </Field>
-          </Grid>
+            <LabeledInput
+              label="Rotation (degrees)"
+              type="number"
+              value={artRotate}
+              onChange={(val) => debouncedUpdateArtRotate(Number(val))}
+            />
+          </ControlGrid>
 
-          <Grid templateColumns="repeat(2, 1fr)" gap={3}>
+          <ActionButtonGroup layout="grid" columns={2} gap={3}>
             <Button
               onClick={() => {
-                updateArt({
-                  artX: 0,
-                  artY: 0,
-                  artZoom: 1,
-                  artRotate: 0,
-                });
-                updateCard({ artGrayscale: false });
+                // If we have an art image and artBounds, apply auto-fit
+                if (artImage && loadedPack?.artBounds) {
+                  // Create minimal card object for auto-fit calculation
+                  const cardForAutoFit = {
+                    width: cardWidth,
+                    height: cardHeight,
+                    marginX: cardMarginX,
+                    marginY: cardMarginY
+                  } as Card;
+                  const { artX: newX, artY: newY, artZoom: newZoom } = calculateAutoFitArt(
+                    artImage,
+                    loadedPack.artBounds,
+                    cardForAutoFit
+                  );
+                  updateArt({
+                    artX: newX,
+                    artY: newY,
+                    artZoom: newZoom,
+                    artRotate: 0,
+                    artGrayscale: false,
+                  });
+                } else {
+                  // Fallback to default position if no auto-fit available
+                  updateArt({
+                    artX: 0,
+                    artY: 0,
+                    artZoom: 1,
+                    artRotate: 0,
+                    artGrayscale: false,
+                  });
+                }
               }}
               colorPalette="blue"
             >
-              Reset Art
+              Reset Art Position
             </Button>
 
             <Button
-              onClick={() => setArtImage(null)}
+              onClick={resetArt}
               colorPalette="red"
             >
               Remove Art
             </Button>
-          </Grid>
+          </ActionButtonGroup>
         </VStack>
       </Box>
     </VStack>
   );
 };
+
+ArtTabComponent.displayName = 'ArtTab';
+export const ArtTab = memo(ArtTabComponent);

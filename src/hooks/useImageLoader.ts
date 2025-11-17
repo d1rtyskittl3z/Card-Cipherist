@@ -5,6 +5,9 @@
 
 import { useState, useCallback } from 'react';
 import { useCardStore } from '../store/cardStore';
+import { useFrameStore } from '../store/frameStore';
+import { useMediaStore } from '../store/mediaStore';
+import { useUIStore } from '../store/uiStore';
 import { calculateAutoFitArt, calculateAutoFitWatermark } from '../utils/canvasHelpers';
 import { loadAndCropSVG } from '../utils/svgCropper';
 
@@ -12,15 +15,32 @@ export const useImageLoader = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Card store - for card dimensions
   const card = useCardStore((state) => state.card);
-  const loadedPack = useCardStore((state) => state.loadedPack);
-  const autoFitArt = useCardStore((state) => state.autoFitArt);
-  const setArtImage = useCardStore((state) => state.setArtImage);
-  const setSetSymbolImage = useCardStore((state) => state.setSetSymbolImage);
-  const setWatermarkImage = useCardStore((state) => state.setWatermarkImage);
-  const updateArt = useCardStore((state) => state.updateArt);
-  const updateSetSymbol = useCardStore((state) => state.updateSetSymbol);
-  const updateWatermark = useCardStore((state) => state.updateWatermark);
+
+  // Frame store - for loaded pack
+  const loadedPackFromFrameStore = useFrameStore((state) => state.loadedPack);
+
+  // TEMPORARY: Fallback to cardStore for loaded pack during migration
+  const loadedPackFromCardStore = useCardStore((state) => state.loadedPack);
+  const loadedPack = loadedPackFromFrameStore || loadedPackFromCardStore;
+
+  // UI store - for auto-fit setting
+  const autoFitArt = useUIStore((state) => state.autoFitArt);
+
+  // Media store - for images and media actions
+  const setArtImage = useMediaStore((state) => state.setArtImage);
+  const setArtImageLoading = useMediaStore((state) => state.setArtImageLoading);
+  const setArtImageError = useMediaStore((state) => state.setArtImageError);
+  const setSetSymbolImage = useMediaStore((state) => state.setSetSymbolImage);
+  const setSetSymbolImageLoading = useMediaStore((state) => state.setSetSymbolImageLoading);
+  const setSetSymbolImageError = useMediaStore((state) => state.setSetSymbolImageError);
+  const setWatermarkImage = useMediaStore((state) => state.setWatermarkImage);
+  const setWatermarkImageLoading = useMediaStore((state) => state.setWatermarkImageLoading);
+  const setWatermarkImageError = useMediaStore((state) => state.setWatermarkImageError);
+  const updateArt = useMediaStore((state) => state.updateArt);
+  const updateSetSymbol = useMediaStore((state) => state.updateSetSymbol);
+  const updateWatermark = useMediaStore((state) => state.updateWatermark);
 
   /**
    * Load image with crossOrigin support
@@ -63,23 +83,37 @@ export const useImageLoader = () => {
     async (src: string): Promise<HTMLImageElement> => {
       setLoading(true);
       setError(null);
+      setArtImageLoading(true);
+      setArtImageError(null);
       try {
         // Use CORS proxy for external URLs
         const proxiedSrc = proxifyUrl(src);
         const img = await loadImage(proxiedSrc);
         setArtImage(img);
-        
+
+        // Debug logging
+        console.log('[useImageLoader] loadArt called');
+        console.log('[useImageLoader] autoFitArt:', autoFitArt);
+        console.log('[useImageLoader] loadedPack:', loadedPack);
+        console.log('[useImageLoader] artBounds:', loadedPack?.artBounds);
+
         // Apply auto-fit if enabled and artBounds are available
         if (autoFitArt && loadedPack?.artBounds) {
-          const { artX, artY, artZoom } = calculateAutoFitArt(img, loadedPack.artBounds, card);
-          updateArt({ artSource: src, artX, artY, artZoom, artRotate: 0 });
+          const calculated = calculateAutoFitArt(img, loadedPack.artBounds, card);
+          console.log('[useImageLoader] Auto-fit calculated:', calculated);
+          updateArt({ artSource: src, artX: calculated.artX, artY: calculated.artY, artZoom: calculated.artZoom, artRotate: 0 });
         } else {
+          console.log('[useImageLoader] Auto-fit disabled or no artBounds, using defaults');
           updateArt({ artSource: src });
         }
-        
+
+        setArtImageLoading(false);
         return img;
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load art');
+        const errorMsg = err instanceof Error ? err.message : 'Failed to load art';
+        setError(errorMsg);
+        setArtImageError(errorMsg);
+        setArtImageLoading(false);
         // Fallback to blank image
         const blank = await loadImage('/img/blank.png');
         setArtImage(blank);
@@ -89,7 +123,7 @@ export const useImageLoader = () => {
         setLoading(false);
       }
     },
-    [loadImage, setArtImage, updateArt, autoFitArt, loadedPack, card, proxifyUrl]
+    [loadImage, setArtImage, setArtImageLoading, setArtImageError, updateArt, autoFitArt, loadedPack, card, proxifyUrl]
   );
 
   /**
@@ -99,14 +133,20 @@ export const useImageLoader = () => {
     async (src: string) => {
       setLoading(true);
       setError(null);
+      setSetSymbolImageLoading(true);
+      setSetSymbolImageError(null);
       try {
         // Use CORS proxy for external URLs
         const proxiedSrc = proxifyUrl(src);
         const img = await loadImage(proxiedSrc);
         setSetSymbolImage(img);
         updateSetSymbol({ setSymbolSource: src });
+        setSetSymbolImageLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load set symbol');
+        const errorMsg = err instanceof Error ? err.message : 'Failed to load set symbol';
+        setError(errorMsg);
+        setSetSymbolImageError(errorMsg);
+        setSetSymbolImageLoading(false);
         // Fallback to blank image
         const blank = await loadImage('/img/blank.png');
         setSetSymbolImage(blank);
@@ -115,7 +155,7 @@ export const useImageLoader = () => {
         setLoading(false);
       }
     },
-    [loadImage, setSetSymbolImage, updateSetSymbol, proxifyUrl]
+    [loadImage, setSetSymbolImage, setSetSymbolImageLoading, setSetSymbolImageError, updateSetSymbol, proxifyUrl]
   );
 
   /**
@@ -125,12 +165,14 @@ export const useImageLoader = () => {
     async (src: string) => {
       setLoading(true);
       setError(null);
+      setWatermarkImageLoading(true);
+      setWatermarkImageError(null);
       try {
         // Use CORS proxy for external URLs
         const proxiedSrc = proxifyUrl(src);
         const img = await loadImage(proxiedSrc);
         setWatermarkImage(img);
-        
+
         // Apply auto-fit if watermarkBounds are available
         if (loadedPack?.watermarkBounds) {
           const { watermarkX, watermarkY, watermarkZoom } = calculateAutoFitWatermark(
@@ -147,8 +189,12 @@ export const useImageLoader = () => {
         } else {
           updateWatermark({ watermarkSource: src });
         }
+        setWatermarkImageLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load watermark');
+        const errorMsg = err instanceof Error ? err.message : 'Failed to load watermark';
+        setError(errorMsg);
+        setWatermarkImageError(errorMsg);
+        setWatermarkImageLoading(false);
         // Fallback to blank image
         const blank = await loadImage('/img/blank.png');
         setWatermarkImage(blank);
@@ -157,7 +203,7 @@ export const useImageLoader = () => {
         setLoading(false);
       }
     },
-    [loadImage, setWatermarkImage, updateWatermark, proxifyUrl, loadedPack, card]
+    [loadImage, setWatermarkImage, setWatermarkImageLoading, setWatermarkImageError, updateWatermark, proxifyUrl, loadedPack, card]
   );
 
   /**
@@ -168,14 +214,16 @@ export const useImageLoader = () => {
     async (urlOrSetCode: string) => {
       setLoading(true);
       setError(null);
+      setWatermarkImageLoading(true);
+      setWatermarkImageError(null);
       try {
         // Crop SVG to bounding box
         const croppedDataUrl = await loadAndCropSVG(urlOrSetCode);
-        
+
         // Load the cropped SVG as an image
         const img = await loadImage(croppedDataUrl);
         setWatermarkImage(img);
-        
+
         // Apply auto-fit if watermarkBounds are available
         if (loadedPack?.watermarkBounds) {
           const { watermarkX, watermarkY, watermarkZoom } = calculateAutoFitWatermark(
@@ -192,8 +240,12 @@ export const useImageLoader = () => {
         } else {
           updateWatermark({ watermarkSource: croppedDataUrl });
         }
+        setWatermarkImageLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load Keyrune watermark');
+        const errorMsg = err instanceof Error ? err.message : 'Failed to load Keyrune watermark';
+        setError(errorMsg);
+        setWatermarkImageError(errorMsg);
+        setWatermarkImageLoading(false);
         // Fallback to blank image
         const blank = await loadImage('/img/blank.png');
         setWatermarkImage(blank);
@@ -202,7 +254,7 @@ export const useImageLoader = () => {
         setLoading(false);
       }
     },
-    [loadImage, setWatermarkImage, updateWatermark, loadedPack, card]
+    [loadImage, setWatermarkImage, setWatermarkImageLoading, setWatermarkImageError, updateWatermark, loadedPack, card]
   );
 
   /**

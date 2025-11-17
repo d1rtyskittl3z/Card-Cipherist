@@ -780,7 +780,7 @@ function finishLine(
   glyphs: Glyph[],
   state: LayoutState,
   lines: Line[],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   _textWidth: number,
   defaultLineSpacing: number
 ): void {

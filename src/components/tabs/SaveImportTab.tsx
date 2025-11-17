@@ -3,12 +3,13 @@
  * Card saving, loading, and export interface
  */
 
-import { Box, Button, Grid, Heading, Text, Textarea, VStack } from '@chakra-ui/react';
-import { ChangeEvent, useCallback, useMemo, useRef, useState } from 'react';
+import { Box, Button, Grid, Heading, Textarea, VStack } from '@chakra-ui/react';
+import { ChangeEvent, useCallback, useMemo, useRef, useState, memo } from 'react';
 import { useCardStore } from '../../store/cardStore';
 import { getCardName, loadImage } from '../../utils/canvasHelpers';
 import type { Card, Frame, Mask } from '../../types/card.types';
-import { Switch } from '../ui/switch';
+import { LabeledSwitch } from '../ui';
+import { validateCard, hasSchemaVersion, SCHEMA_VERSION } from '../../types/validation';
 
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 const METADATA_KEY = 'CardConjurerJSON';
@@ -313,7 +314,7 @@ const hydrateFrames = async (frames: Frame[]): Promise<Frame[]> => {
   return hydrated;
 };
 
-export const SaveImportTab = () => {
+const SaveImportTabComponent = () => {
   const card = useCardStore((state) => state.card);
   const resetCard = useCardStore((state) => state.resetCard);
   const updateCardState = useCardStore((state) => state.updateCard);
@@ -360,7 +361,42 @@ export const SaveImportTab = () => {
 
   const hydrateImportedCard = useCallback(
     async (rawJson: string) => {
-      const parsed = JSON.parse(rawJson) as Card;
+      // Parse JSON
+      let parsedData: unknown;
+      try {
+        parsedData = JSON.parse(rawJson);
+      } catch (error) {
+        throw new Error(`Invalid JSON: ${error instanceof Error ? error.message : 'Parse failed'}`);
+      }
+
+      // Handle versioned vs unversioned data
+      let cardData: unknown;
+      if (hasSchemaVersion(parsedData)) {
+        // Versioned import - check version compatibility
+        const versionedData = parsedData as { schemaVersion: string; card: unknown };
+        const { schemaVersion, card: versionedCard } = versionedData;
+        if (schemaVersion !== SCHEMA_VERSION) {
+          console.warn(
+            `Schema version mismatch: imported ${schemaVersion}, current ${SCHEMA_VERSION}. Attempting to load anyway.`
+          );
+        }
+        cardData = versionedCard;
+      } else {
+        // Legacy unversioned import
+        cardData = parsedData;
+      }
+
+      // Validate card data
+      const validationResult = validateCard(cardData);
+      if (!validationResult.success) {
+        throw new Error(
+          `Card validation failed:\n${validationResult.errorMessage || 'Unknown validation error'}`
+        );
+      }
+
+      // Cast validated data to Card type
+      // The Zod schema validates the structure, but we need to cast for TypeScript
+      const parsed = validationResult.data! as unknown as Card;
       const frames = Array.isArray(parsed.frames) ? await hydrateFrames(parsed.frames) : [];
       const { marginX, marginY } = calculateRequiredMargins(frames);
 
@@ -488,15 +524,13 @@ export const SaveImportTab = () => {
           Save & Export
         </Heading>
 
-        <Box mb={3}>
-          <Switch
-            checked={embedJson}
-            onCheckedChange={(e) => setEmbedJson(e.checked)}
-            colorPalette="purple"
-          >
-            <Text fontSize="sm">Embedded JSON (EXPERIMENTAL)</Text>
-          </Switch>
-        </Box>
+        <LabeledSwitch
+          label="Embedded JSON (EXPERIMENTAL)"
+          checked={embedJson}
+          onCheckedChange={setEmbedJson}
+          colorPalette="purple"
+          mb={3}
+        />
 
         <Grid templateColumns="repeat(2, 1fr)" gap={3}>
           <Button onClick={handleDownloadImage} colorPalette="blue">
@@ -548,3 +582,6 @@ export const SaveImportTab = () => {
     </VStack>
   );
 };
+
+SaveImportTabComponent.displayName = 'SaveImportTab';
+export const SaveImportTab = memo(SaveImportTabComponent);

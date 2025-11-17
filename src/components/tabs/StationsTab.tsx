@@ -3,18 +3,17 @@ import {
   Button,
   Heading,
   HStack,
-  Input,
   SimpleGrid,
   Text,
   VStack,
 } from '@chakra-ui/react';
-import { ChangeEvent, useMemo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { useCardStore } from '../../store/cardStore';
+import { useStationInfo, useIsStationCard } from '../../store/selectors';
 import type { StationColorMode } from '../../types/card.types';
 import { Field } from '../ui/field';
-import { NativeSelectRoot, NativeSelectField } from '../ui/native-select';
 import { Slider } from '../ui/slider';
-import { Switch } from '../ui/switch';
+import { LabeledInput, LabeledSelect, LabeledSwitch } from '../ui';
 
 const BADGE_COLOR_OPTIONS: Array<{ value: Exclude<StationColorMode, 'artifact' | 'land' | 'custom'>; label: string }> = [
   { value: 'auto', label: 'Auto (Based on Mana Cost)' },
@@ -41,16 +40,33 @@ const SQUARE_COLOR_OPTIONS: Array<{ value: StationColorMode; label: string }> = 
   { value: 'custom', label: 'Custom' },
 ];
 
-export const StationsTab = () => {
-  const card = useCardStore((state) => state.card);
+const StationsTabComponent = () => {
+  // Use fine-grained selectors
+  const station = useStationInfo();
+  // const version = useCardVersion(); // Unused - removed in Phase 8
+  const isStationCard = useIsStationCard();
   const updateStationState = useCardStore((state) => state.updateStationState);
   const resetStationSettings = useCardStore((state) => state.resetStationSettings);
 
-  const station = card.station;
-  const isStationCard = useMemo(
-    () => Boolean(card.version?.toLowerCase().includes('station') && station),
-    [card.version, station]
-  );
+  // Local state for sliders (immediate feedback)
+  const [localSquare1Opacity, setLocalSquare1Opacity] = useState(0);
+  const [localSquare2Opacity, setLocalSquare2Opacity] = useState(0);
+
+  // Sync local state from store when station changes
+  // IMPORTANT: Only sync on mount or when the entire station object reference changes
+  // Do NOT sync on every opacity change to avoid fighting with user input
+  useEffect(() => {
+    if (station) {
+      setLocalSquare1Opacity(station.squares[1].opacity ?? 0);
+      setLocalSquare2Opacity(station.squares[2].opacity ?? 0);
+    }
+  }, [station]); // Only depend on station object, not individual opacity values
+
+  // Unused memo - removed in Phase 8
+  // const _unusedMemo = useMemo(
+  //   () => isStationCard,
+  //   [isStationCard]
+  // );
 
   if (!isStationCard || !station) {
     return (
@@ -113,36 +129,32 @@ export const StationsTab = () => {
           Badge Settings
         </Heading>
         <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
-          <Field label="Badge Color Mode">
-            <NativeSelectRoot size="sm">
-              <NativeSelectField
-                value={station.badgeColorMode}
-                onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-                  handleBadgeModeChange(event.target.value as StationColorMode)
-                }
-              >
-                {BADGE_COLOR_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </NativeSelectField>
-            </NativeSelectRoot>
-          </Field>
-          <Field label="First Ability Badge Value">
-            <Input
-              value={station.badgeValues[1] ?? ''}
-              onChange={(event) => handleBadgeValueChange(1, event.target.value)}
-              placeholder="Badge Text"
-            />
-          </Field>
-          <Field label="Second Ability Badge Value">
-            <Input
-              value={station.badgeValues[2] ?? ''}
-              onChange={(event) => handleBadgeValueChange(2, event.target.value)}
-              placeholder="Badge Text"
-            />
-          </Field>
+          <LabeledSelect
+            label="Badge Color Mode"
+            value={station.badgeColorMode}
+            onChange={(val) => handleBadgeModeChange(val as StationColorMode)}
+            size="sm"
+          >
+            {BADGE_COLOR_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </LabeledSelect>
+
+          <LabeledInput
+            label="First Ability Badge Value"
+            value={station.badgeValues[1] ?? ''}
+            onChange={(val) => handleBadgeValueChange(1, val)}
+            placeholder="Badge Text"
+          />
+
+          <LabeledInput
+            label="Second Ability Badge Value"
+            value={station.badgeValues[2] ?? ''}
+            onChange={(val) => handleBadgeValueChange(2, val)}
+            placeholder="Badge Text"
+          />
         </SimpleGrid>
       </Box>
 
@@ -151,48 +163,44 @@ export const StationsTab = () => {
           Power/Toughness Plate
         </Heading>
         <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
-          <Field label="PT Color Mode">
-            <NativeSelectRoot size="sm">
-              <NativeSelectField
-                value={station.ptColorMode}
-                onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-                  handlePTModeChange(event.target.value as StationColorMode)
-                }
-              >
-                {BADGE_COLOR_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </NativeSelectField>
-            </NativeSelectRoot>
-          </Field>
-          <Field label="PT X Offset">
-            <Input
-              type="number"
-              value={station.ptSettings.x}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                const value = Number(event.target.value) || 0;
-                updateStationState((draft) => {
-                  draft.ptSettings.x = value;
-                  return draft;
-                });
-              }}
-            />
-          </Field>
-          <Field label="PT Y Offset">
-            <Input
-              type="number"
-              value={station.ptSettings.y}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                const value = Number(event.target.value) || 0;
-                updateStationState((draft) => {
-                  draft.ptSettings.y = value;
-                  return draft;
-                });
-              }}
-            />
-          </Field>
+          <LabeledSelect
+            label="PT Color Mode"
+            value={station.ptColorMode}
+            onChange={(val) => handlePTModeChange(val as StationColorMode)}
+            size="sm"
+          >
+            {BADGE_COLOR_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </LabeledSelect>
+
+          <LabeledInput
+            label="PT X Offset"
+            type="number"
+            value={station.ptSettings.x}
+            onChange={(val) => {
+              const value = Number(val) || 0;
+              updateStationState((draft) => {
+                draft.ptSettings.x = value;
+                return draft;
+              });
+            }}
+          />
+
+          <LabeledInput
+            label="PT Y Offset"
+            type="number"
+            value={station.ptSettings.y}
+            onChange={(val) => {
+              const value = Number(val) || 0;
+              updateStationState((draft) => {
+                draft.ptSettings.y = value;
+                return draft;
+              });
+            }}
+          />
         </SimpleGrid>
       </Box>
 
@@ -201,128 +209,116 @@ export const StationsTab = () => {
           Square Layout
         </Heading>
         <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} mb={4}>
-          <Field label="Square Width (both)">
-            <Input
-              type="number"
-              value={station.squares[1].width}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                const value = Number(event.target.value) || 0;
-                updateStationState((draft) => {
-                  draft.squares[1].width = value;
-                  draft.squares[2].width = value;
-                  return draft;
-                });
-              }}
-            />
-          </Field>
-          <Field label="Square X Offset (both)">
-            <Input
-              type="number"
-              value={displayedSquareX}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                const value = Number(event.target.value) || 0;
-                updateStationState((draft) => {
-                  const actual = value + (draft.borderlessXOffset ?? 0);
-                  draft.squares[1].x = actual;
-                  draft.squares[2].x = actual;
-                  return draft;
-                });
-              }}
-            />
-          </Field>
-          <Field label="Square Y Offset (first square start)">
-            <Input
-              type="number"
-              value={displayedSquareY}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                const value = Number(event.target.value) || 0;
-                updateStationState((draft) => {
-                  draft.squares[1].y = value + 76;
-                  return draft;
-                });
-              }}
-            />
-          </Field>
+          <LabeledInput
+            label="Square Width (both)"
+            type="number"
+            value={station.squares[1].width}
+            onChange={(val) => {
+              const value = Number(val) || 0;
+              updateStationState((draft) => {
+                draft.squares[1].width = value;
+                draft.squares[2].width = value;
+                return draft;
+              });
+            }}
+          />
+
+          <LabeledInput
+            label="Square X Offset (both)"
+            type="number"
+            value={displayedSquareX}
+            onChange={(val) => {
+              const value = Number(val) || 0;
+              updateStationState((draft) => {
+                const actual = value + (draft.borderlessXOffset ?? 0);
+                draft.squares[1].x = actual;
+                draft.squares[2].x = actual;
+                return draft;
+              });
+            }}
+          />
+
+          <LabeledInput
+            label="Square Y Offset (first square start)"
+            type="number"
+            value={displayedSquareY}
+            onChange={(val) => {
+              const value = Number(val) || 0;
+              updateStationState((draft) => {
+                draft.squares[1].y = value + 76;
+                return draft;
+              });
+            }}
+          />
         </SimpleGrid>
 
         <SimpleGrid columns={{ base: 1, md: 2 }} gap={4} mb={4}>
-          <Field label="First Square Height">
-            <Input
-              type="number"
-              value={station.squares[1].height}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                const value = Number(event.target.value) || 0;
-                updateStationState((draft) => {
-                  draft.squares[1].height = value;
-                  return draft;
-                });
-              }}
-            />
-          </Field>
-          <Field label="Second Square Height">
-            <Input
-              type="number"
-              value={station.squares[2].height}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                const value = Number(event.target.value) || 0;
-                updateStationState((draft) => {
-                  draft.squares[2].height = value;
-                  return draft;
-                });
-              }}
-            />
-          </Field>
+          <LabeledInput
+            label="First Square Height"
+            type="number"
+            value={station.squares[1].height}
+            onChange={(val) => {
+              const value = Number(val) || 0;
+              updateStationState((draft) => {
+                draft.squares[1].height = value;
+                return draft;
+              });
+            }}
+          />
+
+          <LabeledInput
+            label="Second Square Height"
+            type="number"
+            value={station.squares[2].height}
+            onChange={(val) => {
+              const value = Number(val) || 0;
+              updateStationState((draft) => {
+                draft.squares[2].height = value;
+                return draft;
+              });
+            }}
+          />
         </SimpleGrid>
 
-        <Box mb={4}>
-          <HStack gap={3}>
-            <Switch
-              checked={station.disableFirstAbility}
-              onCheckedChange={(event: { checked: boolean }) => {
+        <LabeledSwitch
+          label="Disable First Square Color. When enabled, only the lower square remains visible."
+          checked={station.disableFirstAbility}
+          onCheckedChange={(checked) => {
+            updateStationState((draft) => {
+              draft.disableFirstAbility = checked;
+              draft.squares[1].enabled = !checked;
+              return draft;
+            });
+          }}
+        />
+
+        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4} mt={4}>
+          <LabeledSelect
+            label="Square Color Mode"
+            value={station.colorModes[1]}
+            onChange={(val) => handleSquareModeChange(val as StationColorMode)}
+            size="sm"
+          >
+            {SQUARE_COLOR_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </LabeledSelect>
+
+          {station.colorModes[1] === 'custom' && (
+            <LabeledInput
+              label="Custom Square Color"
+              type="color"
+              value={station.squares[1].color}
+              onChange={(val) => {
                 updateStationState((draft) => {
-                  draft.disableFirstAbility = event.checked;
-                  draft.squares[1].enabled = !event.checked;
+                  draft.squares[1].color = val;
+                  draft.squares[2].color = val;
                   return draft;
                 });
               }}
-            >
-              <Text fontSize="sm">Disable First Square Color. When enabled, only the lower square remains visible.</Text>
-            </Switch>
-          </HStack>
-        </Box>
-
-        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4} mt={4}>
-          <Field label="Square Color Mode">
-            <NativeSelectRoot size="sm">
-              <NativeSelectField
-                value={station.colorModes[1]}
-                onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-                  handleSquareModeChange(event.target.value as StationColorMode)
-                }
-              >
-                {SQUARE_COLOR_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </NativeSelectField>
-            </NativeSelectRoot>
-          </Field>
-          {station.colorModes[1] === 'custom' && (
-            <Field label="Custom Square Color">
-              <Input
-                type="color"
-                value={station.squares[1].color}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                  const color = event.target.value;
-                  updateStationState((draft) => {
-                    draft.squares[1].color = color;
-                    draft.squares[2].color = color;
-                    return draft;
-                  });
-                }}
-              />
-            </Field>
+            />
           )}
         </SimpleGrid>
 
@@ -331,20 +327,24 @@ export const StationsTab = () => {
             <HStack gap={3}>
               <Slider
                 flex={1}
-                value={[station.squares[1].opacity ?? 0]}
+                value={[localSquare1Opacity]}
                 min={0}
                 max={1}
                 step={0.01}
                 onValueChange={(event: { value: number[] }) => {
                   const [value] = event.value;
+                  const finalValue = Number.isFinite(value) ? value : 0;
+                  // Update local state immediately for smooth slider movement
+                  setLocalSquare1Opacity(finalValue);
+                  // Update store
                   updateStationState((draft) => {
-                    draft.squares[1].opacity = Number.isFinite(value) ? value : 0;
+                    draft.squares[1].opacity = finalValue;
                     return draft;
                   });
                 }}
               />
               <Box minW="48px" textAlign="right" fontSize="sm">
-                {(station.squares[1].opacity ?? 0).toFixed(2)}
+                {localSquare1Opacity.toFixed(2)}
               </Box>
             </HStack>
           </Field>
@@ -354,20 +354,24 @@ export const StationsTab = () => {
               <HStack gap={3}>
                 <Slider
                   flex={1}
-                  value={[station.squares[2].opacity ?? 0]}
+                  value={[localSquare2Opacity]}
                   min={0}
                   max={1}
                   step={0.01}
                   onValueChange={(event: { value: number[] }) => {
                     const [value] = event.value;
+                    const finalValue = Number.isFinite(value) ? value : 0;
+                    // Update local state immediately for smooth slider movement
+                    setLocalSquare2Opacity(finalValue);
+                    // Update store
                     updateStationState((draft) => {
-                      draft.squares[2].opacity = Number.isFinite(value) ? value : 0;
+                      draft.squares[2].opacity = finalValue;
                       return draft;
                     });
                   }}
                 />
                 <Box minW="48px" textAlign="right" fontSize="sm">
-                  {(station.squares[2].opacity ?? 0).toFixed(2)}
+                  {localSquare2Opacity.toFixed(2)}
                 </Box>
               </HStack>
             </Field>
@@ -387,3 +391,6 @@ export const StationsTab = () => {
     </VStack>
   );
 };
+
+StationsTabComponent.displayName = 'StationsTab';
+export const StationsTab = memo(StationsTabComponent);

@@ -35,6 +35,7 @@ import {
   createStationDefaults,
   mergeStationDefaults,
 } from '../utils/stationDefaults';
+import { TEXT_FIELDS, isNeoBasicsVersion } from '../constants';
 
 const BASE_WIDTH = 2010;
 const BASE_HEIGHT = 2814;
@@ -656,9 +657,9 @@ export const useCardStore = create<CardState>()(
           });
 
           const store = useCardStore.getState();
-          if (store.card.version === 'neoBasics' && store.card.text?.title) {
+          if (isNeoBasicsVersion(store.card.version) && store.card.text?.title) {
             const change = computeNeoBasicsChange(NEO_BASICS_MIN_TITLE_HEIGHT);
-            store.updateText('title', {
+            store.updateText(TEXT_FIELDS.TITLE, {
               height: change[1] + NEO_BASICS_BASE_TITLE_HEIGHT,
             });
           }
@@ -673,9 +674,9 @@ export const useCardStore = create<CardState>()(
           set({ neoBasicsTitleHeight: clamped });
 
           const store = useCardStore.getState();
-          if (store.card.version === 'neoBasics' && store.card.text?.title) {
+          if (isNeoBasicsVersion(store.card.version) && store.card.text?.title) {
             const change = computeNeoBasicsChange(clamped);
-            store.updateText('title', {
+            store.updateText(TEXT_FIELDS.TITLE, {
               height: change[1] + NEO_BASICS_BASE_TITLE_HEIGHT,
             });
           }

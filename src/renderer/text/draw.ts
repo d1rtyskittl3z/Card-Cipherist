@@ -14,9 +14,7 @@ import type {
   PackMetrics,
 } from './types';
 import { applyFontStyle } from './measure';
-
-const CANVAS_MARGIN = 300;
-const TEXT_FONT_HEIGHT_RATIO = 0.7;
+import { CANVAS_MARGIN, TEXT_FONT_HEIGHT_RATIO } from '../../constants';
 
 /**
  * Draw layout result to target canvas

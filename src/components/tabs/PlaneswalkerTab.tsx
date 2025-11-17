@@ -3,14 +3,16 @@
  * Controls placement and loyalty costs for Planeswalker abilities
  */
 
-import { useEffect, useMemo } from 'react';
-import { Box, Button, Heading, HStack, Input, Text, VStack } from '@chakra-ui/react';
+import { useEffect, useMemo, memo } from 'react';
+import { Box, Button, Heading, HStack, Text, VStack } from '@chakra-ui/react';
 import { useCardStore } from '../../store/cardStore';
-import { Field } from '../ui/field';
+import { usePlaneswalkerInfo, useCardText, useCardHeight, useLoadedPack, useIsPlaneswalkerCard } from '../../store/selectors';
 import { Checkbox } from '../ui/checkbox';
-import { PLANESWALKER_ABILITY_KEYS, applyPlaneswalkerLayout, adjustPlaneswalkerTextBounds, computePlaneswalkerCount, } from '../../utils/planeswalkerHelpers';
+import { LabeledInput } from '../ui';
+import { applyPlaneswalkerLayout, adjustPlaneswalkerTextBounds, computePlaneswalkerCount } from '../../utils/planeswalkerHelpers';
+import { PLANESWALKER_ABILITY_KEYS } from '../../constants';
 import { scaleHeight } from '../../utils/canvasHelpers';
-import type { PlaneswalkerInfo } from '../../types/card.types';
+import type { PlaneswalkerInfo, Card } from '../../types/card.types';
 
 const FALLBACK_X = 0.1167;
 const FALLBACK_WIDTH = 0.8094;
@@ -35,16 +37,21 @@ const cloneTuple = <T,>(values: T[], fallback: T, expected = 4): [T, T, T, T] =>
   return padded.slice(0, expected) as [T, T, T, T];
 };
 
-export const PlaneswalkerTab = () => {
-  const card = useCardStore((state) => state.card);
-  const loadedPack = useCardStore((state) => state.loadedPack);
-
-  const planeswalkerInfo = card.planeswalker;
-  const isPlaneswalkerCard = Boolean(card.version?.toLowerCase().includes('planeswalker') && planeswalkerInfo);
+const PlaneswalkerTabComponent = () => {
+  // Use fine-grained selectors
+  const planeswalkerInfo = usePlaneswalkerInfo();
+  // const version = useCardVersion(); // Unused - removed in Phase 8
+  const text = useCardText();
+  const height = useCardHeight();
+  const loadedPack = useLoadedPack();
+  const isPlaneswalkerCard = useIsPlaneswalkerCard();
 
   const abilityRows = useMemo<AbilityRow[]>(() => {
+    // Create minimal card object for scaleHeight utility
+    const cardForScale = { height } as Card;
+    
     return PLANESWALKER_ABILITY_KEYS.map((key, index) => {
-      const textField = card.text?.[key];
+      const textField = text?.[key];
       const heightNormalized = textField?.height ?? 0;
       const costValue = planeswalkerInfo?.abilities?.[index] ?? '';
       const shiftNormalized = planeswalkerInfo?.abilityAdjust?.[index] ?? 0;
@@ -54,14 +61,14 @@ export const PlaneswalkerTab = () => {
         index,
         label: `Ability ${index + 1}`,
         heightNormalized,
-        heightPx: scaleHeight(card, heightNormalized),
+        heightPx: scaleHeight(cardForScale, heightNormalized),
         cost: costValue,
         shiftNormalized,
-        shiftPx: scaleHeight(card, shiftNormalized),
+        shiftPx: scaleHeight(cardForScale, shiftNormalized),
         text: textField?.text ?? '',
       };
     });
-  }, [card, planeswalkerInfo]);
+  }, [height, text, planeswalkerInfo]);
 
   const totalHeightNormalized = abilityRows.reduce((sum, ability) => sum + ability.heightNormalized, 0);
   const totalHeightPx = abilityRows.reduce((sum, ability) => sum + ability.heightPx, 0);
@@ -300,42 +307,39 @@ export const PlaneswalkerTab = () => {
           </Heading>
           <VStack align="stretch" gap={3}>
             <HStack align="flex-end" gap={3} flexWrap="wrap">
-              <Field label="Textbox Height (px)">
-                <Input
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={ability.heightPx}
-                  onChange={(event) => {
-                    const nextValue = Number(event.currentTarget.value);
-                    if (!Number.isNaN(nextValue)) {
-                      handleHeightChange(ability.index, nextValue);
-                    }
-                  }}
-                />
-              </Field>
+              <LabeledInput
+                label="Textbox Height (px)"
+                type="number"
+                min={0}
+                step={1}
+                value={ability.heightPx}
+                onChange={(val) => {
+                  const nextValue = Number(val);
+                  if (!Number.isNaN(nextValue)) {
+                    handleHeightChange(ability.index, nextValue);
+                  }
+                }}
+              />
 
-              <Field label="Loyalty Cost">
-                <Input
-                  value={ability.cost}
-                  onChange={(event) => handleCostChange(ability.index, event.currentTarget.value)}
-                  placeholder="+1, 0, -7, etc."
-                />
-              </Field>
+              <LabeledInput
+                label="Loyalty Cost"
+                value={ability.cost}
+                onChange={(val) => handleCostChange(ability.index, val)}
+                placeholder="+1, 0, -7, etc."
+              />
 
-              <Field label="Icon Shift (px)">
-                <Input
-                  type="number"
-                  step={1}
-                  value={ability.shiftPx}
-                  onChange={(event) => {
-                    const nextValue = Number(event.currentTarget.value);
-                    if (!Number.isNaN(nextValue)) {
-                      handleShiftChange(ability.index, nextValue);
-                    }
-                  }}
-                />
-              </Field>
+              <LabeledInput
+                label="Icon Shift (px)"
+                type="number"
+                step={1}
+                value={ability.shiftPx}
+                onChange={(val) => {
+                  const nextValue = Number(val);
+                  if (!Number.isNaN(nextValue)) {
+                    handleShiftChange(ability.index, nextValue);
+                  }
+                }}
+              />
             </HStack>
 
             {ability.text && (
@@ -365,3 +369,6 @@ export const PlaneswalkerTab = () => {
     </VStack>
   );
 };
+
+PlaneswalkerTabComponent.displayName = 'PlaneswalkerTab';
+export const PlaneswalkerTab = memo(PlaneswalkerTabComponent);

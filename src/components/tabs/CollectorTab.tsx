@@ -3,18 +3,24 @@
  * Card collector information interface (card number, rarity, artist, etc.)
  */
 
-import { useState, useEffect } from 'react';
-import { Box, Grid, HStack, Input, RadioGroup, VStack, Button } from '@chakra-ui/react';
+import { useState, useEffect, memo } from 'react';
+import { Box, HStack, RadioGroup, VStack, Button } from '@chakra-ui/react';
 import { Field } from '../ui/field';
-import { Switch } from '../ui/switch';
+import { LabeledInput, ControlGrid, LabeledSwitch } from '../ui';
 import { useCardStore } from '../../store/cardStore';
+import { useCollectorInfo, useSerialNumbers, useFrames } from '../../store/selectors';
 import { getCollectorInfoConfig, replaceCollectorTokens } from '../../utils/collectorInfoConfig';
-import { toaster } from '../ui/toaster';
+import { toaster } from '../ui/toaster-instance';
+import type { Card } from '../../types/card.types';
 
-export const CollectorTab = () => {
-  const card = useCardStore((state) => state.card);
+const CollectorTabComponent = () => {
+  // Use fine-grained selectors
+  const frames = useFrames();
+  const showCollectorInfo = useCardStore((state) => state.card.showCollectorInfo ?? false);
+  const collectorInfoStyle = useCardStore((state) => state.card.collectorInfoStyle ?? 'default');
+  const { show: showSerialNumbers, number: serialNumber, total: serialTotal, x: serialX, y: serialY, scale: serialScale } = useSerialNumbers();
+  const bottomInfoColor = useCardStore((state) => state.card.bottomInfoColor);
   const updateCard = useCardStore((state) => state.updateCard);
-  const showSerialNumbers = useCardStore((s) => s.showSerialNumbers)
   const setShowSerialNumbers = useCardStore((s) => s.setShowSerialNumbers)
   const [useStar, setUseStar] = useState(false);
   const [enableAdditionalFields, setEnableAdditionalFields] = useState(false);
@@ -23,16 +29,8 @@ export const CollectorTab = () => {
   const [bottomRight, setBottomRight] = useState('');
   // removed local state; now using store-backed showSerialNumbers
 
-  // Subscribe directly to these specific state values to ensure re-renders
-  const showCollectorInfo = useCardStore((state) => state.card.showCollectorInfo ?? false);
-  const collectorInfoStyle = useCardStore((state) => state.card.collectorInfoStyle ?? 'default');
-
   // Get collector info from store
-  const setCode = useCardStore((state) => state.collectorSetCode);
-  const language = useCardStore((state) => state.collectorLanguage);
-  const artist = useCardStore((state) => state.collectorArtist);
-  const rarity = useCardStore((state) => state.collectorRarity);
-  const digits = useCardStore((state) => state.collectorDigits);
+  const { setCode, language, artist, rarity, digits } = useCollectorInfo();
   const setCollectorSetCode = useCardStore((state) => state.setCollectorSetCode);
   const setCollectorLanguage = useCardStore((state) => state.setCollectorLanguage);
   const setCollectorArtist = useCardStore((state) => state.setCollectorArtist);
@@ -47,7 +45,9 @@ export const CollectorTab = () => {
   useEffect(() => {
     if (!showCollectorInfo) return;
 
-  const config = getCollectorInfoConfig(card, collectorInfoStyle, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight);
+  // Create minimal card object for config function
+  const cardForConfig = { bottomInfoColor, frames };
+  const config = getCollectorInfoConfig(cardForConfig as Card, collectorInfoStyle, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight);
     const bottomInfo: Record<string, {
       name: string;
       text: string;
@@ -97,11 +97,11 @@ export const CollectorTab = () => {
 
     updateCard({ bottomInfo });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, card.frames]);
+  }, [showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames]);
 
   // Ensure the switch is off by default on first mount
   useEffect(() => {
-    if (card.showCollectorInfo === undefined) {
+    if (showCollectorInfo === undefined) {
       updateCard({ showCollectorInfo: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,73 +134,64 @@ export const CollectorTab = () => {
   return (
     <VStack align="stretch" gap={4}>
       <Box>
-        <Box mb={4}>
-          <Switch
-            colorPalette="purple"
-            checked={showCollectorInfo}
-            onCheckedChange={(e) => handleShowCollectorInfoChange(e.checked)}
-            size="lg"
-          >
-            Show Collector Information
-          </Switch>
-        </Box>
+        <LabeledSwitch
+          label="Show Collector Information"
+          checked={showCollectorInfo}
+          onCheckedChange={handleShowCollectorInfoChange}
+          colorPalette="purple"
+          size="lg"
+        />
 
         {/* When collector info is OFF, show the Serial Numbers switch right below */}
         {!showCollectorInfo && (
-          <Box mb={4}>
-            <Switch
-              colorPalette="purple"
+          <Box>
+            <LabeledSwitch
+              label="Show Serial Numbers"
               checked={showSerialNumbers}
-              onCheckedChange={(e) => setShowSerialNumbers(e.checked)}
+              onCheckedChange={setShowSerialNumbers}
+              colorPalette="purple"
               size="lg"
-            >
-              Show Serial Numbers
-            </Switch>
+            />
 
             {showSerialNumbers && (
-              <Grid templateColumns="repeat(3, 1fr)" gap={3} mt={3}>
-                <Field label="Serial Number">
-                  <Input
-                    type="text"
-                    placeholder="e.g., 001"
-                    value={String(card.serialNumber ?? '')}
-                    onChange={(e) => updateCard({ serialNumber: e.target.value })}
-                  />
-                </Field>
+              <ControlGrid columns={3} gap={3} mt={3}>
+                <LabeledInput
+                  label="Serial Number"
+                  type="text"
+                  placeholder="e.g., 001"
+                  value={String(serialNumber ?? '')}
+                  onChange={(val) => updateCard({ serialNumber: val })}
+                />
 
-                <Field label="Serial Total">
-                  <Input
-                    type="text"
-                    placeholder="e.g., 100"
-                    value={String(card.serialTotal ?? '')}
-                    onChange={(e) => updateCard({ serialTotal: e.target.value })}
-                  />
-                </Field>
+                <LabeledInput
+                  label="Serial Total"
+                  type="text"
+                  placeholder="e.g., 100"
+                  value={String(serialTotal ?? '')}
+                  onChange={(val) => updateCard({ serialTotal: val })}
+                />
 
-                <Field label="Serial X (design px)">
-                  <Input
-                    type="number"
-                    value={Number(card.serialX ?? 172)}
-                    onChange={(e) => updateCard({ serialX: Number(e.target.value) || 0 })}
-                  />
-                </Field>
+                <LabeledInput
+                  label="Serial X (design px)"
+                  type="number"
+                  value={Number(serialX ?? 172)}
+                  onChange={(val) => updateCard({ serialX: Number(val) || 0 })}
+                />
 
-                <Field label="Serial Y (design px)">
-                  <Input
-                    type="number"
-                    value={Number(card.serialY ?? 1383)}
-                    onChange={(e) => updateCard({ serialY: Number(e.target.value) || 0 })}
-                  />
-                </Field>
+                <LabeledInput
+                  label="Serial Y (design px)"
+                  type="number"
+                  value={Number(serialY ?? 1383)}
+                  onChange={(val) => updateCard({ serialY: Number(val) || 0 })}
+                />
 
-                <Field label="Serial Scale">
-                  <Input
-                    type="number"
-                    step="0.05"
-                    value={Number(card.serialScale ?? 1)}
-                    onChange={(e) => updateCard({ serialScale: Number(e.target.value) || 1 })}
-                  />
-                </Field>
+                <LabeledInput
+                  label="Serial Scale"
+                  type="number"
+                  step={0.05}
+                  value={Number(serialScale ?? 1)}
+                  onChange={(val) => updateCard({ serialScale: Number(val) || 1 })}
+                />
 
                 {/* Reset Placement Button (full width) */}
                 <Box gridColumn="1 / -1">
@@ -211,7 +202,7 @@ export const CollectorTab = () => {
                     Reset Placement
                   </Button>
                 </Box>
-              </Grid>
+              </ControlGrid>
             )}
           </Box>
         )}
@@ -241,124 +232,115 @@ export const CollectorTab = () => {
         )}
 
   {showCollectorInfo && (
-  <Grid templateColumns="repeat(3, 1fr)" gap={3}>
+  <ControlGrid columns={3} gap={3}>
           {/* Row 1 */}
-          <Field label="Number">
-            <Input
-              type="number"
-              value={digits}
-              onChange={(e) => setCollectorDigits(e.target.value)}
-            />
-          </Field>
+          <LabeledInput
+            label="Number"
+            type="number"
+            value={digits}
+            onChange={setCollectorDigits}
+          />
 
-          <Field label="Rarity">
-            <Input
-              type="text"
-              placeholder="C for common, U for uncommon, etc..."
-              value={rarity}
-              onChange={(e) => setCollectorRarity(e.target.value)}
-            />
-          </Field>
+          <LabeledInput
+            label="Rarity"
+            type="text"
+            placeholder="C for common, U for uncommon, etc..."
+            value={rarity}
+            onChange={setCollectorRarity}
+          />
 
-          <Field label="Note">
-            <Input
-              type="text"
-              placeholder="Additional note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </Field>
+          <LabeledInput
+            label="Note"
+            type="text"
+            placeholder="Additional note"
+            value={note}
+            onChange={setNote}
+          />
 
           {/* Row 2 */}
-          <Field label="Set Code">
-            <Input
-              type="text"
-              placeholder="e.g., MID, VOW, NEO"
-              value={setCode}
-              onChange={(e) => setCollectorSetCode(e.target.value)}
-            />
-          </Field>
+          <LabeledInput
+            label="Set Code"
+            type="text"
+            placeholder="e.g., MID, VOW, NEO"
+            value={setCode}
+            onChange={setCollectorSetCode}
+          />
 
-          <Field label="Language">
-            <Input
-              type="text"
-              placeholder="e.g., EN, JP, DE"
-              value={language}
-              onChange={(e) => setCollectorLanguage(e.target.value)}
-            />
-          </Field>
+          <LabeledInput
+            label="Language"
+            type="text"
+            placeholder="e.g., EN, JP, DE"
+            value={language}
+            onChange={setCollectorLanguage}
+          />
 
-          <Field label="Artist">
-            <Input
-              type="text"
-              placeholder="Artist name"
-              value={artist}
-              onChange={(e) => setCollectorArtist(e.target.value)}
-            />
-          </Field>
+          <LabeledInput
+            label="Artist"
+            type="text"
+            placeholder="Artist name"
+            value={artist}
+            onChange={setCollectorArtist}
+          />
 
           {/* Serial inputs have been moved to render directly under the Show Serial switch only */}
 
           {/* Enable Additional Fields Switch (spans full width) */}
-          <Box gridColumn="1 / -1" mb={2}>
-            <Switch
-              colorPalette="purple"
+          <Box gridColumn="1 / -1">
+            <LabeledSwitch
+              label="Enable Additional Fields"
               checked={enableAdditionalFields}
-              onCheckedChange={(e) => handleAdditionalFieldsToggle(e.checked)}
+              onCheckedChange={handleAdditionalFieldsToggle}
+              colorPalette="purple"
               size="lg"
-            >
-              Enable Additional Fields
-            </Switch>
+              mb={2}
+            />
           </Box>
 
           {/* Additional Fields Row */}
           {enableAdditionalFields && (
             <>
-              <Field label="Middle Right">
-                <Input
-                  type="text"
-                  placeholder="Middle Right"
-                  value={middleRight}
-                  onChange={(e) => setMiddleRight(e.target.value)}
-                />
-              </Field>
+              <LabeledInput
+                label="Middle Right"
+                type="text"
+                placeholder="Middle Right"
+                value={middleRight}
+                onChange={setMiddleRight}
+              />
 
-              <Field label="Bottom Left">
-                <Input
-                  type="text"
-                  placeholder="Bottom Left"
-                  value={bottomLeft}
-                  onChange={(e) => setBottomLeft(e.target.value)}
-                />
-              </Field>
+              <LabeledInput
+                label="Bottom Left"
+                type="text"
+                placeholder="Bottom Left"
+                value={bottomLeft}
+                onChange={setBottomLeft}
+              />
 
-              <Field label="Bottom Right">
-                <Input
-                  type="text"
-                  placeholder="Bottom Right"
-                  value={bottomRight}
-                  onChange={(e) => setBottomRight(e.target.value)}
-                />
-              </Field>
+              <LabeledInput
+                label="Bottom Right"
+                type="text"
+                placeholder="Bottom Right"
+                value={bottomRight}
+                onChange={setBottomRight}
+              />
             </>
           )}
 
           {/* Toggle Star/Dot Row (spans full width) */}
-          <Box gridColumn="1 / -1" mb={2}>
-            <Switch
-              colorPalette="purple"
+          <Box gridColumn="1 / -1">
+            <LabeledSwitch
+              label="Toggle Star/Dot"
               checked={useStar}
-              onCheckedChange={(e) => setUseStar(e.checked)}
+              onCheckedChange={setUseStar}
+              colorPalette="purple"
               size="lg"
-            >
-              Toggle Star/Dot
-            </Switch>
+              mb={2}
+            />
           </Box>
 
           {/* Row 3 */}
           <Field label="Bottom Info Color">
             <RadioGroup.Root
-              value={card.bottomInfoColor || 'white'}
+              value={bottomInfoColor || 'white'}
               onValueChange={(e) => updateCard({ bottomInfoColor: e.value || 'white' })}
             >
               <HStack gap={4}>
@@ -381,61 +363,56 @@ export const CollectorTab = () => {
           </Field>
 
           {/* When collector info is ON, move the Serial Numbers switch to the very bottom */}
-          <Box gridColumn="1 / -1" mt={2}>
-            <Switch
-              colorPalette="purple"
+          <Box gridColumn="1 / -1">
+            <LabeledSwitch
+              label="Show Serial Numbers"
               checked={showSerialNumbers}
-              onCheckedChange={(e) => setShowSerialNumbers(e.checked)}
+              onCheckedChange={setShowSerialNumbers}
+              colorPalette="purple"
               size="lg"
-            >
-              Show Serial Numbers
-            </Switch>
+              mb={2}
+            />
           </Box>
 
           {showSerialNumbers && (
-            <Grid templateColumns="repeat(3, 1fr)" gap={3} gridColumn="1 / -1" mt={3}>
-              <Field label="Serial Number">
-                <Input
-                  type="text"
-                  placeholder="e.g., 001"
-                  value={String(card.serialNumber ?? '')}
-                  onChange={(e) => updateCard({ serialNumber: e.target.value })}
-                />
-              </Field>
+            <ControlGrid columns={3} gap={3} gridColumn="1 / -1" mt={3}>
+              <LabeledInput
+                label="Serial Number"
+                type="text"
+                placeholder="e.g., 001"
+                value={String(serialNumber ?? '')}
+                onChange={(val) => updateCard({ serialNumber: val })}
+              />
 
-              <Field label="Serial Total">
-                <Input
-                  type="text"
-                  placeholder="e.g., 100"
-                  value={String(card.serialTotal ?? '')}
-                  onChange={(e) => updateCard({ serialTotal: e.target.value })}
-                />
-              </Field>
+              <LabeledInput
+                label="Serial Total"
+                type="text"
+                placeholder="e.g., 100"
+                value={String(serialTotal ?? '')}
+                onChange={(val) => updateCard({ serialTotal: val })}
+              />
 
-              <Field label="Serial X (design px)">
-                <Input
-                  type="number"
-                  value={Number(card.serialX ?? 172)}
-                  onChange={(e) => updateCard({ serialX: Number(e.target.value) || 0 })}
-                />
-              </Field>
+              <LabeledInput
+                label="Serial X (design px)"
+                type="number"
+                value={Number(serialX ?? 172)}
+                onChange={(val) => updateCard({ serialX: Number(val) || 0 })}
+              />
 
-              <Field label="Serial Y (design px)">
-                <Input
-                  type="number"
-                  value={Number(card.serialY ?? 1383)}
-                  onChange={(e) => updateCard({ serialY: Number(e.target.value) || 0 })}
-                />
-              </Field>
+              <LabeledInput
+                label="Serial Y (design px)"
+                type="number"
+                value={Number(serialY ?? 1383)}
+                onChange={(val) => updateCard({ serialY: Number(val) || 0 })}
+              />
 
-              <Field label="Serial Scale">
-                <Input
-                  type="number"
-                  step="0.05"
-                  value={Number(card.serialScale ?? 1)}
-                  onChange={(e) => updateCard({ serialScale: Number(e.target.value) || 1 })}
-                />
-              </Field>
+              <LabeledInput
+                label="Serial Scale"
+                type="number"
+                step={0.05}
+                value={Number(serialScale ?? 1)}
+                onChange={(val) => updateCard({ serialScale: Number(val) || 1 })}
+              />
 
               {/* Reset Placement Button (full width) */}
               <Box gridColumn="1 / -1">
@@ -446,11 +423,14 @@ export const CollectorTab = () => {
                   Reset Placement
                 </Button>
               </Box>
-            </Grid>
+            </ControlGrid>
           )}
-  </Grid>
+  </ControlGrid>
   )}
       </Box>
     </VStack>
   );
 };
+
+CollectorTabComponent.displayName = 'CollectorTab';
+export const CollectorTab = memo(CollectorTabComponent);
