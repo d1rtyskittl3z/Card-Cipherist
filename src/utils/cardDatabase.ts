@@ -14,6 +14,12 @@ export interface StoredCard {
   timestamp: number;     // Save time
   card: Card;            // Full card data
   thumbnail?: string;    // Optional base64 thumbnail
+  artImageData?: string; // Optional base64 art image
+}
+
+export interface LoadedCardData {
+  card: Card;
+  artImageData?: string;
 }
 
 /**
@@ -89,12 +95,14 @@ function stripImageObjects(card: Card): Card {
  * @param card - The card data to save
  * @param customName - Optional custom name (falls back to card title)
  * @param thumbnail - Optional base64 thumbnail image
+ * @param artImageData - Optional base64 art image
  * @returns The ID of the saved card
  */
 export async function saveCard(
   card: Card,
   customName?: string,
-  thumbnail?: string
+  thumbnail?: string,
+  artImageData?: string
 ): Promise<string> {
   const db = await initDB();
 
@@ -115,6 +123,7 @@ export async function saveCard(
       timestamp,
       card: cleanCard,
       thumbnail,
+      artImageData,
     };
 
     const request = objectStore.add(storedCard);
@@ -136,9 +145,9 @@ export async function saveCard(
 /**
  * Load a card from IndexedDB by ID
  * @param id - The card ID
- * @returns The stored card data or null if not found
+ * @returns The stored card data with art image or null if not found
  */
-export async function loadCard(id: string): Promise<Card | null> {
+export async function loadCard(id: string): Promise<LoadedCardData | null> {
   const db = await initDB();
 
   return new Promise((resolve, reject) => {
@@ -148,7 +157,14 @@ export async function loadCard(id: string): Promise<Card | null> {
 
     request.onsuccess = () => {
       const storedCard = request.result as StoredCard | undefined;
-      resolve(storedCard?.card || null);
+      if (!storedCard) {
+        resolve(null);
+      } else {
+        resolve({
+          card: storedCard.card,
+          artImageData: storedCard.artImageData,
+        });
+      }
     };
 
     request.onerror = () => {

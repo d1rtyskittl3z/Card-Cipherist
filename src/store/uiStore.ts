@@ -185,7 +185,7 @@ export const useUIStore = create<UIState>()(
       showArtBoundsDebug: false,
       customArtBounds: null,
       showSerialNumbers: false,
-      autoFitArt: false,
+      autoFitArt: true,
       selectedTextIndex: 0,
       hasShownSagaTab: false,
       hasShownPlaneswalkerTab: false,

@@ -19,7 +19,10 @@ import {
 import { Drawer } from '@chakra-ui/react';
 import { ChangeEvent, useCallback, useMemo, useRef, useState, memo, useEffect } from 'react';
 import { useCardStore } from '../../store/cardStore';
-import { getCardName, loadImage } from '../../utils/canvasHelpers';
+import { useMediaStore } from '../../store/mediaStore';
+import { useFrameStore } from '../../store/frameStore';
+import { useUIStore } from '../../store/uiStore';
+import { getCardName, loadImage, calculateAutoFitArt } from '../../utils/canvasHelpers';
 import type { Card, Frame, Mask } from '../../types/card.types';
 import { LabeledInput, LabeledSwitch } from '../ui';
 import { toaster } from '../ui/toaster-instance';
@@ -353,10 +356,26 @@ const SaveImportTabComponent = () => {
   const card = useCardStore((state) => state.card);
   const resetCard = useCardStore((state) => state.resetCard);
   const updateCardState = useCardStore((state) => state.updateCard);
-  const setArtImage = useCardStore((state) => state.setArtImage);
   const setSetSymbolImage = useCardStore((state) => state.setSetSymbolImage);
   const setWatermarkImage = useCardStore((state) => state.setWatermarkImage);
   const previewCanvasRef = useCardStore((state) => state.previewCanvasRef);
+
+  // Get art image and setter from mediaStore
+  const artImage = useMediaStore((state) => state.artImage);
+  const setArtImage = useMediaStore((state) => state.setArtImage);
+  const updateArt = useMediaStore((state) => state.updateArt);
+
+  // Get loaded pack from frameStore
+  const loadedPack = useFrameStore((state) => state.loadedPack);
+
+  // Get auto-fit setting from uiStore
+  const autoFitArt = useUIStore((state) => state.autoFitArt);
+
+  // Get card dimensions for auto-fit calculation
+  const cardWidth = useCardStore((state) => state.card.width);
+  const cardHeight = useCardStore((state) => state.card.height);
+  const cardMarginX = useCardStore((state) => state.card.marginX);
+  const cardMarginY = useCardStore((state) => state.card.marginY);
 
   const [jsonText, setJsonText] = useState('');
   const [message, setMessage] = useState('');
@@ -527,6 +546,30 @@ const SaveImportTabComponent = () => {
     }
   }, [previewCanvasRef]);
 
+  const convertArtImageToBase64 = useCallback(async (): Promise<string | undefined> => {
+    if (!artImage) {
+      return undefined;
+    }
+
+    try {
+      // Create a temporary canvas to convert the image to base64
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = artImage.width;
+      tempCanvas.height = artImage.height;
+
+      const ctx = tempCanvas.getContext('2d');
+      if (!ctx) {
+        return undefined;
+      }
+
+      ctx.drawImage(artImage, 0, 0);
+      return tempCanvas.toDataURL('image/png');
+    } catch (error) {
+      console.error('Failed to convert art image to base64', error);
+      return undefined;
+    }
+  }, [artImage]);
+
   const handleSaveToBrowser = useCallback(async () => {
     if (!isIndexedDBAvailable()) {
       toaster.create({
@@ -539,8 +582,16 @@ const SaveImportTabComponent = () => {
 
     try {
       const thumbnail = await generateThumbnail();
+      const artImageData = await convertArtImageToBase64();
       const name = customSaveName.trim() || getCardName(card);
-      await saveCard(card, name, thumbnail);
+
+      // Update the card's artSource to use the base64 data
+      // This ensures the art loads correctly when the card is reopened
+      const cardToSave = artImageData
+        ? { ...card, artSource: artImageData }
+        : card;
+
+      await saveCard(cardToSave, name, thumbnail, artImageData);
 
       toaster.create({
         title: 'Card saved!',
@@ -558,13 +609,13 @@ const SaveImportTabComponent = () => {
         type: 'error',
       });
     }
-  }, [card, customSaveName, generateThumbnail, loadSavedCardsList]);
+  }, [card, customSaveName, generateThumbnail, convertArtImageToBase64, loadSavedCardsList]);
 
   const handleCardClick = useCallback(
     async (id: string) => {
       try {
-        const loadedCard = await loadCard(id);
-        if (!loadedCard) {
+        const loadedData = await loadCard(id);
+        if (!loadedData) {
           toaster.create({
             title: 'Card not found',
             description: 'The selected card could not be loaded.',
@@ -573,8 +624,44 @@ const SaveImportTabComponent = () => {
           return;
         }
 
+        const { card: loadedCard, artImageData } = loadedData;
+
+        // Hydrate the card data (loads frame images, etc.)
         const normalizedJson = await hydrateImportedCard(JSON.stringify(loadedCard));
         setJsonText(normalizedJson);
+
+        // Restore the art image if available
+        if (artImageData) {
+          try {
+            const artImg = await loadImage(artImageData);
+            setArtImage(artImg);
+
+            // Apply auto-fit if enabled and art bounds are available
+            // Use a small delay to ensure card state has been updated after hydration
+            if (autoFitArt && loadedPack?.artBounds) {
+              const artBounds = loadedPack.artBounds; // Capture for closure
+              setTimeout(() => {
+                // Create minimal card object with current dimensions
+                const cardForAutoFit = {
+                  width: cardWidth,
+                  height: cardHeight,
+                  marginX: cardMarginX,
+                  marginY: cardMarginY
+                } as Card;
+
+                const { artX: newX, artY: newY, artZoom: newZoom } = calculateAutoFitArt(
+                  artImg,
+                  artBounds,
+                  cardForAutoFit
+                );
+                updateArt({ artX: newX, artY: newY, artZoom: newZoom, artRotate: 0 });
+              }, 100); // Small delay to ensure state is updated
+            }
+          } catch (error) {
+            console.error('Failed to restore art image', error);
+          }
+        }
+
         setLoadDrawerOpen(false);
 
         toaster.create({
@@ -591,7 +678,7 @@ const SaveImportTabComponent = () => {
         });
       }
     },
-    [hydrateImportedCard]
+    [hydrateImportedCard, setArtImage, autoFitArt, loadedPack, updateArt, cardWidth, cardHeight, cardMarginX, cardMarginY]
   );
 
   const handleDeleteCard = useCallback(async (id: string, name: string) => {
