@@ -30,7 +30,7 @@ export interface FrameItem {
   bounds?: Bounds;
   ogBounds?: Bounds;
   noDefaultMask?: boolean;
-  complementary?: number | number[]; // Auto-add frame(s) at these indices when no masks are selected
+  complementary?: number | number[] | string | string[]; // Auto-add frame(s) at these indices or by name when no masks are selected
   erase?: boolean; // Use 'destination-out' compositing mode (removes pixels instead of drawing)
   preserveAlpha?: boolean; // Preserve alpha channel when applying color adjustments
   stretch?: StretchConfig[];

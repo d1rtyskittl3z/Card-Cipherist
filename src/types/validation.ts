@@ -543,7 +543,12 @@ export const framePackFrameItemSchema = z.object({
   bounds: framePackBoundsSchema.optional(),
   ogBounds: framePackBoundsSchema.optional(),
   noDefaultMask: z.boolean().optional(),
-  complementary: z.union([z.number().int().nonnegative(), z.array(z.number().int().nonnegative())]).optional(),
+  complementary: z.union([
+    z.number().int().nonnegative(),
+    z.array(z.number().int().nonnegative()),
+    z.string().min(1),
+    z.array(z.string().min(1))
+  ]).optional(),
   erase: z.boolean().optional(),
   preserveAlpha: z.boolean().optional(),
   stretch: z.array(framePackStretchConfigSchema).optional(),

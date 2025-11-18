@@ -978,16 +978,35 @@ const FrameTabComponent = () => {
       // Handle complementary frames BEFORE adding the main frame
       // This ensures complementary frames appear below the main frame in the layer stack
       if (selectedFrame.complementary && masks.length === 0) {
-        const complementaryIndices = Array.isArray(selectedFrame.complementary) 
-          ? selectedFrame.complementary 
+        const complementaryItems = Array.isArray(selectedFrame.complementary)
+          ? selectedFrame.complementary
           : [selectedFrame.complementary];
-        
-        for (const complementaryIndex of complementaryIndices) {
-          if (complementaryIndex < availableFrames.length) {
-            // Recursively add the complementary frame(s) with no mask
-            // These will be added first, appearing as bottom layers
-            await handleAddFrameToCard(0, undefined, complementaryIndex); // 0 = "No Mask"
+
+        for (const complementaryItem of complementaryItems) {
+          let complementaryIndex: number | undefined;
+
+          if (typeof complementaryItem === 'string') {
+            // Find frame by name
+            complementaryIndex = availableFrames.findIndex(frame => frame.name === complementaryItem);
+            if (complementaryIndex === -1) {
+              console.warn(`Complementary frame "${complementaryItem}" not found in available frames`);
+              continue;
+            }
+          } else if (typeof complementaryItem === 'number') {
+            // Use numeric index directly
+            complementaryIndex = complementaryItem;
+            if (complementaryIndex >= availableFrames.length) {
+              console.warn(`Complementary frame index ${complementaryItem} is out of bounds`);
+              continue;
+            }
+          } else {
+            console.warn(`Invalid complementary item type: ${typeof complementaryItem}`);
+            continue;
           }
+
+          // Recursively add the complementary frame(s) with no mask
+          // These will be added first, appearing as bottom layers
+          await handleAddFrameToCard(0, undefined, complementaryIndex); // 0 = "No Mask"
         }
       }
 
