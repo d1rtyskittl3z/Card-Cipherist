@@ -295,10 +295,11 @@ describe('useThrottledRender', () => {
 
     it('should handle null/undefined dependencies', () => {
       const callback = vi.fn();
+      type NullableDep = number | null | undefined;
 
       const { rerender } = renderHook(
-        ({ dep }) => useThrottledRender(callback, [dep]),
-        { initialProps: { dep: null as any } }
+        ({ dep }: { dep: NullableDep }) => useThrottledRender(callback, [dep]),
+        { initialProps: { dep: null as NullableDep } }
       );
 
       expect(() => {
@@ -335,8 +336,7 @@ describe('useThrottledRender', () => {
 
       rerender({ dep: 1 });
 
-      // Should not throw
-      expect(true).toBe(true);
+      expect(externalState).toBeGreaterThan(0);
     });
 
     it('should handle concurrent renders', () => {

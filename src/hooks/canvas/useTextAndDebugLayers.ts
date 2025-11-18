@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import { useCanvasContext } from '../../contexts/CanvasContext';
+import { useCanvasContext } from '../../contexts/useCanvasContext';
 import { drawGuidelines, drawBottomInfo } from '../../utils/canvasHelpers';
 import { useTextFieldRenderer } from '../useTextFieldRenderer';
 import type { Card, CardBounds } from '../../types/card.types';

@@ -112,13 +112,16 @@ export function handleTextRenderResult(
   result: Result<void>,
   onError?: (error: string) => void
 ): void {
-  const { setError, clearError } = useTextRenderErrors();
+  const {
+    setTextRenderError,
+    clearTextRenderError,
+  } = useUIStore.getState();
 
   if (!result.success) {
-    setError(fieldName, result.error);
+    setTextRenderError(fieldName, result.error);
     onError?.(result.error);
   } else {
-    clearError(fieldName);
+    clearTextRenderError(fieldName);
   }
 }
 

@@ -352,6 +352,34 @@ const hydrateFrames = async (frames: Frame[]): Promise<Frame[]> => {
   return hydrated;
 };
 
+type MediaSnapshot = ReturnType<typeof useMediaStore.getState>;
+
+const mergeMediaTransformsIntoCard = (card: Card, media: MediaSnapshot): Card => ({
+  ...card,
+  artSource: media.artSource || card.artSource,
+  artX: media.artX,
+  artY: media.artY,
+  artZoom: media.artZoom,
+  artRotate: media.artRotate,
+  artGrayscale: media.artGrayscale,
+  setSymbolSource: media.setSymbolSource || card.setSymbolSource,
+  setSymbolX: media.setSymbolX,
+  setSymbolY: media.setSymbolY,
+  setSymbolZoom: media.setSymbolZoom,
+  watermarkSource: media.watermarkSource || card.watermarkSource,
+  watermarkX: media.watermarkX,
+  watermarkY: media.watermarkY,
+  watermarkZoom: media.watermarkZoom,
+  watermarkLeft: media.watermarkLeft,
+  watermarkRight: media.watermarkRight,
+  watermarkOpacity: media.watermarkOpacity,
+});
+
+const hasCustomArtTransform = (cardData: Card): boolean => {
+  const rotate = typeof cardData.artRotate === 'number' ? cardData.artRotate : 0;
+  return cardData.artX !== 0 || cardData.artY !== 0 || cardData.artZoom !== 1 || rotate !== 0;
+};
+
 const SaveImportTabComponent = () => {
   const card = useCardStore((state) => state.card);
   const resetCard = useCardStore((state) => state.resetCard);
@@ -364,18 +392,14 @@ const SaveImportTabComponent = () => {
   const artImage = useMediaStore((state) => state.artImage);
   const setArtImage = useMediaStore((state) => state.setArtImage);
   const updateArt = useMediaStore((state) => state.updateArt);
+  const updateSetSymbolMedia = useMediaStore((state) => state.updateSetSymbol);
+  const updateWatermarkMedia = useMediaStore((state) => state.updateWatermark);
 
   // Get loaded pack from frameStore
   const loadedPack = useFrameStore((state) => state.loadedPack);
 
   // Get auto-fit setting from uiStore
   const autoFitArt = useUIStore((state) => state.autoFitArt);
-
-  // Get card dimensions for auto-fit calculation
-  const cardWidth = useCardStore((state) => state.card.width);
-  const cardHeight = useCardStore((state) => state.card.height);
-  const cardMarginX = useCardStore((state) => state.card.marginX);
-  const cardMarginY = useCardStore((state) => state.card.marginY);
 
   const [jsonText, setJsonText] = useState('');
   const [message, setMessage] = useState('');
@@ -424,8 +448,37 @@ const SaveImportTabComponent = () => {
     }
   }, []);
 
+  const syncMediaStoreFromCard = useCallback(
+    (cardData: Card) => {
+      updateArt({
+        artSource: cardData.artSource,
+        artX: cardData.artX,
+        artY: cardData.artY,
+        artZoom: cardData.artZoom,
+        artRotate: cardData.artRotate,
+        artGrayscale: cardData.artGrayscale ?? false,
+      });
+      updateSetSymbolMedia({
+        setSymbolSource: cardData.setSymbolSource,
+        setSymbolX: cardData.setSymbolX,
+        setSymbolY: cardData.setSymbolY,
+        setSymbolZoom: cardData.setSymbolZoom,
+      });
+      updateWatermarkMedia({
+        watermarkSource: cardData.watermarkSource,
+        watermarkX: cardData.watermarkX,
+        watermarkY: cardData.watermarkY,
+        watermarkZoom: cardData.watermarkZoom,
+        watermarkLeft: cardData.watermarkLeft,
+        watermarkRight: cardData.watermarkRight,
+        watermarkOpacity: cardData.watermarkOpacity,
+      });
+    },
+    [updateArt, updateSetSymbolMedia, updateWatermarkMedia]
+  );
+
   const hydrateImportedCard = useCallback(
-    async (rawJson: string) => {
+    async (rawJson: string): Promise<Card> => {
       // Parse JSON
       let parsedData: unknown;
       try {
@@ -474,6 +527,7 @@ const SaveImportTabComponent = () => {
 
       resetCard();
       updateCardState(nextCard);
+      syncMediaStoreFromCard(nextCard);
 
       const [artImg, setSymbolImg, watermarkImg] = await Promise.all([
         loadOptionalImage(nextCard.artSource),
@@ -485,9 +539,17 @@ const SaveImportTabComponent = () => {
       setSetSymbolImage(setSymbolImg);
       setWatermarkImage(watermarkImg);
 
-      return JSON.stringify(nextCard, null, 2);
+      return nextCard;
     },
-    [loadOptionalImage, resetCard, setArtImage, setSetSymbolImage, setWatermarkImage, updateCardState]
+    [
+      loadOptionalImage,
+      resetCard,
+      setArtImage,
+      setSetSymbolImage,
+      setWatermarkImage,
+      syncMediaStoreFromCard,
+      updateCardState,
+    ]
   );
 
   // IndexedDB Handlers
@@ -584,12 +646,14 @@ const SaveImportTabComponent = () => {
       const thumbnail = await generateThumbnail();
       const artImageData = await convertArtImageToBase64();
       const name = customSaveName.trim() || getCardName(card);
+      const mediaSnapshot = useMediaStore.getState();
+      const cardWithTransforms = mergeMediaTransformsIntoCard(card, mediaSnapshot);
 
       // Update the card's artSource to use the base64 data
       // This ensures the art loads correctly when the card is reopened
       const cardToSave = artImageData
-        ? { ...card, artSource: artImageData }
-        : card;
+        ? { ...cardWithTransforms, artSource: artImageData }
+        : cardWithTransforms;
 
       await saveCard(cardToSave, name, thumbnail, artImageData);
 
@@ -625,41 +689,34 @@ const SaveImportTabComponent = () => {
         }
 
         const { card: loadedCard, artImageData } = loadedData;
-
-        // Hydrate the card data (loads frame images, etc.)
-        const normalizedJson = await hydrateImportedCard(JSON.stringify(loadedCard));
-        setJsonText(normalizedJson);
+        const hydratedCard = await hydrateImportedCard(JSON.stringify(loadedCard));
+        setJsonText(JSON.stringify(hydratedCard, null, 2));
 
         // Restore the art image if available
+        let artImageForAutoFit: HTMLImageElement | null = useMediaStore.getState().artImage;
         if (artImageData) {
           try {
             const artImg = await loadImage(artImageData);
             setArtImage(artImg);
+            artImageForAutoFit = artImg;
+            updateArt({ artSource: artImageData });
 
             // Apply auto-fit if enabled and art bounds are available
-            // Use a small delay to ensure card state has been updated after hydration
-            if (autoFitArt && loadedPack?.artBounds) {
-              const artBounds = loadedPack.artBounds; // Capture for closure
-              setTimeout(() => {
-                // Create minimal card object with current dimensions
-                const cardForAutoFit = {
-                  width: cardWidth,
-                  height: cardHeight,
-                  marginX: cardMarginX,
-                  marginY: cardMarginY
-                } as Card;
-
-                const { artX: newX, artY: newY, artZoom: newZoom } = calculateAutoFitArt(
-                  artImg,
-                  artBounds,
-                  cardForAutoFit
-                );
-                updateArt({ artX: newX, artY: newY, artZoom: newZoom, artRotate: 0 });
-              }, 100); // Small delay to ensure state is updated
-            }
           } catch (error) {
             console.error('Failed to restore art image', error);
           }
+        }
+
+        const artBounds = loadedPack?.artBounds;
+        const shouldAutoFit = autoFitArt && !!artBounds && !hasCustomArtTransform(hydratedCard);
+
+        if (shouldAutoFit && artImageForAutoFit && artBounds) {
+          const { artX: newX, artY: newY, artZoom: newZoom } = calculateAutoFitArt(
+            artImageForAutoFit,
+            artBounds,
+            hydratedCard
+          );
+          updateArt({ artX: newX, artY: newY, artZoom: newZoom, artRotate: 0 });
         }
 
         setLoadDrawerOpen(false);
@@ -678,7 +735,7 @@ const SaveImportTabComponent = () => {
         });
       }
     },
-    [hydrateImportedCard, setArtImage, autoFitArt, loadedPack, updateArt, cardWidth, cardHeight, cardMarginX, cardMarginY]
+    [autoFitArt, hydrateImportedCard, loadedPack, setArtImage, updateArt]
   );
 
   const handleDeleteCard = useCallback(async (id: string, name: string) => {
@@ -780,8 +837,8 @@ const SaveImportTabComponent = () => {
           return;
         }
 
-        const normalizedJson = await hydrateImportedCard(embeddedJson);
-        setJsonText(normalizedJson);
+        const hydratedCard = await hydrateImportedCard(embeddedJson);
+        setJsonText(JSON.stringify(hydratedCard, null, 2));
         setMessage('Card loaded from image!');
       } catch (error) {
         console.error('Failed to load card from image', error);

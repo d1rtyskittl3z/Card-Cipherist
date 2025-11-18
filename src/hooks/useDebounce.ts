@@ -80,7 +80,7 @@ export function useDebounce<T>(value: T, delay: number = 300): T {
  * />
  * ```
  */
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
+export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number = 150
 ): (...args: Parameters<T>) => void {
@@ -146,7 +146,9 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
  * };
  * ```
  */
-export function useDebouncedCallbackImmediate<T extends (...args: any[]) => any>(
+export function useDebouncedCallbackImmediate<T extends (
+  ...args: unknown[]
+) => unknown>(
   callback: T,
   delay: number = 150,
   immediate: boolean = false

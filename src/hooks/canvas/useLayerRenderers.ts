@@ -6,7 +6,7 @@
 import { useCallback } from 'react';
 import { useCardStore } from '../../store/cardStore';
 import { useMediaStore } from '../../store/mediaStore';
-import { useCanvasContext } from '../../contexts/CanvasContext';
+import { useCanvasContext } from '../../contexts/useCanvasContext';
 import { drawFrameLayers } from '../../utils/canvasHelpers';
 import type { Card } from '../../types/card.types';
 import type { FramePackTemplate } from '../../components/frames/packs/types';

@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import { useCanvasContext } from '../../contexts/CanvasContext';
+import { useCanvasContext } from '../../contexts/useCanvasContext';
 import { drawSagaLayer } from '../../utils/sagaHelpers';
 import {
   drawPlaneswalkerPreLayer,

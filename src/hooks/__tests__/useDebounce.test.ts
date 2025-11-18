@@ -14,7 +14,7 @@
  * - Rapid value changes (stress test)
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import {
   useDebounce,
   useDebouncedCallback,
@@ -169,7 +169,7 @@ describe('useDebounce', () => {
 
   describe('Cleanup', () => {
     it('should cleanup timeout on unmount', () => {
-      const { result, rerender, unmount } = renderHook(
+      const { rerender, unmount } = renderHook(
         ({ value }) => useDebounce(value, 300),
         { initialProps: { value: 'initial' } }
       );
@@ -544,7 +544,7 @@ describe('Edge Cases', () => {
 
     expect(result.current).toBeNull();
 
-    rerender({ value: undefined as any });
+    rerender({ value: undefined as string | null | undefined });
     act(() => vi.advanceTimersByTime(100));
 
     expect(result.current).toBeUndefined();

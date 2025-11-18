@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import { useCanvasContext } from '../../contexts/CanvasContext';
+import { useCanvasContext } from '../../contexts/useCanvasContext';
 import { shouldUseStationLayers } from '../../utils/stationHelpers';
 import type { Card } from '../../types/card.types';
 import type { FramePackTemplate } from '../../components/frames/packs/types';
