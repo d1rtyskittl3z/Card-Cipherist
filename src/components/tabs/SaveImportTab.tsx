@@ -3,18 +3,53 @@
  * Card saving, loading, and export interface
  */
 
-import { Box, Button, Grid, Heading, Textarea, VStack } from '@chakra-ui/react';
-import { ChangeEvent, useCallback, useMemo, useRef, useState, memo } from 'react';
+import {
+  Box,
+  Button,
+  Grid,
+  Heading,
+  Textarea,
+  VStack,
+  HStack,
+  Text,
+  Spinner,
+  Portal,
+  CloseButton,
+} from '@chakra-ui/react';
+import { Drawer } from '@chakra-ui/react';
+import { ChangeEvent, useCallback, useMemo, useRef, useState, memo, useEffect } from 'react';
 import { useCardStore } from '../../store/cardStore';
 import { getCardName, loadImage } from '../../utils/canvasHelpers';
 import type { Card, Frame, Mask } from '../../types/card.types';
-import { LabeledSwitch } from '../ui';
+import { LabeledInput, LabeledSwitch } from '../ui';
+import { toaster } from '../ui/toaster-instance';
 import { validateCard, hasSchemaVersion, SCHEMA_VERSION } from '../../types/validation';
+import {
+  saveCard,
+  loadCard,
+  getAllCards,
+  deleteCard,
+  isIndexedDBAvailable,
+} from '../../utils/cardDatabase';
 
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
-const METADATA_KEY = 'CardConjurerJSON';
+const METADATA_KEY = 'CardCipheristJSON';
 const utf8Encoder = new TextEncoder();
 const utf8Decoder = new TextDecoder('utf-8');
+
+// Format timestamp for display (e.g., "2 minutes ago", "3 days ago")
+const formatTimestamp = (timestamp: number): string => {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  return `${days} day${days > 1 ? 's' : ''} ago`;
+};
 
 const crcTable = (() => {
   const table = new Uint32Array(256);
@@ -327,6 +362,17 @@ const SaveImportTabComponent = () => {
   const [message, setMessage] = useState('');
   const [embedJson, setEmbedJson] = useState(false);
 
+  // IndexedDB state
+  const [customSaveName, setCustomSaveName] = useState('');
+  const [savedCards, setSavedCards] = useState<Array<{
+    id: string;
+    name: string;
+    timestamp: number;
+    thumbnail?: string;
+  }>>([]);
+  const [loadDrawerOpen, setLoadDrawerOpen] = useState(false);
+  const [loadingCards, setLoadingCards] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const cardJsonPretty = useMemo(() => JSON.stringify(card, null, 2), [card]);
@@ -424,6 +470,163 @@ const SaveImportTabComponent = () => {
     },
     [loadOptionalImage, resetCard, setArtImage, setSetSymbolImage, setWatermarkImage, updateCardState]
   );
+
+  // IndexedDB Handlers
+  const loadSavedCardsList = useCallback(async () => {
+    if (!isIndexedDBAvailable()) {
+      toaster.create({
+        title: 'Browser storage unavailable',
+        description: 'IndexedDB is not supported in this browser or mode.',
+        type: 'error',
+      });
+      return;
+    }
+
+    setLoadingCards(true);
+    try {
+      const cards = await getAllCards();
+      setSavedCards(cards);
+    } catch (error) {
+      console.error('Failed to load saved cards', error);
+      toaster.create({
+        title: 'Failed to load saved cards',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        type: 'error',
+      });
+    } finally {
+      setLoadingCards(false);
+    }
+  }, []);
+
+  const generateThumbnail = useCallback(async (): Promise<string | undefined> => {
+    const canvas = previewCanvasRef ?? (document.querySelector('canvas') as HTMLCanvasElement | null);
+    if (!canvas) {
+      return undefined;
+    }
+
+    try {
+      // Create a thumbnail canvas scaled proportionally
+      const targetHeight = 280;
+      const scale = targetHeight / canvas.height;
+      const targetWidth = canvas.width * scale;
+
+      const thumbCanvas = document.createElement('canvas');
+      thumbCanvas.width = targetWidth;
+      thumbCanvas.height = targetHeight;
+
+      const ctx = thumbCanvas.getContext('2d');
+      if (!ctx) {
+        return undefined;
+      }
+
+      ctx.drawImage(canvas, 0, 0, targetWidth, targetHeight);
+      return thumbCanvas.toDataURL('image/png');
+    } catch (error) {
+      console.error('Failed to generate thumbnail', error);
+      return undefined;
+    }
+  }, [previewCanvasRef]);
+
+  const handleSaveToBrowser = useCallback(async () => {
+    if (!isIndexedDBAvailable()) {
+      toaster.create({
+        title: 'Browser storage unavailable',
+        description: 'IndexedDB is not supported in this browser or mode.',
+        type: 'error',
+      });
+      return;
+    }
+
+    try {
+      const thumbnail = await generateThumbnail();
+      const name = customSaveName.trim() || getCardName(card);
+      await saveCard(card, name, thumbnail);
+
+      toaster.create({
+        title: 'Card saved!',
+        description: `"${name}" saved to browser storage.`,
+        type: 'success',
+      });
+
+      setCustomSaveName('');
+      await loadSavedCardsList();
+    } catch (error) {
+      console.error('Failed to save card', error);
+      toaster.create({
+        title: 'Failed to save card',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        type: 'error',
+      });
+    }
+  }, [card, customSaveName, generateThumbnail, loadSavedCardsList]);
+
+  const handleCardClick = useCallback(
+    async (id: string) => {
+      try {
+        const loadedCard = await loadCard(id);
+        if (!loadedCard) {
+          toaster.create({
+            title: 'Card not found',
+            description: 'The selected card could not be loaded.',
+            type: 'error',
+          });
+          return;
+        }
+
+        const normalizedJson = await hydrateImportedCard(JSON.stringify(loadedCard));
+        setJsonText(normalizedJson);
+        setLoadDrawerOpen(false);
+
+        toaster.create({
+          title: 'Card loaded!',
+          description: 'Card loaded from browser storage.',
+          type: 'success',
+        });
+      } catch (error) {
+        console.error('Failed to load card', error);
+        toaster.create({
+          title: 'Failed to load card',
+          description: error instanceof Error ? error.message : 'Unknown error',
+          type: 'error',
+        });
+      }
+    },
+    [hydrateImportedCard]
+  );
+
+  const handleDeleteCard = useCallback(async (id: string, name: string) => {
+    if (confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+      try {
+        await deleteCard(id);
+        toaster.create({
+          title: 'Card deleted',
+          description: `"${name}" removed from browser storage.`,
+          type: 'success',
+        });
+
+        await loadSavedCardsList();
+      } catch (error) {
+        console.error('Failed to delete card', error);
+        toaster.create({
+          title: 'Failed to delete card',
+          description: error instanceof Error ? error.message : 'Unknown error',
+          type: 'error',
+        });
+      }
+    }
+  }, [loadSavedCardsList]);
+
+  // Load saved cards list on mount and when drawer opens
+  useEffect(() => {
+    if (loadDrawerOpen) {
+      loadSavedCardsList();
+    }
+  }, [loadDrawerOpen, loadSavedCardsList]);
+
+  // Load saved cards count on component mount
+  useEffect(() => {
+    loadSavedCardsList();
+  }, [loadSavedCardsList]);
 
   const triggerDownload = useCallback((blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
@@ -545,6 +748,35 @@ const SaveImportTabComponent = () => {
         </Grid>
       </Box>
 
+      {/* Browser Storage Section */}
+      <Box>
+        <Heading size="md" mb={4}>
+          Browser Storage (EXPERIMENTAL)
+        </Heading>
+
+        <Box mb={3}>
+          <LabeledInput
+            label="Card Name (optional)"
+            value={customSaveName}
+            onChange={setCustomSaveName}
+            placeholder={getCardName(card)}
+          />
+        </Box>
+
+        <Grid templateColumns="repeat(2, 1fr)" gap={3}>
+          <Button onClick={handleSaveToBrowser} colorPalette="teal">
+            Save to Browser
+          </Button>
+          <Button onClick={() => setLoadDrawerOpen(true)} colorPalette="cyan">
+            Load from Browser
+          </Button>
+        </Grid>
+
+        <Text fontSize="xs" color="gray.400" mt={2}>
+          Cards are saved locally in your browser. Saved cards: {savedCards.length}
+        </Text>
+      </Box>
+
       <Box>
         <Heading size="sm" mb={3}>
           JSON Data
@@ -579,6 +811,108 @@ const SaveImportTabComponent = () => {
           Clear Card
         </Button>
       </Box>
+
+      {/* Load Saved Cards Drawer */}
+      <Drawer.Root
+        open={loadDrawerOpen}
+        onOpenChange={(e) => !e.open && setLoadDrawerOpen(false)}
+        placement="end"
+        size="lg"
+      >
+        <Portal>
+          <Drawer.Backdrop />
+          <Drawer.Positioner>
+            <Drawer.Content>
+              <Drawer.Header borderBottomWidth="1px">
+                <HStack justify="space-between" w="full">
+                  <Heading size="md">Load Saved Card</Heading>
+                  <Drawer.CloseTrigger asChild>
+                    <CloseButton size="sm" />
+                  </Drawer.CloseTrigger>
+                </HStack>
+              </Drawer.Header>
+
+              <Drawer.Body>
+                <VStack align="stretch" gap={4} py={4}>
+                  {loadingCards ? (
+                    <HStack justify="center" py={8}>
+                      <Spinner size="lg" />
+                      <Text>Loading saved cards...</Text>
+                    </HStack>
+                  ) : savedCards.length === 0 ? (
+                    <Text textAlign="center" color="gray.400" py={8}>
+                      No saved cards found. Save a card to see it here!
+                    </Text>
+                  ) : (
+                    <Grid templateColumns="repeat(auto-fill, minmax(200px, 1fr))" gap={4}>
+                      {savedCards.map((savedCard) => (
+                        <Box
+                          key={savedCard.id}
+                          cursor="pointer"
+                          onClick={() => handleCardClick(savedCard.id)}
+                          position="relative"
+                          border="2px solid transparent"
+                          borderRadius="md"
+                          overflow="hidden"
+                          transition="all 0.2s"
+                          _hover={{
+                            borderColor: 'cyan.400',
+                            bg: 'rgba(0, 188, 212, 0.1)',
+                          }}
+                        >
+                          {/* Thumbnail */}
+                          {savedCard.thumbnail ? (
+                            <img
+                              src={savedCard.thumbnail}
+                              alt={savedCard.name}
+                              style={{ width: '100%', height: 'auto', display: 'block' }}
+                            />
+                          ) : (
+                            <Box
+                              bg="gray.700"
+                              height="280px"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                            >
+                              <Text color="gray.500">No Preview</Text>
+                            </Box>
+                          )}
+
+                          {/* Card Info Overlay */}
+                          <Box p={2} bg="rgba(0, 0, 0, 0.8)">
+                            <Text fontSize="sm" fontWeight="bold" truncate>
+                              {savedCard.name}
+                            </Text>
+                            <Text fontSize="xs" color="gray.400">
+                              {formatTimestamp(savedCard.timestamp)}
+                            </Text>
+                          </Box>
+
+                          {/* Delete Button (on hover) */}
+                          <Button
+                            size="xs"
+                            colorPalette="red"
+                            position="absolute"
+                            top={2}
+                            right={2}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCard(savedCard.id, savedCard.name);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      ))}
+                    </Grid>
+                  )}
+                </VStack>
+              </Drawer.Body>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
     </VStack>
   );
 };

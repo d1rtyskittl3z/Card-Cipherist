@@ -66,7 +66,7 @@ export const frameSchema = z.object({
   masks: z.array(maskSchema).default([]),
   bounds: cardBoundsSchema.optional(),
   ogBounds: cardBoundsSchema.optional(),
-  opacity: z.number().min(0).max(1),
+  opacity: z.number().min(0).max(100), // App uses 0-100 range, not 0-1
   mode: z.string().optional(), // GlobalCompositeOperation - can't validate specific values
   erase: z.boolean().optional(),
   preserveAlpha: z.boolean().optional(),
