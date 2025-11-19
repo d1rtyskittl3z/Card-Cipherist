@@ -15,6 +15,24 @@ import { renderHook } from '@testing-library/react';
 import { useThrottledRender } from '../useThrottledRender';
 
 describe('useThrottledRender', () => {
+  const originalRaf = globalThis.requestAnimationFrame;
+  const originalCancelRaf = globalThis.cancelAnimationFrame;
+
+  beforeAll(() => {
+    globalThis.requestAnimationFrame = ((cb: FrameRequestCallback): number => {
+      return setTimeout(() => cb(performance.now()), 0) as unknown as number;
+    }) as typeof globalThis.requestAnimationFrame;
+
+    globalThis.cancelAnimationFrame = ((id: number): void => {
+      clearTimeout(id);
+    }) as typeof globalThis.cancelAnimationFrame;
+  });
+
+  afterAll(() => {
+    globalThis.requestAnimationFrame = originalRaf;
+    globalThis.cancelAnimationFrame = originalCancelRaf;
+  });
+
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -329,12 +347,14 @@ describe('useThrottledRender', () => {
         externalState++;
       });
 
-      const { rerender } = renderHook(
+      renderHook(
         ({ dep }) => useThrottledRender(callback, [dep]),
         { initialProps: { dep: 0 } }
       );
 
-      rerender({ dep: 1 });
+      // Hook immediately schedules RAF on mount. Our stub uses setTimeout(cb, 0).
+      // Flush all pending timers to execute the callback chain.
+      vi.runAllTimers();
 
       expect(externalState).toBeGreaterThan(0);
     });

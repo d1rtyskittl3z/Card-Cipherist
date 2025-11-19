@@ -9,7 +9,7 @@ import { useCardStore } from '../store/cardStore';
 import { useEffect, useRef } from 'react';
 import { useStationManager } from '../hooks/useStationManager';
 import { PerformanceProfiler } from './PerformanceProfiler';
-import { CanvasProvider } from '../contexts/CanvasContext';
+import { CanvasProvider } from '../contexts/CanvasProvider';
 import { useCanvasManager } from '../hooks/canvas/useCanvasManager';
 import { CardCanvasRenderer } from './CardCanvasRenderer';
 
