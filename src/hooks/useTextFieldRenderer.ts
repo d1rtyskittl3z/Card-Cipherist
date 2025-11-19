@@ -85,7 +85,6 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
       if (src.includes('nickname') || name.includes('nickname')) {
         hasNicknameLayer = true;
 
-        // Full-frame nickname templates (PromoNickname/M15Nickname) already position title/nickname correctly
         if (name.includes('frame') || src.includes('frame')) {
           hasFullNicknameFrame = true;
         }
@@ -93,20 +92,19 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
     }
 
     const packId = pack?.id?.toLowerCase() ?? '';
-    const packExplicitlyEnablesSwap = packId === 'm15nickname-2' || packId === 'm15smoothnickname';
-    const packExplicitlyDisablesSwap = packId === 'm15nickname' || packId === 'promonickname';
+    const packLabel = pack?.label?.toLowerCase() ?? '';
+    const packNameIncludesNickname = packId.includes('nickname') || packLabel.includes('nickname');
 
-    if (packExplicitlyDisablesSwap || hasFullNicknameFrame) {
-      return false;
-    }
-
-    if (packExplicitlyEnablesSwap) {
+    if (packNameIncludesNickname) {
       return true;
     }
 
-    // Fallback: swap when nickname overlays are present without a full nickname frame on the card
+    if (hasFullNicknameFrame) {
+      return false;
+    }
+
     return hasNicknameLayer;
-  }, [card.frames, pack?.id]);
+  }, [card.frames, pack?.id, pack?.label]);
 
   // Create render function
   const render = useCallback(

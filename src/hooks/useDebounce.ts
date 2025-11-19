@@ -80,10 +80,10 @@ export function useDebounce<T>(value: T, delay: number = 300): T {
  * />
  * ```
  */
-export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
-  callback: T,
+export function useDebouncedCallback<TArgs extends unknown[]>(
+  callback: (...args: TArgs) => void,
   delay: number = 150
-): (...args: Parameters<T>) => void {
+): (...args: TArgs) => void {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const callbackRef = useRef(callback);
 
@@ -94,7 +94,7 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
 
   // Create debounced function
   const debouncedCallback = useCallback(
-    (...args: Parameters<T>) => {
+    (...args: TArgs) => {
       // Clear existing timeout
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -146,13 +146,11 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
  * };
  * ```
  */
-export function useDebouncedCallbackImmediate<T extends (
-  ...args: unknown[]
-) => unknown>(
-  callback: T,
+export function useDebouncedCallbackImmediate<TArgs extends unknown[]>(
+  callback: (...args: TArgs) => void,
   delay: number = 150,
   immediate: boolean = false
-): (...args: Parameters<T>) => void {
+): (...args: TArgs) => void {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const callbackRef = useRef(callback);
 
@@ -163,7 +161,7 @@ export function useDebouncedCallbackImmediate<T extends (
 
   // Create debounced function with immediate option
   const debouncedCallback = useCallback(
-    (...args: Parameters<T>) => {
+    (...args: TArgs) => {
       const callNow = immediate && !timeoutRef.current;
 
       // Clear existing timeout

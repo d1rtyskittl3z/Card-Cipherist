@@ -1062,9 +1062,9 @@ const FrameTabComponent = () => {
         applyNeoBasicsAdjustments();
       }
 
-      // Handle special packs that add text fields dynamically
-      // M15Nickname-2, M15SmoothNickname, & PromoNickname: Add nickname text field when any frame from these packs is added
-      if ((loadedPack?.id === 'M15Nickname-2' || loadedPack?.id === 'M15SmoothNickname' || loadedPack?.id === 'M15Nickname' || loadedPack?.id === 'PromoNickname') && loadedPack.text?.nickname) {
+      // Handle packs with nickname layouts: add nickname field once so swap logic can stay transparent
+      const nicknamePackName = `${loadedPack?.id ?? ''}${loadedPack?.label ?? ''}`.toLowerCase();
+      if (nicknamePackName.includes('nickname') && loadedPack?.text?.nickname) {
         const currentText = useCardStore.getState().card.text;
         if (currentText && !currentText.nickname) {
           // Add the nickname text field from the pack's configuration

@@ -33,17 +33,17 @@ const M15SmoothNickname: FramePackTemplate = {
     { name: 'Purple (Black Alt Light) Nickname', src: '/img/frames/m15/nickname/smooth/bAltLight.png', masks, bounds, complementary: 22 },
 
     // Color title variants (auto-add border cover at index 22)
-    { name: 'White Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/w.png', masks, bounds, complementary: 22 },
-    { name: 'Blue Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/u.png', masks, bounds, complementary: 22 },
-    { name: 'Black Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/b.png', masks, bounds, complementary: 22 },
-    { name: 'Red Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/r.png', masks, bounds, complementary: 22 },
-    { name: 'Green Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/g.png', masks, bounds, complementary: 22 },
-    { name: 'Multicolored Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/m.png', masks, bounds, complementary: 22 },
-    { name: 'Artifact Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/a.png', masks, bounds, complementary: 22 },
-    { name: 'Colorless Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/c.png', masks, bounds, complementary: 22 },
-    { name: 'Land Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/L.png', masks, bounds, complementary: 22 },
-    { name: 'Purple (Black Alt) Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/bAlt.png', masks, bounds, complementary: 22 },
-    { name: 'Purple (Black Alt Light) Nickname', src: '/img/frames/m15/nickname/smooth/colortitle/bAltLight.png', masks, bounds, complementary: 22 },
+    { name: 'White Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/w.png', masks, bounds, complementary: 22 },
+    { name: 'Blue Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/u.png', masks, bounds, complementary: 22 },
+    { name: 'Black Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/b.png', masks, bounds, complementary: 22 },
+    { name: 'Red Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/r.png', masks, bounds, complementary: 22 },
+    { name: 'Green Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/g.png', masks, bounds, complementary: 22 },
+    { name: 'Multicolored Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/m.png', masks, bounds, complementary: 22 },
+    // { name: 'Artifact Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/a.png', masks, bounds, complementary: 22 },
+    { name: 'Colorless Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/c.png', masks, bounds, complementary: 22 },
+    { name: 'Land Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/L.png', masks, bounds, complementary: 22 },
+    { name: 'Purple (Black Alt) Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/bAlt.png', masks, bounds, complementary: 22 },
+    { name: 'Purple (Black Alt Light) Nickname', src: '/img/frames/m15/nickname/smooth/colorTitle/bAltLight.png', masks, bounds, complementary: 22 },
 
     // Cutout elements
     { name: 'Legend Crown Border Cover (Auto Erase Title Under Crown)', src: '/img/black.png', bounds: { x: 0.0394, y: 0.0277, width: 0.9214, height: 0.0177 }, erase: true, complementary: 23 },
