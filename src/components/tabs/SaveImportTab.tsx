@@ -586,10 +586,13 @@ const SaveImportTabComponent = () => {
     }
 
     try {
-      // Create a thumbnail canvas scaled proportionally
-      const targetHeight = 280;
-      const scale = targetHeight / canvas.height;
-      const targetWidth = canvas.width * scale;
+      // Render thumbnails at device pixel ratio so downscaled previews stay crisp.
+      const displayHeight = 280;
+      const displayWidth = canvas.width * (displayHeight / canvas.height);
+      const pixelRatio = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
+
+      const targetWidth = Math.max(1, Math.round(displayWidth * pixelRatio));
+      const targetHeight = Math.max(1, Math.round(displayHeight * pixelRatio));
 
       const thumbCanvas = document.createElement('canvas');
       thumbCanvas.width = targetWidth;
@@ -600,6 +603,8 @@ const SaveImportTabComponent = () => {
         return undefined;
       }
 
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(canvas, 0, 0, targetWidth, targetHeight);
       return thumbCanvas.toDataURL('image/png');
     } catch (error) {
