@@ -4,7 +4,7 @@
  */
 
 import { memo } from 'react';
-import { Box, Heading, Input, VStack, HStack, Button, SimpleGrid, Checkbox, Collapsible, Image, IconButton, RadioCard } from '@chakra-ui/react';
+import { Box, Heading, Input, VStack, HStack, Button, SimpleGrid, Checkbox, Collapsible, Image, IconButton, RadioCard, Text } from '@chakra-ui/react';
 import { Field } from '../ui/field';
 import { NativeSelectRoot, NativeSelectField } from '../ui/native-select';
 import { FileUploadZone } from '../ui';
@@ -434,11 +434,6 @@ const FrameTabComponent = () => {
     return [...packFrames, ...customFrames];
   }, [loadedPack, customFrames]);
 
-  // Reset mask selection when frame selection changes (different frames have different masks)
-  useEffect(() => {
-    setSelectedMaskIndex(null); // Reset to no selection
-  }, [selectedFrameIndex]);
-
   const availableMasks = useMemo(() => {
     // "No Mask" option (only shown if frame doesn't have noDefaultMask)
     const noMask: Mask = { src: '/img/black.png', name: 'No Mask' };
@@ -468,6 +463,22 @@ const FrameTabComponent = () => {
     return [noMask, ...selectedFrame.masks, ...customMasks];
   }, [customMasks, selectedFrameIndex, availableFrames]);
 
+  const selectedFrameLabel = useMemo(() => {
+    if (selectedFrameIndex === null || selectedFrameIndex < 0 || selectedFrameIndex >= availableFrames.length) {
+      return 'No frame selected';
+    }
+
+    return availableFrames[selectedFrameIndex]?.name || 'No frame selected';
+  }, [selectedFrameIndex, availableFrames]);
+
+  const selectedMaskLabel = useMemo(() => {
+    if (selectedMaskIndex === null || selectedMaskIndex < 0 || selectedMaskIndex >= availableMasks.length) {
+      return 'No mask selected';
+    }
+
+    return availableMasks[selectedMaskIndex]?.name || 'No mask selected';
+  }, [selectedMaskIndex, availableMasks]);
+
   const getMaskOptionsForFrame = useCallback(
     (frame: FrameItem | undefined | null) => {
       const noMask: Mask = { src: '/img/black.png', name: 'No Mask' };
@@ -483,6 +494,40 @@ const FrameTabComponent = () => {
     },
     [customMasks],
   );
+
+  // Reset mask selection when frame selection changes (different frames have different masks)
+  useEffect(() => {
+    if (selectedFrameIndex === null) {
+      setSelectedMaskIndex(null);
+      return;
+    }
+
+    const nextFrame = availableFrames[selectedFrameIndex];
+    if (!nextFrame) {
+      setSelectedMaskIndex(null);
+      return;
+    }
+
+    const maskOptions = getMaskOptionsForFrame(nextFrame);
+    if (maskOptions.length === 0) {
+      setSelectedMaskIndex(null);
+      return;
+    }
+
+    const noMaskIndex = maskOptions.findIndex((mask) => mask.name === 'No Mask');
+
+    setSelectedMaskIndex((current) => {
+      if (current !== null && current >= 0 && current < maskOptions.length) {
+        return current;
+      }
+
+      if (noMaskIndex >= 0) {
+        return noMaskIndex;
+      }
+
+      return 0;
+    });
+  }, [selectedFrameIndex, availableFrames, getMaskOptionsForFrame]);
 
   // Search through groups and packs
   const searchResults = useMemo(() => {
@@ -1524,6 +1569,9 @@ const FrameTabComponent = () => {
             Bottom Half
           </Button>
         </SimpleGrid>
+        <Text mt={2} fontSize="sm" color="gray.300">
+          Selected: {selectedFrameLabel}, {selectedMaskLabel}
+        </Text>
       </Box>
 
       {/* Frame Layer List */}
