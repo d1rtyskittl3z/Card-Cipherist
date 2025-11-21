@@ -8,6 +8,11 @@ import M15TransformFront from './M15TransformFront';
 import M15TransformNyxFront from './M15TransformNyxFront';
 import M15Nyx from './M15Nyx';
 import SagaNyx from './SagaNyx';
+import SagaRegular from './SagaRegular';
+import SagaUB from './SagaUB';
+import SagaCreature from './SagaCreature';
+import SagaCreatureUB from './SagaCreatureUB';
+import SagaLTR from './SagaLTR';
 import M15LegendCrowns from './M15LegendCrowns';
 import M15LegendCrownsFloating from './M15LegendCrownsFloating';
 import M15InnerCrowns from './M15InnerCrowns';
@@ -103,6 +108,11 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15TransformNyxFront': M15TransformNyxFront,
   'M15Nyx': M15Nyx,
   'SagaNyx': SagaNyx,
+  'SagaRegular': SagaRegular,
+  'SagaUB': SagaUB,
+  'SagaCreature': SagaCreature,
+  'SagaCreatureUB': SagaCreatureUB,
+  'SagaLTR': SagaLTR,
   'NeoBasics': NeoBasics,
   'M15LegendCrowns': M15LegendCrowns,
   'M15LegendCrownsFloating': M15LegendCrownsFloating,

@@ -5,8 +5,8 @@ const group: LegacyGroup = {
   label: 'Sagas',
   // notice: 'More work need to be done for this group',
   packs: [
-    { kind: 'pack', label: 'Nyx Frames', id:'SagaNyx' },
     { kind: 'pack', label: 'Regular Frames', id:'SagaRegular' },
+    { kind: 'pack', label: 'Nyx Frames', id:'SagaNyx' },
     { kind: 'pack', label: 'Universes Beyond Frames', id:'SagaUB' },
 
     { kind: 'label', label: 'Saga Creatures (Summons)' },
