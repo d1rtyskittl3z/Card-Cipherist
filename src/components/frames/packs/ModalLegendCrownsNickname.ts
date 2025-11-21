@@ -18,7 +18,12 @@ const template: FramePackTemplate = {
   id: 'ModalLegendCrownsNickname',
   label: 'Nickname Legend Crowns',
   notice: 'Adds nickname legend crown overlays for modal DFCs and includes the nickname cutout to remove the default frame border.',
-  frames
+  frames,
+  text: {
+    nickname: { name: 'Nickname', text: '', x: 0.14, y: 0.1129, width: 0.72, height: 0.0243, oneLine: true, font: 'mplantini', size: 0.0229, color: 'white', shadowX: 0.0014, shadowY: 0.001, align: 'center' }
+  }
 };
+
+
 
 export default template;

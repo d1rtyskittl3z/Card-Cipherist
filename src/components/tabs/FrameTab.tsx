@@ -269,6 +269,11 @@ const FrameTabComponent = () => {
             color: baseConfig.color ?? 'black',
           };
         }
+        for (const [key, config] of Object.entries(currentTextFields)) {
+          if (!pack.text[key]) {
+            textFields[key] = { ...config };
+          }
+        }
         // Set all text fields at once
         store.setText(textFields);
       }
@@ -1072,7 +1077,7 @@ const FrameTabComponent = () => {
           const nicknameConfig = loadedPack.text.nickname;
           const nicknameField = {
             name: nicknameConfig.name,
-            text: nicknameConfig.text,
+            text: currentText.title?.text ?? nicknameConfig.text ?? '',
             x: nicknameConfig.x ?? 0,
             y: nicknameConfig.y,
             width: nicknameConfig.width,
@@ -1148,7 +1153,7 @@ const FrameTabComponent = () => {
                     );
                   } else {
                     return (
-                      <option key={entry.id} value={entry.id}>
+                      <option key={`${entry.id}-${index}`} value={entry.id}>
                         {entry.label}
                       </option>
                     );

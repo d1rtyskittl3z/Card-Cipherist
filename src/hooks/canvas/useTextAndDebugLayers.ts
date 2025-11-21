@@ -42,7 +42,7 @@ export const useTextAndDebugLayers = ({
     textContext.clearRect(0, 0, textCanvas.width, textCanvas.height);
 
     // Render all standard text fields using the new renderer
-    const standardFields = ['mana', 'title', 'type', 'rules', 'pt'];
+    const standardFields = ['mana', 'title', 'nickname', 'type', 'rules', 'pt'];
 
     for (const fieldKey of standardFields) {
       // Check if field exists in card text or pack text config

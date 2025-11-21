@@ -74,37 +74,105 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
   }), [card.width, card.height, card.marginX, card.marginY]);
 
   // Determine whether we need to swap title/nickname content when rendering
-  const shouldSwapTitleNickname = useMemo(() => {
-    let hasNicknameLayer = false;
-    let hasFullNicknameFrame = false;
-
-    for (const frame of card.frames) {
-      const src = frame.src?.toLowerCase() ?? '';
-      const name = frame.name?.toLowerCase() ?? '';
-
-      if (src.includes('nickname') || name.includes('nickname')) {
-        hasNicknameLayer = true;
-
-        if (name.includes('frame') || src.includes('frame')) {
-          hasFullNicknameFrame = true;
-        }
+  const hasNicknameOverlay = useMemo(() => {
+    const includesNickname = (value?: string | null) => {
+      if (typeof value !== 'string') {
+        return false;
       }
-    }
+      const normalized = value.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return normalized.includes('nickname');
+    };
 
-    const packId = pack?.id?.toLowerCase() ?? '';
-    const packLabel = pack?.label?.toLowerCase() ?? '';
-    const packNameIncludesNickname = packId.includes('nickname') || packLabel.includes('nickname');
+    const imageIncludesNickname = (image?: HTMLImageElement | null) =>
+      includesNickname(image?.src ?? undefined);
 
-    if (packNameIncludesNickname) {
+    const logSwapReason = (reason: string, extra?: Record<string, unknown>) => {
+      if (import.meta.env.PROD) {
+        return;
+      }
+      console.log('[useTextFieldRenderer] Nickname/title swap active:', reason, {
+        packId: pack?.id,
+        packLabel: pack?.label,
+        cardVersion: card.version,
+        ...extra,
+      });
+    };
+
+    const metadataValues = [pack?.id, pack?.label, pack?.version, card.version];
+    const metadataMatches = metadataValues.filter((value) => includesNickname(value));
+    if (metadataMatches.length > 0) {
+      logSwapReason('metadata match', { metadataMatches });
       return true;
     }
 
-    if (hasFullNicknameFrame) {
+    const packNicknameKeys = Object.entries(pack?.text ?? {}).filter(([key, config]) =>
+      includesNickname(key) || includesNickname(config?.name)
+    );
+    if (packNicknameKeys.length > 0) {
+      logSwapReason('pack text definition includes nickname', {
+        textKeys: packNicknameKeys.map(([key]) => key),
+      });
+      return true;
+    }
+
+    const cardNicknameKeys = Object.entries(card.text ?? {}).filter(([key, config]) =>
+      includesNickname(key) || includesNickname(config?.name)
+    );
+    if (cardNicknameKeys.length > 0) {
+      logSwapReason('card text definition includes nickname', {
+        textKeys: cardNicknameKeys.map(([key]) => key),
+      });
+      return true;
+    }
+
+    for (const frame of card.frames) {
+      if (!frame) {
+        continue;
+      }
+
+      if (
+        includesNickname(frame.name) ||
+        includesNickname(frame.src) ||
+        imageIncludesNickname(frame.image) ||
+        includesNickname((frame as { label?: string })?.label)
+      ) {
+        logSwapReason('frame match', { frameName: frame.name, frameSrc: frame.src });
+        return true;
+      }
+
+      if (
+        frame.masks?.some((mask) => {
+          if (includesNickname(mask.name) || includesNickname(mask.src)) {
+            logSwapReason('mask match', { maskName: mask.name, maskSrc: mask.src, frameName: frame.name });
+            return true;
+          }
+          if (imageIncludesNickname(mask.image as HTMLImageElement | undefined)) {
+            logSwapReason('mask image match', { maskName: mask.name, frameName: frame.name });
+            return true;
+          }
+          return false;
+        })
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [card.frames, card.text, card.version, pack?.id, pack?.label, pack?.version, pack?.text]);
+
+  const shouldSwapTitleNickname = useMemo(() => {
+    if (!hasNicknameOverlay) {
+      return false;
+    }
+    const titleField = card.text?.title;
+    const nicknameField = card.text?.nickname;
+    if (!titleField || !nicknameField) {
       return false;
     }
 
-    return hasNicknameLayer;
-  }, [card.frames, pack?.id, pack?.label]);
+    const packDefinesDedicatedLayout = Boolean(pack?.text?.title && pack?.text?.nickname);
+    return !packDefinesDedicatedLayout;
+  }, [hasNicknameOverlay, card.text, pack?.text]);
 
   // Create render function
   const render = useCallback(
@@ -117,18 +185,23 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
         return;
       }
 
-      // Special handling: Swap title/nickname CONTENT when nickname pack frames are present
-      // Desired result: Title tab text → render at nickname position (crown area)
-      //                 Nickname tab text → render at title position (top)
-      // Visual result: No indication of swap, just content appears in swapped locations
-      const positionFieldKey = fieldKey; // Field to use for getting position/layout (never swapped)
-      let contentFieldKey = fieldKey;    // Field to use for getting text content
+      const nicknameText = (card.text?.nickname?.text ?? '').trim();
+      const hideUpperBanner = hasNicknameOverlay && nicknameText.length === 0;
+      const upperFieldKey = shouldSwapTitleNickname ? 'title' : 'nickname';
 
-  if (shouldSwapTitleNickname && (fieldKey === 'title' || fieldKey === 'nickname')) {
-        // Swap ONLY the content, NOT the position
-        // When rendering "title" position: use nickname tab's text content
-        // When rendering "nickname" position: use title tab's text content
-        contentFieldKey = fieldKey === 'title' ? 'nickname' : 'title';
+      if (hideUpperBanner && fieldKey === upperFieldKey) {
+        return;
+      }
+
+      // Nickname overlays blank the upper banner until actual nickname text is present.
+      // The lower crown should always render the main Title text so players can keep
+      // editing the true card name without it jumping between slots.
+      const positionFieldKey = fieldKey;
+      const contentFieldKey = fieldKey;
+
+      let resolvedContentFieldKey = contentFieldKey;
+      if (shouldSwapTitleNickname && (fieldKey === 'title' || fieldKey === 'nickname')) {
+        resolvedContentFieldKey = fieldKey === 'title' ? 'nickname' : 'title';
       }
 
       // Get position/layout from pack OR card (nickname field added dynamically to card)
@@ -137,7 +210,7 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
       const positionSpec = packPositionSpec || cardPositionSpec;
 
       // Get text content from card
-      const cardContentData = card.text?.[contentFieldKey];
+      const cardContentData = card.text?.[resolvedContentFieldKey];
 
       // If we have no position spec, skip this field
       if (!positionSpec) {
@@ -197,7 +270,7 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
         clearTextRenderError(fieldKey);
       }
     },
-  [symbolAtlas, pack, card, packMetrics, shouldSwapTitleNickname, setTextRenderError, clearTextRenderError]
+  [symbolAtlas, pack, card, packMetrics, hasNicknameOverlay, shouldSwapTitleNickname, setTextRenderError, clearTextRenderError]
   );
 
   return {
@@ -234,8 +307,8 @@ export function useTextRenderer(
     // Clear canvas
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    // Render standard fields in order
-    const standardFields = ['mana', 'title', 'type', 'rules', 'pt'];
+    // Render standard fields in order – nickname sits between title and type when defined
+    const standardFields = ['mana', 'title', 'nickname', 'type', 'rules', 'pt'];
 
     for (const fieldKey of standardFields) {
       if (card.text?.[fieldKey] || pack?.text?.[fieldKey]) {

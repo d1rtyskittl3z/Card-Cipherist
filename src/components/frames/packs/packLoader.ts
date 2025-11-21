@@ -38,6 +38,7 @@ import OilSlick from './OilSlick';
 import M21 from './M21';
 import CustomNeon from './CustomNeon';
 import PlaneswalkerRegular from './PlaneswalkerRegular';
+import PlaneswalkerNickname from './PlaneswalkerNickname';
 import TokenRegular1 from './TokenRegular-1';
 import TokenTextless1 from './TokenTextless-1';
 import TokenTextlessBorderless from './TokenTextlessBorderless';
@@ -111,6 +112,8 @@ import ClassicshiftedPlaneswalker from './ClassicshiftedPlaneswalker';
 import ClassicshiftedPlaneswalkerTransform from './ClassicshiftedPlaneswalkerTransform';
 import ClassicshiftedDFC from './ClassicshiftedDFC';
 import ClassicshiftedTransform from './ClassicshiftedTransform';
+import StoneCutterDeluxe from './StoneCutterDeluxe';
+import StoneCutterDeluxeNicknameAddons from './StoneCutterDeluxeNicknameAddons';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -152,6 +155,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M21': M21,
   'CustomNeon': CustomNeon,
   'PlaneswalkerRegular': PlaneswalkerRegular,
+  'PlaneswalkerNickname': PlaneswalkerNickname,
   'TokenRegular-1': TokenRegular1,
   'TokenTextless-1': TokenTextless1,
   'TokenTextlessBorderless': TokenTextlessBorderless,
@@ -213,6 +217,8 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'UBLegendCrownsNew': UBLegendCrownsNew,
   'BorderlessStellarSights': BorderlessStellarSights,
   'MiscCustom': MiscCustom,
+  'StoneCutterDeluxe': StoneCutterDeluxe,
+  'StoneCutterDeluxeNicknameAddons': StoneCutterDeluxeNicknameAddons,
   'StationRegular': StationRegular,
   'StationBorderless': StationBorderless,
   'Elemental': Elemental,

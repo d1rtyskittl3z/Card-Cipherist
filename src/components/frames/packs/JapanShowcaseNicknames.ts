@@ -31,7 +31,7 @@ const JapanShowcaseNicknames: FramePackTemplate = {
     { name: 'Multicolored Nickname', src: '/img/frames/m15/japanShowcase/nickname/m.png', bounds },
     { name: 'Artifact Nickname', src: '/img/frames/m15/japanShowcase/nickname/a.png', bounds },
     { name: 'Land Nickname', src: '/img/frames/m15/japanShowcase/nickname/L.png', bounds },
-    { name: 'Colorless Nickname', src: '/img/frames/m15/japanShowcase/nickname/c.png', bounds }
+    // { name: 'Colorless Nickname', src: '/img/frames/m15/japanShowcase/nickname/c.png', bounds }
   ],
   text: {
     mana: {
