@@ -72,8 +72,21 @@ import UBFull from './UBFull';
 import UBExtendedArt from './UBExtendedArt';
 import UBLegendCrowns from './UBLegendCrowns';
 import TransformLegendCrownsUB from './TransformLegendCrownsUB';
+import ModalLegendCrowns from './ModalLegendCrowns';
+import ModalLegendCrownsBrawl from './ModalLegendCrownsBrawl';
+import ModalLegendCrownsFloating from './ModalLegendCrownsFloating';
+import ModalLegendCrownsNickname from './ModalLegendCrownsNickname';
 import ModalLegendCrownsUB from './ModalLegendCrownsUB';
+import ModalHelper from './ModalHelper';
+import ModalNyx from './ModalNyx';
 import ModalRegular from './ModalRegular';
+import ModalSnow from './ModalSnow';
+import ModalUB from './ModalUB';
+import ModalBorderless from './ModalBorderless';
+import ModalExtended from './ModalExtended';
+import ModalNickname from './ModalNickname';
+import ModalShort from './ModalShort';
+import ModalShortNickname from './ModalShortNickname';
 import UBLegendCrownsFloating from './UBLegendCrownsFloating';
 import M15RegularNew from './M15RegularNew';
 import M15ExtendedArtNew from './M15ExtendedArtNew-1';
@@ -173,8 +186,21 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'UBExtendedArt': UBExtendedArt,
   'UBLegendCrowns': UBLegendCrowns,
   'TransformLegendCrownsUB': TransformLegendCrownsUB,
+  'ModalLegendCrowns': ModalLegendCrowns,
+  'ModalLegendCrownsFloating': ModalLegendCrownsFloating,
+  'ModalLegendCrownsNickname': ModalLegendCrownsNickname,
+  'ModalLegendCrownsBrawl': ModalLegendCrownsBrawl,
   'ModalLegendCrownsUB': ModalLegendCrownsUB,
+  'ModalNyx': ModalNyx,
   'ModalRegular': ModalRegular,
+  'ModalHelper': ModalHelper,
+  'ModalSnow': ModalSnow,
+  'ModalUB': ModalUB,
+  'ModalBorderless': ModalBorderless,
+  'ModalExtended': ModalExtended,
+  'ModalNickname': ModalNickname,
+  'ModalShort': ModalShort,
+  'ModalShortNickname': ModalShortNickname,
   'UBLegendCrownsFloating': UBLegendCrownsFloating,
   'M15RegularNew': M15RegularNew,
   'M15ExtendedArtNew': M15ExtendedArtNew,
