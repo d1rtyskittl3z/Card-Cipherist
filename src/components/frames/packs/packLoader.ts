@@ -37,7 +37,11 @@ import Wanted from './Wanted';
 import OilSlick from './OilSlick';
 import M21 from './M21';
 import CustomNeon from './CustomNeon';
+import PlaneswalkerBorderless from './PlaneswalkerBorderless';
+import PlaneswalkerBoxTopper from './PlaneswalkerBoxTopper';
 import PlaneswalkerRegular from './PlaneswalkerRegular';
+import PlaneswalkerTall from './PlaneswalkerTall';
+import PlaneswalkerTallBorderless from './PlaneswalkerTallBorderless';
 import PlaneswalkerNickname from './PlaneswalkerNickname';
 import TokenRegular1 from './TokenRegular-1';
 import TokenTextless1 from './TokenTextless-1';
@@ -114,6 +118,17 @@ import ClassicshiftedDFC from './ClassicshiftedDFC';
 import ClassicshiftedTransform from './ClassicshiftedTransform';
 import StoneCutterDeluxe from './StoneCutterDeluxe';
 import StoneCutterDeluxeNicknameAddons from './StoneCutterDeluxeNicknameAddons';
+import PlaneswalkerCompleated from './PlaneswalkerCompleated';
+import PlaneswalkerDBL from './PlaneswalkerDBL';
+import PlaneswalkerTallDBL from './PlaneswalkerTallDBL';
+import PlaneswalkerHoloStamps from './PlaneswalkerHoloStamps';
+import PlaneswalkerSDCC15 from './PlaneswalkerSDCC15';
+import PlaneswalkerMDFC from './PlaneswalkerMDFC';
+import PlaneswalkerTransformFront from './PlaneswalkerTransformFront';
+import PlaneswalkerTransformBack from './PlaneswalkerTransformBack';
+import PlaneswalkerTransformFrontDBL from './PlaneswalkerTransformFrontDBL';
+import PlaneswalkerTransformBackDBL from './PlaneswalkerTransformBackDBL';
+import PlaneswalkerTransformIcons from './PlaneswalkerTransformIcons';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -154,7 +169,11 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'OilSlick': OilSlick,
   'M21': M21,
   'CustomNeon': CustomNeon,
+  'PlaneswalkerBorderless': PlaneswalkerBorderless,
+  'PlaneswalkerBoxTopper': PlaneswalkerBoxTopper,
   'PlaneswalkerRegular': PlaneswalkerRegular,
+  'PlaneswalkerTall': PlaneswalkerTall,
+  'PlaneswalkerTallBorderless': PlaneswalkerTallBorderless,
   'PlaneswalkerNickname': PlaneswalkerNickname,
   'TokenRegular-1': TokenRegular1,
   'TokenTextless-1': TokenTextless1,
@@ -230,6 +249,17 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'ClassicshiftedPlaneswalkerTransform': ClassicshiftedPlaneswalkerTransform,
   'ClassicshiftedDFC': ClassicshiftedDFC,
   'ClassicshiftedTransform': ClassicshiftedTransform,
+  'PlaneswalkerCompleated': PlaneswalkerCompleated,
+  'PlaneswalkerDBL': PlaneswalkerDBL,
+  'PlaneswalkerTallDBL': PlaneswalkerTallDBL,
+  'PlaneswalkerHoloStamps': PlaneswalkerHoloStamps,
+  'PlaneswalkerSDCC15': PlaneswalkerSDCC15,
+  'PlaneswalkerMDFC': PlaneswalkerMDFC,
+  'PlaneswalkerTransformFront': PlaneswalkerTransformFront,
+  'PlaneswalkerTransformBack': PlaneswalkerTransformBack,
+  'PlaneswalkerTransformFrontDBL': PlaneswalkerTransformFrontDBL,
+  'PlaneswalkerTransformBackDBL': PlaneswalkerTransformBackDBL,
+  'PlaneswalkerTransformIcons': PlaneswalkerTransformIcons,
   // Add more packs here as you create them
 };
 
