@@ -99,6 +99,30 @@ import M15LegendCrownsNew from './M15LegendCrownsNew-1';
 import M15InnerCrownsNew from './M15InnerCrownsNew-1';
 import FullArtNew from './FullArtNew-1';
 import SnowNew from './SnowNew-1';
+import M15TransformSnowFront from './M15TransformSnowFront';
+import M15TransformUBFront from './M15TransformUBFront';
+import TransformBorderlessFront from './TransformBorderlessFront';
+import TransformExtendedFront from './TransformExtendedFront';
+import SagaDFC from './SagaDFC';
+import SagaCreatureFront from './SagaCreatureFront';
+import SagaCreatureBack from './SagaCreatureBack';
+import SagaCreatureUBFront from './SagaCreatureUBFront';
+import SagaCreatureUBBack from './SagaCreatureUBBack';
+import M15TransformBackNew from './M15TransformBackNew';
+import M15TransformNyxBackNew from './M15TransformNyxBackNew';
+import M15TransformSnowBackNew from './M15TransformSnowBackNew';
+import M15TransformUBBackNew from './M15TransformUBBackNew';
+import TransformBorderlessBack from './TransformBorderlessBack';
+import TransformExtendedBack from './TransformExtendedBack';
+import M15TransformTypes from './M15TransformTypes';
+import M15TransformBack from './M15TransformBack';
+import M15TransformNyxBack from './M15TransformNyxBack';
+import M15TransformSnowBack from './M15TransformSnowBack';
+import M15TransformUBBack from './M15TransformUBBack';
+import TransformSDCC15 from './TransformSDCC15';
+import TransformLegendCrowns from './TransformLegendCrowns';
+import TransformLegendCrownsFloating from './TransformLegendCrownsFloating';
+import TransformLegendCrownsNickname from './TransformLegendCrownsNickname';
 import M15NyxNew from './M15NyxNew-1';
 import UBNew from './UBNew-1';
 import UBLegendCrownsNew from './UBLegendCrownsNew-1';
@@ -260,7 +284,30 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PlaneswalkerTransformFrontDBL': PlaneswalkerTransformFrontDBL,
   'PlaneswalkerTransformBackDBL': PlaneswalkerTransformBackDBL,
   'PlaneswalkerTransformIcons': PlaneswalkerTransformIcons,
-  // Add more packs here as you create them
+  'M15TransformSnowFront': M15TransformSnowFront,
+  'M15TransformUBFront': M15TransformUBFront,
+  'TransformBorderlessFront': TransformBorderlessFront,
+  'TransformExtendedFront': TransformExtendedFront,
+  'SagaDFC': SagaDFC,
+  'SagaCreatureFront': SagaCreatureFront,
+  'SagaCreatureBack': SagaCreatureBack,
+  'SagaCreatureUBFront': SagaCreatureUBFront,
+  'SagaCreatureUBBack': SagaCreatureUBBack,
+  'M15TransformBackNew': M15TransformBackNew,
+  'M15TransformNyxBackNew': M15TransformNyxBackNew,
+  'M15TransformSnowBackNew': M15TransformSnowBackNew,
+  'M15TransformUBBackNew': M15TransformUBBackNew,
+  'TransformBorderlessBack': TransformBorderlessBack,
+  'TransformExtendedBack': TransformExtendedBack,
+  'M15TransformTypes': M15TransformTypes,
+  'M15TransformBack': M15TransformBack,
+  'M15TransformNyxBack': M15TransformNyxBack,
+  'M15TransformSnowBack': M15TransformSnowBack,
+  'M15TransformUBBack': M15TransformUBBack,
+  'TransformSDCC15': TransformSDCC15,
+  'TransformLegendCrowns': TransformLegendCrowns,
+  'TransformLegendCrownsFloating': TransformLegendCrownsFloating,
+  'TransformLegendCrownsNickname': TransformLegendCrownsNickname,
 };
 
 /**
