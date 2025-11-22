@@ -139,25 +139,36 @@ const TextTabComponent = () => {
   );
 
   /**
-   * Dynamically build TEXT_FIELDS from available text fields in the card
-   * Order: mana, title, type, rules, pt, then any additional fields (like nickname)
-   * Uses the 'name' property from text config, with FIELD_LABELS as fallback
+   * Dynamically build TEXT_FIELDS based on the loaded frame pack (if any)
+   * Pack-defined fields take priority and preserve their declared order
+   * Fallback to default card text ordering when no pack text is available
    */
   const TEXT_FIELDS = useMemo(() => {
-    if (!text) return [];
+    const packText = loadedPack?.text;
+    const packFields = packText ? Object.keys(packText) : [];
+    const cardFields = text ? Object.keys(text) : [];
 
+    const activeFields = packFields.length > 0 ? packFields : cardFields;
+    if (activeFields.length === 0) return [];
+
+    const resolveLabel = (key: string) =>
+      packText?.[key]?.name || text?.[key]?.name || FIELD_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1);
+
+    // When a pack defines text entries, respect its order exactly
+    if (packFields.length > 0) {
+      return activeFields.map((key) => ({ key, label: resolveLabel(key) }));
+    }
+
+    // Otherwise fall back to the default ordering logic
     const fieldOrder = ['mana', 'title', 'type', 'rules', 'pt'];
-    const availableFields = Object.keys(text);
+    const orderedFields = fieldOrder.filter((key) => activeFields.includes(key));
+    const extraFields = activeFields.filter((key) => !fieldOrder.includes(key));
 
-    // Build ordered list based on standard order, then add any extras
-    const orderedFields = fieldOrder.filter(key => availableFields.includes(key));
-    const extraFields = availableFields.filter(key => !fieldOrder.includes(key));
-
-    return [...orderedFields, ...extraFields].map(key => ({
+    return [...orderedFields, ...extraFields].map((key) => ({
       key,
-      label: text[key]?.name || FIELD_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1),
+      label: resolveLabel(key),
     }));
-  }, [text]);
+  }, [loadedPack, text]);
 
   // Initialize selected field to first available field if not set
   const currentField = useMemo(() => {
