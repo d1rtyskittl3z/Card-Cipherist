@@ -27,6 +27,7 @@ import M15CIPips from './M15CIPips';
 import TheList from './TheList';
 import M15Lands from './M15Lands';
 import Spree from './Spree';
+import SpreeUB from './SpreeUB';
 import Attraction from './Attraction';
 import M15Snow from './M15Snow';
 import Conspiracy from './Conspiracy';
@@ -51,6 +52,7 @@ import TokenShort1 from './TokenShort-1';
 import TokenMonarch from './TokenMonarch';
 import TokenMarker from './TokenMarker';
 import TokenInitiative from './TokenInitiative';
+import TokenDayNight from './TokenDayNight';
 import Emblem from './Emblem';
 import TokenRegularM15 from './TokenRegularM15';
 import TokenTextlessM15 from './TokenTextlessM15';
@@ -71,7 +73,9 @@ import PromoNyx from './PromoNyx';
 import PromoExtended from './PromoExtended';
 import PromoNickname from './PromoNickname';
 import PromoGenericShowcase from './PromoGenericShowcase';
+import J22Front from './J22Front';
 import JapanShowcaseNicknames from './JapanShowcaseNicknames';
+import JMPFront from './JMPFront';
 import UB from './UB';
 import UBFull from './UBFull';
 import UBExtendedArt from './UBExtendedArt';
@@ -183,6 +187,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'TheList': TheList,
   'M15Lands': M15Lands,
   'Spree': Spree,
+  'SpreeUB': SpreeUB,
   'Attraction': Attraction,
   'M15Snow': M15Snow,
   'Conspiracy': Conspiracy,
@@ -207,6 +212,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'TokenMonarch': TokenMonarch,
   'TokenMarker': TokenMarker,
   'TokenInitiative': TokenInitiative,
+  'TokenDayNight': TokenDayNight,
   'Emblem': Emblem,
   'TokenRegularM15': TokenRegularM15,
   'TokenTextlessM15': TokenTextlessM15,
@@ -227,7 +233,9 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PromoExtended': PromoExtended,
   'PromoNickname': PromoNickname,
   'PromoGenericShowcase': PromoGenericShowcase,
+  'J22Front': J22Front,
   'JapanShowcaseNicknames': JapanShowcaseNicknames,
+  'JMPFront': JMPFront,
   'UB': UB,
   'UBFull': UBFull,
   'UBExtendedArt': UBExtendedArt,
