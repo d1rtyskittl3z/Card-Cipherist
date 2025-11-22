@@ -47,25 +47,18 @@ export const useCanvasRender = () => {
 
   // Initialize layer renderers
   const { renderFrameLayer, renderArtLayer, renderSetSymbol, renderWatermark } = useLayerRenderers({
-    canvasRefs,
-    contextRefs,
-    canvasesReady,
     blackImage,
     rightGradientMask,
   });
 
   // Initialize special card type layers
   const { renderSaga, renderPlaneswalker, renderStation, renderSerial } = useSpecialLayers({
-    canvasRefs,
-    contextRefs,
     showSerialNumbers,
   });
 
   // Initialize text and debug layers
   const { renderTextLayer, renderGuidelines, renderArtBoundsDebug, renderBottomInfo } =
     useTextAndDebugLayers({
-      canvasRefs,
-      contextRefs,
       card,
       loadedPack,
       showGuidelines,
@@ -75,12 +68,10 @@ export const useCanvasRender = () => {
 
   // Initialize compositor
   const { compositeAllLayers } = useCompositor({
-    canvasRefs,
     previewRef,
     renderArtLayer,
     renderSetSymbol,
   });
-
   /**
    * Main render function - orchestrates all layer rendering
    */
@@ -94,8 +85,7 @@ export const useCanvasRender = () => {
     perfMonitor.measure('canvas:renderFrameLayer', () => renderFrameLayer());
     await perfMonitor.measureAsync('canvas:renderSerial', () => renderSerial(card));
     await perfMonitor.measureAsync('canvas:renderStation', () => renderStation(card));
-    perfMonitor.measure('canvas:renderWatermark', () => renderWatermark(card));
-    await perfMonitor.measureAsync('canvas:renderSaga', () => renderSaga(card));
+    perfMonitor.measure('canvas:renderWatermark', () => renderWatermark());
     await perfMonitor.measureAsync('canvas:renderPlaneswalker', () => renderPlaneswalker(card));
     await perfMonitor.measureAsync('canvas:renderTextLayer', () => renderTextLayer());
     await perfMonitor.measureAsync('canvas:renderBottomInfo', () => renderBottomInfo());

@@ -818,7 +818,7 @@ const drawTextWithMana = async (
           try {
             const img = await loadManaSymbol(segment.content, manaPrefix);
             manaSymbolCache.set(segment.content, img);
-          } catch (error) {
+          } catch (_error) {
             // Symbol failed to load, skip it
             continue;
           }
@@ -928,7 +928,7 @@ const drawManaWithPlacement = async (
       try {
         const img = await loadManaSymbol(segment.content, manaPrefix);
         manaSymbolCache.set(segment.content, img);
-      } catch (error) {
+      } catch (_error) {
         continue; // Skip if failed to load
       }
     }
@@ -1301,7 +1301,7 @@ export const drawBottomInfo = async (
       await Promise.all(fontsToLoad.map((f) => fontSet.load(`16px ${f}`)));
       if (fontSet.ready) await fontSet.ready;
     }
-  } catch (e) {
+  } catch (_error) {
     // Non-fatal: if fonts API is unavailable, continue; canvas will use fallbacks
   }
 

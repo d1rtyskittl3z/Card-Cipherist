@@ -39,6 +39,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { castDraft } from 'immer';
 import type { Frame, FrameOption } from '../types/card.types';
 import type { FramePackTemplate } from '../components/frames/packs/types';
 
@@ -278,7 +279,7 @@ export const useFrameStore = create<FrameState>()(
       // Frame Management
       addFrame: (frame) =>
         set((draft) => {
-          draft.frames.push(frame);
+          draft.frames.push(castDraft(frame));
         }),
 
       removeFrame: (index) =>
@@ -304,7 +305,7 @@ export const useFrameStore = create<FrameState>()(
 
       setFrames: (frames) =>
         set((draft) => {
-          draft.frames = frames;
+          draft.frames = castDraft(frames);
         }),
 
       // Frame Selection

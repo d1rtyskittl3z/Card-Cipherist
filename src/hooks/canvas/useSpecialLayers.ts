@@ -287,7 +287,7 @@ export const useSpecialLayers = ({
           ctx.restore();
         },
       });
-    } catch (e) {
+    } catch (_error) {
       // swallow to avoid breaking render pipeline
     }
   }, [canvasRefs, contextRefs, showSerialNumbers]);

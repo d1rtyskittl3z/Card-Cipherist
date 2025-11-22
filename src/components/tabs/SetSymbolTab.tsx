@@ -170,8 +170,8 @@ const SetSymbolTabComponent = () => {
       if (window.ipcRenderer) {
         try {
           customFolders = await window.ipcRenderer.invoke('read-custom-symbol-folders') as string[];
-        } catch (e) {
-          console.log('Could not read folders via IPC, using fallback');
+        } catch (error) {
+          console.log('Could not read folders via IPC, using fallback', error);
         }
       }
       
@@ -210,7 +210,7 @@ const SetSymbolTabComponent = () => {
               img.src = path;
             });
             availableSymbols.push(path);
-          } catch (e) {
+          } catch (_error) {
             // Symbol doesn't exist, skip it
           }
         }

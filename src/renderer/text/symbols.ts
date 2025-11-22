@@ -231,7 +231,7 @@ async function loadPrefixedManaSymbols(
         symbols.push(symbol);
         loaded = true;
         break;
-      } catch (error) {
+      } catch (_error) {
         // Skip missing assets and try next extension
       }
     }
@@ -241,7 +241,7 @@ async function loadPrefixedManaSymbols(
       try {
         const symbol = await loadManaSymbol(name, basePath, options);
         symbols.push(symbol);
-      } catch (error) {
+      } catch (_error) {
         // Skip missing assets silently; packs can opt-in by adjusting codes list
       }
     }

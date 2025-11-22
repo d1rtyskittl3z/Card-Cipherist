@@ -194,7 +194,7 @@ const stripExistingMetadataChunks = (bytes: Uint8Array): Uint8Array => {
           offset += totalLength;
           continue;
         }
-      } catch (error) {
+      } catch (_error) {
         // Ignore malformed or compressed chunks
       }
     }

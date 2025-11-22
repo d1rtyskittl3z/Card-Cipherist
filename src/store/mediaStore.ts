@@ -35,6 +35,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { castDraft } from 'immer';
 
 /**
  * Media Store State Interface
@@ -321,7 +322,7 @@ export const useMediaStore = create<MediaState>()(
 
       setArtImage: (image) => {
         set((draft) => {
-          draft.artImage = image;
+          draft.artImage = castDraft(image);
         });
       },
 
@@ -349,7 +350,7 @@ export const useMediaStore = create<MediaState>()(
 
       setSetSymbolImage: (image) => {
         set((draft) => {
-          draft.setSymbolImage = image;
+          draft.setSymbolImage = castDraft(image);
         });
       },
 
@@ -392,7 +393,7 @@ export const useMediaStore = create<MediaState>()(
 
       setWatermarkImage: (image) => {
         set((draft) => {
-          draft.watermarkImage = image;
+          draft.watermarkImage = castDraft(image);
         });
       },
 
@@ -411,7 +412,7 @@ export const useMediaStore = create<MediaState>()(
       // Mana Symbol Management
       setManaSymbolImages: (images) => {
         set((draft) => {
-          draft.manaSymbolImages = images;
+          draft.manaSymbolImages = castDraft(images);
         });
       },
 

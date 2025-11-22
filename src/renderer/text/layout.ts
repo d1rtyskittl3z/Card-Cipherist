@@ -297,7 +297,6 @@ function processCommand(
   _fieldSpec: FieldSpec,
   packMetrics: PackMetrics,
   ctx: CanvasRenderingContext2D,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _options: RenderOptions
 ): void {
   const code = token.value;
@@ -645,7 +644,6 @@ function processSymbol(
   fieldSpec: FieldSpec,
   packMetrics: PackMetrics,
   atlas: SymbolAtlas,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _options: RenderOptions
 ): SymbolGlyph | null {
   const code = token.value.replace(/\//g, '');

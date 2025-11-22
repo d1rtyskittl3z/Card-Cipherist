@@ -148,7 +148,7 @@ export async function drawSerialPlate(args: DrawSerialPlateArgs): Promise<void> 
     // Draw texts using provided writer
     if (numberText) writeText(numberSpec, ctx)
     if (totalText) writeText(totalSpec, ctx)
-  } catch (err) {
+  } catch (_error) {
     // Fail gracefully: swallow drawing if image load or text rendering fails
     // Optionally log to console during development
     // console.warn('drawSerialPlate: skipped due to error:', err)
