@@ -22,6 +22,7 @@ import { SaveImportTab } from './tabs/SaveImportTab';
 // import { TutorialTab } from './tabs/TutorialTab'; //  Hidden for now --DSKZ
 import { Toaster } from './ui/toaster';
 import { useCardStore } from '../store/cardStore';
+import { useRotateCanvasPreview } from '../store/selectors';
 import { TABS } from '../constants';
 
 const CardCreatorLayoutComponent = () => {
@@ -29,6 +30,8 @@ const CardCreatorLayoutComponent = () => {
   const hasShownPlaneswalkerTab = useCardStore((state) => state.hasShownPlaneswalkerTab);
   const hasShownKamigawaTab = useCardStore((state) => state.hasShownKamigawaTab);
   const hasShownStationsTab = useCardStore((state) => state.hasShownStationsTab);
+  const rotateCanvasPreview = useRotateCanvasPreview();
+  const accordionWidth = rotateCanvasPreview ? '1000px' : '1200px';
 
   return (
     <Box
@@ -75,11 +78,12 @@ const CardCreatorLayoutComponent = () => {
           // These two determine the size of the Panel. Need to play with this --DSKZ
           flexShrink={0}
           flexGrow={0}
-          flexBasis="1200px"
+          flexBasis={accordionWidth}
           minW="500px"
-          maxW="2000px"
+          maxW={rotateCanvasPreview ? '1800px' : '2000px'}
           h="100%"
           overflowY="auto"
+          transition="flex-basis 0.2s ease, max-width 0.2s ease"
             css={{
               '&::-webkit-scrollbar': {
                 width: '8px',

@@ -86,6 +86,7 @@ export const useCanvasRender = () => {
     await perfMonitor.measureAsync('canvas:renderSerial', () => renderSerial(card));
     await perfMonitor.measureAsync('canvas:renderStation', () => renderStation(card));
     perfMonitor.measure('canvas:renderWatermark', () => renderWatermark());
+    await perfMonitor.measureAsync('canvas:renderSaga', () => renderSaga(card));
     await perfMonitor.measureAsync('canvas:renderPlaneswalker', () => renderPlaneswalker(card));
     await perfMonitor.measureAsync('canvas:renderTextLayer', () => renderTextLayer());
     await perfMonitor.measureAsync('canvas:renderBottomInfo', () => renderBottomInfo());
