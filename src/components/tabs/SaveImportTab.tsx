@@ -718,12 +718,9 @@ const SaveImportTabComponent = () => {
         const shouldAutoFit = autoFitArt && !!artBounds && !hasCustomArtTransform(hydratedCard);
 
         if (shouldAutoFit && artImageForAutoFit && artBounds) {
-          const { artX: newX, artY: newY, artZoom: newZoom } = calculateAutoFitArt(
-            artImageForAutoFit,
-            artBounds,
-            hydratedCard
-          );
-          updateArt({ artX: newX, artY: newY, artZoom: newZoom, artRotate: 0 });
+          const { artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate } =
+            calculateAutoFitArt(artImageForAutoFit, artBounds, hydratedCard);
+          updateArt({ artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate });
         }
 
         setLoadDrawerOpen(false);

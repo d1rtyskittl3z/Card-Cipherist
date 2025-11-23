@@ -132,12 +132,12 @@ const ArtTabComponent = () => {
         marginX: cardMarginX,
         marginY: cardMarginY
       };
-      const { artX: newX, artY: newY, artZoom: newZoom } = calculateAutoFitArt(
+      const { artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate } = calculateAutoFitArt(
         artImage,
         loadedPack.artBounds,
         cardForAutoFit as Card
       );
-      updateArt({ artX: newX, artY: newY, artZoom: newZoom, artRotate: 0 });
+      updateArt({ artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadedPack?.id, autoFitArt]); // Only trigger when pack ID or auto-fit changes
@@ -443,7 +443,7 @@ const ArtTabComponent = () => {
                     marginX: cardMarginX,
                     marginY: cardMarginY
                   } as Card;
-                  const { artX: newX, artY: newY, artZoom: newZoom } = calculateAutoFitArt(
+                  const { artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate } = calculateAutoFitArt(
                     artImage,
                     loadedPack.artBounds,
                     cardForAutoFit
@@ -452,7 +452,7 @@ const ArtTabComponent = () => {
                     artX: newX,
                     artY: newY,
                     artZoom: newZoom,
-                    artRotate: 0,
+                    artRotate: newRotate,
                     artGrayscale: false,
                   });
                 } else {

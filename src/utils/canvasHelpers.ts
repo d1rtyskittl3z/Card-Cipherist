@@ -20,7 +20,7 @@ export const calculateAutoFitArt = (
   artImage: HTMLImageElement,
   artBounds: CardBounds,
   card: Card
-): { artX: number; artY: number; artZoom: number } => {
+): { artX: number; artY: number; artZoom: number; artRotate: number } => {
   // Convert normalized bounds to pixel coordinates
   const boundsX = scaleX(card, artBounds.x);
   const boundsY = scaleY(card, artBounds.y);
@@ -44,7 +44,7 @@ export const calculateAutoFitArt = (
   const scaleY_ratio = boundsHeight / artImage.height;
   const artZoom = Math.max(scaleX_ratio, scaleY_ratio);
 
-  return { artX, artY, artZoom };
+  return { artX, artY, artZoom, artRotate: artBounds.rotation ?? 0 };
 };
 
 /**

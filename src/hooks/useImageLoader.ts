@@ -99,9 +99,10 @@ export const useImageLoader = () => {
 
         // Apply auto-fit if enabled and artBounds are available
         if (autoFitArt && loadedPack?.artBounds) {
-          const calculated = calculateAutoFitArt(img, loadedPack.artBounds, card);
-          console.log('[useImageLoader] Auto-fit calculated:', calculated);
-          updateArt({ artSource: src, artX: calculated.artX, artY: calculated.artY, artZoom: calculated.artZoom, artRotate: 0 });
+          const { artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate } =
+            calculateAutoFitArt(img, loadedPack.artBounds, card);
+          console.log('[useImageLoader] Auto-fit calculated:', { newX, newY, newZoom, newRotate });
+          updateArt({ artSource: src, artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate });
         } else {
           console.log('[useImageLoader] Auto-fit disabled or no artBounds, using defaults');
           updateArt({ artSource: src });
