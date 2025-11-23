@@ -293,6 +293,7 @@ export const useShowGuidelines = () => useCardStore((state) => state.showGuideli
 export const useShowArtBoundsDebug = () => useCardStore((state) => state.showArtBoundsDebug);
 export const useShowTransparencies = () => useCardStore((state) => state.showTransparencies);
 export const useAutoFitArt = () => useUIStore((state) => state.autoFitArt);
+export const useRotateCanvasPreview = () => useUIStore((state) => state.rotateCanvasPreview);
 
 // ============================================================================
 // Saga Selectors

@@ -8,6 +8,7 @@ import { Box, Heading, Input, VStack, HStack, Button, SimpleGrid, Checkbox, Coll
 import { Field } from '../ui/field';
 import { NativeSelectRoot, NativeSelectField } from '../ui/native-select';
 import { FileUploadZone } from '../ui';
+import { LabeledSwitch } from '../ui/labeled-switch';
 import { toaster } from '../ui/toaster-instance';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import type { LegacyGroup } from '../frames/groups/types';
@@ -19,12 +20,14 @@ import { FrameLayerList } from '../frames/FrameLayerList';
 import { FrameLayerEditor } from '../FrameLayerEditor';
 import { useCardStore } from '../../store/cardStore';
 import { useMediaStore } from '../../store/mediaStore';
+import { useUIStore } from '../../store/uiStore';
 import { applySagaHeights, calculateSagaAbilityHeights } from '../../utils/sagaHelpers';
 import {
   useShowGuidelines,
   useShowTransparencies,
   useIsFrameEditorOpen,
   useEditingFrameIndex,
+  useRotateCanvasPreview,
 } from '../../store/selectors';
 import {
   adjustPlaneswalkerTextBounds,
@@ -70,6 +73,8 @@ const FRAME_GROUPS: Record<string, LegacyGroup> = {
   'FleshAndBlood': FleshAndBlood,
 };
 
+const ROTATION_PACK_IDS = new Set<string>(['Battle', 'Flip', 'Fuse', 'Split', 'Room', 'RoomUB']);
+
 const PLANESWALKER_FALLBACK_ABILITIES: [string, string, string, string] = ['', '+1', '0', '-7'];
 const PLANESWALKER_FALLBACK_ADJUST: [number, number, number, number] = [0, 0, 0, 0];
 const PLANESWALKER_FALLBACK_X = 0.1167;
@@ -96,6 +101,8 @@ const FrameTabComponent = () => {
   const setHasShownStationsTab = useCardStore((state) => state.setHasShownStationsTab);
   const initializeNeoBasicsControls = useCardStore((state) => state.initializeNeoBasicsControls);
   const applyNeoBasicsAdjustments = useCardStore((state) => state.applyNeoBasicsAdjustments);
+  const rotateCanvasPreview = useRotateCanvasPreview();
+  const setRotateCanvasPreview = useUIStore((state) => state.setRotateCanvasPreview);
   const [selectedGroupId, setSelectedGroupId] = useState<string>('Standard-3');
   const [selectedPackId, setSelectedPackId] = useState<string>('M15Regular-1');
   const [searchQuery, setSearchQuery] = useState('');
@@ -180,6 +187,14 @@ const FrameTabComponent = () => {
   const availablePacks = useMemo(() => {
     return selectedGroup?.packs || [];
   }, [selectedGroup]);
+
+  const rotationSupported = loadedPack ? ROTATION_PACK_IDS.has(loadedPack.id) : false;
+
+  useEffect(() => {
+    if (!rotationSupported && rotateCanvasPreview) {
+      setRotateCanvasPreview(false);
+    }
+  }, [rotationSupported, rotateCanvasPreview, setRotateCanvasPreview]);
 
   // Reset pack when group ACTUALLY changes (unless it's from search)
   useEffect(() => {
@@ -1595,6 +1610,16 @@ const FrameTabComponent = () => {
 
       {/* Frame Layer List */}
       <Box>
+        {rotationSupported && (
+          <LabeledSwitch
+            label="Rotate Canvas (EXPERIMENTAL)"
+            checked={rotateCanvasPreview}
+            onCheckedChange={setRotateCanvasPreview}
+            colorPalette="purple"
+            helperText="Preview only - saved exports stay portrait"
+            mb={2}
+          />
+        )}
         <Heading size="sm" mb={2}>
           Frame Layers
         </Heading>

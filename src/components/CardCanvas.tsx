@@ -12,10 +12,12 @@ import { PerformanceProfiler } from './PerformanceProfiler';
 import { CanvasProvider } from '../contexts/CanvasProvider';
 import { useCanvasManager } from '../hooks/canvas/useCanvasManager';
 import { CardCanvasRenderer } from './CardCanvasRenderer';
+import { useRotateCanvasPreview } from '../store/selectors';
 
 export const CardCanvas = () => {
   const showTransparencies = useCardStore((state) => state.showTransparencies);
   const setPreviewCanvasRef = useCardStore((state) => state.setPreviewCanvasRef);
+  const rotateCanvasPreview = useRotateCanvasPreview();
   const previewRef = useRef<HTMLCanvasElement>(null);
 
   // Initialize canvas manager (provides refs for context)
@@ -51,9 +53,11 @@ export const CardCanvas = () => {
       objectFit: 'contain',
     };
 
+    let style: React.CSSProperties;
+
     if (showTransparencies) {
       // Checkerboard pattern using CSS background
-      return {
+      style = {
         ...baseStyle,
         backgroundImage: `
           linear-gradient(45deg, #808080 25%, transparent 25%),
@@ -65,12 +69,22 @@ export const CardCanvas = () => {
         backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
         backgroundColor: '#404040',
       };
+    } else {
+      style = {
+        ...baseStyle,
+        backgroundColor: 'transparent',
+      };
     }
 
-    return {
-      ...baseStyle,
-      backgroundColor: 'transparent',
-    };
+    if (rotateCanvasPreview) {
+      style = {
+        ...style,
+        transform: 'rotate(90deg)',
+        transformOrigin: 'center center',
+      };
+    }
+
+    return style;
   };
 
   return (

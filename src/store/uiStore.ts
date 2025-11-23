@@ -66,6 +66,9 @@ interface UIState {
   /** Whether auto-fit art is enabled (object-fit: cover behavior) */
   autoFitArt: boolean;
 
+  /** Whether the preview canvas should be rotated 90 degrees in the UI */
+  rotateCanvasPreview: boolean;
+
   /** Index of currently selected text field */
   selectedTextIndex: number;
 
@@ -127,6 +130,12 @@ interface UIState {
   setAutoFitArt: (enabled: boolean) => void;
 
   /**
+   * Toggle rotating the preview canvas 90 degrees (UI only)
+   * @param enabled - True to rotate, false to reset orientation
+   */
+  setRotateCanvasPreview: (enabled: boolean) => void;
+
+  /**
    * Set the currently selected text field index
    * @param index - Index of text field to select
    */
@@ -186,6 +195,7 @@ export const useUIStore = create<UIState>()(
       customArtBounds: null,
       showSerialNumbers: false,
       autoFitArt: true,
+      rotateCanvasPreview: false,
       selectedTextIndex: 0,
       hasShownSagaTab: false,
       hasShownPlaneswalkerTab: false,
@@ -227,6 +237,12 @@ export const useUIStore = create<UIState>()(
       setAutoFitArt: (enabled) =>
         set((draft) => {
           draft.autoFitArt = enabled;
+        }),
+
+      // Canvas Orientation
+      setRotateCanvasPreview: (enabled) =>
+        set((draft) => {
+          draft.rotateCanvasPreview = enabled;
         }),
 
       // Text Selection
