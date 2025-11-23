@@ -366,6 +366,7 @@ const mergeMediaTransformsIntoCard = (card: Card, media: MediaSnapshot): Card =>
   setSymbolX: media.setSymbolX,
   setSymbolY: media.setSymbolY,
   setSymbolZoom: media.setSymbolZoom,
+  setSymbolRotate: media.setSymbolRotate,
   watermarkSource: media.watermarkSource || card.watermarkSource,
   watermarkX: media.watermarkX,
   watermarkY: media.watermarkY,
@@ -463,6 +464,7 @@ const SaveImportTabComponent = () => {
         setSymbolX: cardData.setSymbolX,
         setSymbolY: cardData.setSymbolY,
         setSymbolZoom: cardData.setSymbolZoom,
+        setSymbolRotate: cardData.setSymbolRotate ?? 0,
       });
       updateWatermarkMedia({
         watermarkSource: cardData.watermarkSource,

@@ -116,6 +116,7 @@ interface CardState {
     setSymbolX?: number;
     setSymbolY?: number;
     setSymbolZoom?: number;
+    setSymbolRotate?: number;
   }) => void;
   setSetSymbolImage: (image: HTMLImageElement | null) => void;
   setSetCode: (code: string) => void;
@@ -342,6 +343,7 @@ const getInitialCard = (): Card => ({
   setSymbolX: 0,
   setSymbolY: 0,
   setSymbolZoom: 1,
+  setSymbolRotate: 0,
   watermarkSource: '/img/blank.png',
   watermarkX: 0,
   watermarkY: 0,
@@ -879,6 +881,7 @@ export const useCardStore = create<CardState>()(
             setSymbolX: 0, // Don't persist set symbol position - reset on refresh
             setSymbolY: 0, // Don't persist set symbol position - reset on refresh
             setSymbolZoom: 1, // Don't persist set symbol zoom - reset on refresh
+            setSymbolRotate: 0, // Don't persist set symbol rotation - reset on refresh
             watermarkSource: '/img/blank.png', // Don't persist watermark - reset on refresh
             watermarkX: 0, // Don't persist watermark position - reset on refresh
             watermarkY: 0, // Don't persist watermark position - reset on refresh

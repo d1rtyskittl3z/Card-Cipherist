@@ -8,6 +8,7 @@ export interface Bounds {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
 }
 
 export interface Mask {
@@ -61,6 +62,7 @@ export interface TextConfig {
   horizontal?: 'left' | 'center' | 'right';
   shadowColor?: string;
   conditionalColor?: string; // Color adjustments based on frame/mask selections (e.g., '(Back):white' or 'Frame1,Frame2:black')
+  rotation?: number;
 }
 
 export interface SagaPackConfig {

@@ -18,6 +18,7 @@ import { getThumbnailPath } from '../frames/packs/types';
 import { FrameLayerList } from '../frames/FrameLayerList';
 import { FrameLayerEditor } from '../FrameLayerEditor';
 import { useCardStore } from '../../store/cardStore';
+import { useMediaStore } from '../../store/mediaStore';
 import { applySagaHeights, calculateSagaAbilityHeights } from '../../utils/sagaHelpers';
 import {
   useShowGuidelines,
@@ -232,6 +233,7 @@ const FrameTabComponent = () => {
 
       const pack = result.data;
       const store = useCardStore.getState();
+      const mediaStore = useMediaStore.getState();
       setLoadedPack(pack);
       setLoadedPackStore(pack); // Update store for guidelines
       setSelectedFrameIndex(null);
@@ -296,6 +298,18 @@ const FrameTabComponent = () => {
 
         if (Object.keys(cardUpdates).length > 0) {
           store.updateCard(cardUpdates);
+        }
+
+        if (pack.setSymbolBounds?.rotation !== undefined) {
+          const hasCustomSetSymbolTransform =
+            mediaStore.setSymbolX !== 0 ||
+            mediaStore.setSymbolY !== 0 ||
+            mediaStore.setSymbolZoom !== 1 ||
+            mediaStore.setSymbolRotate !== 0;
+
+          if (!hasCustomSetSymbolTransform) {
+            mediaStore.updateSetSymbol({ setSymbolRotate: pack.setSymbolBounds.rotation });
+          }
         }
 
         const isSagaPack = pack.version?.toLowerCase().includes('saga');

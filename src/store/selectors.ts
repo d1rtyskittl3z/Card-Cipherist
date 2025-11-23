@@ -176,6 +176,7 @@ export const useSetSymbolState = () => {
       setSymbolX: state.setSymbolX,
       setSymbolY: state.setSymbolY,
       setSymbolZoom: state.setSymbolZoom,
+      setSymbolRotate: state.setSymbolRotate,
       setSymbolImage: state.setSymbolImage,
       setCode: state.setCode,
       rarity: state.rarity,
@@ -189,6 +190,7 @@ export const useSetSymbolState = () => {
 export const useSetSymbolX = () => useMediaStore((state) => state.setSymbolX);
 export const useSetSymbolY = () => useMediaStore((state) => state.setSymbolY);
 export const useSetSymbolZoom = () => useMediaStore((state) => state.setSymbolZoom);
+export const useSetSymbolRotation = () => useMediaStore((state) => state.setSymbolRotate);
 export const useSetSymbolImage = () => useMediaStore((state) => state.setSymbolImage);
 
 /**

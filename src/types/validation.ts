@@ -23,6 +23,7 @@ export const cardBoundsSchema = z.object({
   y: normalizedCoordSchema,
   width: normalizedCoordSchema,
   height: normalizedCoordSchema,
+  rotation: z.number().optional(),
 });
 
 /**
@@ -131,6 +132,7 @@ export const textObjectSchema = z.object({
   shadowY: z.number().optional(),
   shadowColor: z.string().optional(),
   manaSpacing: z.number().optional(),
+  rotation: z.number().optional(),
 });
 
 /**
@@ -336,6 +338,7 @@ export const cardSchema = z.object({
   setSymbolX: z.number(),
   setSymbolY: z.number(),
   setSymbolZoom: z.number().positive(),
+  setSymbolRotate: z.number().default(0),
 
   // Watermark
   watermarkSource: z.string(),
@@ -511,6 +514,7 @@ export const framePackBoundsSchema = z.object({
   y: normalizedCoordSchema,
   width: normalizedCoordSchema,
   height: normalizedCoordSchema,
+  rotation: z.number().optional(),
 });
 
 /**
@@ -585,6 +589,7 @@ export const framePackTextConfigSchema = z.object({
   horizontal: z.enum(['left', 'center', 'right']).optional(),
   shadowColor: z.string().optional(),
   conditionalColor: z.string().optional(),
+  rotation: z.number().optional(),
 });
 
 /**

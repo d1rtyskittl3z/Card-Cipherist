@@ -32,6 +32,7 @@ import Attraction from './Attraction';
 import M15Snow from './M15Snow';
 import Conspiracy from './Conspiracy';
 import Colorshifted from './Colorshifted';
+import Battle from './Battle';
 import Brawl from './Brawl';
 import Margin1 from './Margin-1';
 import Wanted from './Wanted';
@@ -192,6 +193,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15Snow': M15Snow,
   'Conspiracy': Conspiracy,
   'Colorshifted': Colorshifted,
+  'Battle': Battle,
   'Brawl': Brawl,
   'Margin-1': Margin1,
   'Wanted': Wanted,

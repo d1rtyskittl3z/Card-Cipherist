@@ -37,6 +37,8 @@ export interface CardBounds {
   width: number;
   /** Height (0-1, or beyond for margins) */
   height: number;
+  /** Optional rotation in degrees (used for portrait/tapped layouts) */
+  rotation?: number;
 }
 
 /**
@@ -189,6 +191,8 @@ export interface TextObject {
   shadowColor?: string;
   /** Spacing between mana symbols in pixels */
   manaSpacing?: number;
+  /** Rotation applied to the entire text block */
+  rotation?: number;
 }
 
 export interface ManaSymbol {
@@ -373,6 +377,8 @@ export interface Card {
   setSymbolY: number;
   /** Set symbol zoom factor (1.0 = 100%) */
   setSymbolZoom: number;
+  /** Set symbol rotation in degrees */
+  setSymbolRotate: number;
 
   /** Watermark image source path */
   watermarkSource: string;

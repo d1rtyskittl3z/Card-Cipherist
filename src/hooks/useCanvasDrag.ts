@@ -53,8 +53,8 @@ export const useCanvasDrag = ({
         const newZoom = Math.max(0.1, Math.min(5, current.zoom + zoomDelta));
         onZoomChange(newZoom);
       }
-      // Ctrl key (art mode only): Rotate
-      else if (e.ctrlKey && mode === 'art' && onRotateChange && current.rotation !== undefined) {
+      // Ctrl key: Rotate when handler is provided
+      else if (e.ctrlKey && onRotateChange && current.rotation !== undefined) {
         const rotateDelta = deltaY * 0.5; // 0.5 degrees per pixel
         const newRotation = current.rotation + rotateDelta;
         onRotateChange(newRotation);

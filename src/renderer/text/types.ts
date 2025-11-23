@@ -177,6 +177,10 @@ export interface LayoutResult {
   verticalAdjust: number;
   horizontalAdjust: number;
   absoluteSymbols?: SymbolGlyph[];  // Symbols with absolute positioning (e.g. manaPlacement)
+  ptShift: [number, number];
+  permaShift: [number, number];
+  rotation: number;
+  drawToPrePTCanvas: boolean;
 }
 
 /**

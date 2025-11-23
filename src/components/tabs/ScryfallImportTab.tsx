@@ -105,6 +105,7 @@ const ScryfallImportTabComponent = () => {
   const setCollectorRarity = useCardStore((state) => state.setCollectorRarity);
   const setCollectorDigits = useCardStore((state) => state.setCollectorDigits);
   const loadedPack = useCardStore((state) => state.loadedPack);
+  const defaultSetSymbolRotation = loadedPack?.setSymbolBounds?.rotation ?? 0;
 
   // Get media actions from media store
   const updateArt = useMediaStore((state) => state.updateArt);
@@ -194,6 +195,7 @@ const ScryfallImportTabComponent = () => {
         setSymbolX: 0,
         setSymbolY: 0,
         setSymbolZoom: 1,
+        setSymbolRotate: defaultSetSymbolRotation,
       });
     }
 

@@ -133,8 +133,10 @@ export function renderField(
 
     // Draw final layout
     drawLayout(ctx, layout, fieldSpec, packMetrics, tempCanvases, {
-      // Note: ptShift, permaShift, rotation are handled within layout
-      // and stored in the layout result if needed
+      ptShift: layout.ptShift,
+      permaShift: layout.permaShift,
+      rotation: layout.rotation,
+      drawToPrePT: layout.drawToPrePTCanvas,
     });
   }, ErrorType.TEXT_RENDER_ERROR);
 }

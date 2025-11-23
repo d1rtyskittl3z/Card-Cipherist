@@ -37,6 +37,7 @@ export const useLayerRenderers = ({
   const setSymbolX = useMediaStore((state) => state.setSymbolX);
   const setSymbolY = useMediaStore((state) => state.setSymbolY);
   const setSymbolZoom = useMediaStore((state) => state.setSymbolZoom);
+  const setSymbolRotate = useMediaStore((state) => state.setSymbolRotate);
 
   // Watermark state
   const watermarkImage = useMediaStore((state) => state.watermarkImage);
@@ -182,8 +183,23 @@ export const useLayerRenderers = ({
       y -= symbolHeight / 2;
     }
 
-    ctx.drawImage(setSymbolImage, x, y, symbolWidth, symbolHeight);
-  }, [canvasRefs, setSymbolImage, setSymbolSource, setSymbolX, setSymbolY, setSymbolZoom]);
+    const centerX = x + symbolWidth / 2;
+    const centerY = y + symbolHeight / 2;
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate((setSymbolRotate * Math.PI) / 180);
+    ctx.drawImage(setSymbolImage, -symbolWidth / 2, -symbolHeight / 2, symbolWidth, symbolHeight);
+    ctx.restore();
+  }, [
+    canvasRefs,
+    setSymbolImage,
+    setSymbolSource,
+    setSymbolX,
+    setSymbolY,
+    setSymbolZoom,
+    setSymbolRotate,
+  ]);
 
   /**
    * Render watermark layer with two-tone gradient support

@@ -13,7 +13,7 @@ const sharedGlobals = {
 
 export default [
   {
-    ignores: ['dist', 'dist-electron'],
+    ignores: ['dist', 'dist-electron', 'src/.Source_Material', 'src/.TMP_Files', '.TMP_Storage', 'docs', 'scripts'],
   },
   {
     languageOptions: {

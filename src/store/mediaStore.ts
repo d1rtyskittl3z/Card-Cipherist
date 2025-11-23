@@ -82,6 +82,9 @@ interface MediaState {
   /** Set symbol zoom factor (1.0 = 100%) */
   setSymbolZoom: number;
 
+  /** Set symbol rotation in degrees */
+  setSymbolRotate: number;
+
   /** Loaded set symbol image element (null if not loaded) */
   setSymbolImage: HTMLImageElement | null;
 
@@ -170,6 +173,7 @@ interface MediaState {
     setSymbolX?: number;
     setSymbolY?: number;
     setSymbolZoom?: number;
+    setSymbolRotate?: number;
   }) => void;
 
   /**
@@ -270,6 +274,7 @@ const DEFAULT_SET_SYMBOL_STATE = {
   setSymbolX: 0,
   setSymbolY: 0,
   setSymbolZoom: 1,
+  setSymbolRotate: 0,
 };
 
 const DEFAULT_WATERMARK_STATE = {
@@ -345,6 +350,7 @@ export const useMediaStore = create<MediaState>()(
           if (updates.setSymbolX !== undefined) draft.setSymbolX = updates.setSymbolX;
           if (updates.setSymbolY !== undefined) draft.setSymbolY = updates.setSymbolY;
           if (updates.setSymbolZoom !== undefined) draft.setSymbolZoom = updates.setSymbolZoom;
+          if (updates.setSymbolRotate !== undefined) draft.setSymbolRotate = updates.setSymbolRotate;
         });
       },
 

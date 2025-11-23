@@ -40,6 +40,7 @@ export const useCardStoreAdapter = () => {
         setSymbolX: mediaState.setSymbolX,
         setSymbolY: mediaState.setSymbolY,
         setSymbolZoom: mediaState.setSymbolZoom,
+        setSymbolRotate: mediaState.setSymbolRotate,
         watermarkSource: mediaState.watermarkSource,
         watermarkX: mediaState.watermarkX,
         watermarkY: mediaState.watermarkY,
@@ -156,6 +157,7 @@ export const useCardStoreAdapter = () => {
           setSymbolX: updates.setSymbolX,
           setSymbolY: updates.setSymbolY,
           setSymbolZoom: updates.setSymbolZoom,
+          setSymbolRotate: updates.setSymbolRotate,
         });
       },
       setSetSymbolImage: mediaState.setSetSymbolImage,

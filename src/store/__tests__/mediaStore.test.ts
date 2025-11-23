@@ -38,6 +38,7 @@ describe('mediaStore', () => {
       setSymbolX: 0,
       setSymbolY: 0,
       setSymbolZoom: 1,
+      setSymbolRotate: 0,
       setSymbolImage: null,
       setCode: '',
       rarity: '',
@@ -219,6 +220,13 @@ describe('mediaStore', () => {
         expect(setSymbolZoom).toBe(1.2);
       });
 
+      it('should update set symbol rotation', () => {
+        useMediaStore.getState().updateSetSymbol({ setSymbolRotate: 45 });
+
+        const { setSymbolRotate } = useMediaStore.getState();
+        expect(setSymbolRotate).toBe(45);
+      });
+
       it('should update set symbol source', () => {
         useMediaStore.getState().updateSetSymbol({ setSymbolSource: '/symbols/mh3.png' });
 
@@ -303,6 +311,7 @@ describe('mediaStore', () => {
           setSymbolX: 0.9,
           setSymbolY: 0.7,
           setSymbolZoom: 1.5,
+          setSymbolRotate: 12,
         });
         useMediaStore.getState().setSetCode('MH3');
         useMediaStore.getState().setRarity('mythic');
@@ -316,6 +325,7 @@ describe('mediaStore', () => {
         expect(state.setSymbolX).toBe(0);
         expect(state.setSymbolY).toBe(0);
         expect(state.setSymbolZoom).toBe(1);
+        expect(state.setSymbolRotate).toBe(0);
         expect(state.setCode).toBe('');
         expect(state.rarity).toBe('');
         expect(state.setSymbolImage).toBeNull();

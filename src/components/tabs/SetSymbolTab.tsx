@@ -3,16 +3,15 @@
  * Set symbol upload and positioning interface
  */
 
-import { memo } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Button, Heading, Input, VStack, HStack, Drawer, Portal, CloseButton, Text, Spinner } from '@chakra-ui/react';
 import { Field } from '../ui/field';
 import { LabeledInput, LabeledSelect, ActionButtonGroup, LabeledSwitch, FileUploadZone } from '../ui';
 // import { useCardStore } from '../../store/cardStore'; // Unused - removed in Phase 8
 import { useMediaStore } from '../../store/mediaStore';
-import { usePreviewCanvasRef, useSetSymbolState } from '../../store/selectors';
+import { usePreviewCanvasRef, useSetSymbolBounds, useSetSymbolState } from '../../store/selectors';
 import { useImageLoader } from '../../hooks/useImageLoader';
 import { useCanvasDrag } from '../../hooks/useCanvasDrag';
-import { useRef, useState, useEffect } from 'react';
 import { toaster } from '../ui/toaster-instance';
 import { useDebouncedCallback } from '../../hooks/useDebounce';
 import { SLIDER_DEBOUNCE_MS } from '../../constants/canvas';
@@ -33,7 +32,9 @@ const symbolSources = [
 const SetSymbolTabComponent = () => {
   // Use fine-grained selectors
   const previewCanvasRef = usePreviewCanvasRef();
-  const { setSymbolX, setSymbolY, setSymbolZoom, setCode, rarity } = useSetSymbolState();
+  const { setSymbolX, setSymbolY, setSymbolZoom, setSymbolRotate, setCode, rarity } = useSetSymbolState();
+  const setSymbolBounds = useSetSymbolBounds();
+  const packRotation = setSymbolBounds?.rotation ?? 0;
   const updateSetSymbol = useMediaStore((state) => state.updateSetSymbol);
   const setSetSymbolImage = useMediaStore((state) => state.setSetSymbolImage);
   const setSetCode = useMediaStore((state) => state.setSetCode);
@@ -67,6 +68,21 @@ const SetSymbolTabComponent = () => {
     SLIDER_DEBOUNCE_MS
   );
 
+  const debouncedUpdateRotate = useDebouncedCallback(
+    (val: number) => updateSetSymbol({ setSymbolRotate: val }),
+    SLIDER_DEBOUNCE_MS
+  );
+
+  const getPackAlignedTransform = useCallback(
+    () => ({
+      setSymbolX: 0,
+      setSymbolY: 0,
+      setSymbolZoom: 1,
+      setSymbolRotate: packRotation,
+    }),
+    [packRotation]
+  );
+
   // Update canvas ref when preview canvas changes
   useEffect(() => {
     canvasRef.current = previewCanvasRef;
@@ -83,10 +99,14 @@ const SetSymbolTabComponent = () => {
     onZoomChange: (zoom) => {
       updateSetSymbol({ setSymbolZoom: zoom });
     },
+    onRotateChange: (rotation) => {
+      updateSetSymbol({ setSymbolRotate: rotation });
+    },
     getCurrentPosition: () => ({
       x: setSymbolX,
       y: setSymbolY,
       zoom: setSymbolZoom,
+      rotation: setSymbolRotate,
     }),
   });
 
@@ -133,11 +153,7 @@ const SetSymbolTabComponent = () => {
     }
 
     // Reset position to use frame pack bounds
-    updateSetSymbol({
-      setSymbolX: 0,
-      setSymbolY: 0,
-      setSymbolZoom: 1,
-    });
+    updateSetSymbol(getPackAlignedTransform());
   };
 
   // Show toast notification when symbol loading fails
@@ -232,11 +248,7 @@ const SetSymbolTabComponent = () => {
   const handleCommunitySymbolClick = (symbolPath: string) => {
     loadSetSymbol(symbolPath);
     // Reset position to use frame pack bounds
-    updateSetSymbol({
-      setSymbolX: 0,
-      setSymbolY: 0,
-      setSymbolZoom: 1,
-    });
+    updateSetSymbol(getPackAlignedTransform());
     setExamplesDrawerOpen(false);
   };
 
@@ -403,16 +415,23 @@ const SetSymbolTabComponent = () => {
               onChange={(val) => debouncedUpdateZoom(Number(val))}
               flex="1"
             />
+
+            <LabeledInput
+              label="Rotation (°)"
+              type="number"
+              step={1}
+              min={-180}
+              max={180}
+              value={setSymbolRotate}
+              onChange={(val) => debouncedUpdateRotate(Number(val))}
+              flex="1"
+            />
           </HStack>
 
           <ActionButtonGroup layout="hstack" gap={2}>
             <Button
               onClick={() =>
-                updateSetSymbol({
-                  setSymbolX: 0,
-                  setSymbolY: 0,
-                  setSymbolZoom: 1,
-                })
+                updateSetSymbol(getPackAlignedTransform())
               }
               colorPalette="blue"
               flex="1"
@@ -424,9 +443,7 @@ const SetSymbolTabComponent = () => {
                 setSetSymbolImage(null);
                 updateSetSymbol({
                   setSymbolSource: '',
-                  setSymbolX: 0,
-                  setSymbolY: 0,
-                  setSymbolZoom: 1,
+                  ...getPackAlignedTransform(),
                 });
               }}
               colorPalette="blue"

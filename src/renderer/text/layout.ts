@@ -285,6 +285,10 @@ export function layoutText(
     verticalAdjust,
     horizontalAdjust,
     absoluteSymbols: absoluteSymbols.length > 0 ? absoluteSymbols : undefined,
+    ptShift: state.ptShift,
+    permaShift: state.permaShift,
+    rotation: state.rotation,
+    drawToPrePTCanvas: state.drawToPrePTCanvas,
   };
 }
 
