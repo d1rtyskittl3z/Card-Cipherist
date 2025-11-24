@@ -359,6 +359,9 @@ const TextTabComponent = () => {
               border="2px solid"
               borderColor="transparent"
               borderRadius="md"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
               _selected={{
                 borderColor: 'purple.400',
                 boxShadow: '0 0 12px rgba(159, 122, 234, 0.6)',

@@ -63,6 +63,7 @@ export interface TextConfig {
   shadowColor?: string;
   conditionalColor?: string; // Color adjustments based on frame/mask selections (e.g., '(Back):white' or 'Frame1,Frame2:black')
   rotation?: number;
+  allCaps?: boolean; // Render text in all uppercase
 }
 
 export interface SagaPackConfig {

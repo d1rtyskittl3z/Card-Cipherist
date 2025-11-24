@@ -59,8 +59,8 @@ const template: FramePackTemplate = {
     pt: { name: 'Power/Toughness 1', text: '', x: 0.7928, y: 0.6591, width: 0.1367, height: 0.0372, size: 0.0372, font: 'belerenbsc', oneLine: true, align: 'center' },
     pt2: { name: 'Power/Toughness 2', text: '', x: 0.7928, y: 0.7524, width: 0.1367, height: 0.0372, size: 0.0372, font: 'belerenbsc', oneLine: true, align: 'center' },
     pt3: { name: 'Power/Toughness 3', text: '', x: 0.7928, y: 0.8515, width: 0.1367, height: 0.0372, size: 0.0372, font: 'belerenbsc', oneLine: true, align: 'center' },
-    level2: { name: 'Level 2', text: 'LEVEL\n{fontsize0.02}1-5', x: 0.0727, y: 0.7420, width: 0.08, height: 0.0572, size: 0.0139, font: 'belerenbsc', align: 'center' },
-    level3: { name: 'Level 3', text: 'LEVEL\n6+', x: 0.0727, y: 0.8448, width: 0.08, height: 0.0572, size: 0.0139, font: 'belerenbsc', align: 'center' },
+    level2: { name: 'Level 2', text: 'LEVEL\n{fontsize45}1-5', x: 0.0727, y: 0.7420, width: 0.08, height: 0.0572, size: 0.0139, font: 'belerenbsc', align: 'center' },
+    level3: { name: 'Level 3', text: 'LEVEL\n{fontsize45}6+', x: 0.0727, y: 0.8448, width: 0.08, height: 0.0572, size: 0.0139, font: 'belerenbsc', align: 'center' },
   },
 };
 

@@ -28,6 +28,7 @@ import TheList from './TheList';
 import M15Lands from './M15Lands';
 import Spree from './Spree';
 import SpreeUB from './SpreeUB';
+import SimpleInventions from './SimpleInventions';
 import Adventure from './Adventure';
 import Attraction from './Attraction';
 import M15Devoid from './M15Devoid';
@@ -37,11 +38,15 @@ import Conspiracy from './Conspiracy';
 import Colorshifted from './Colorshifted';
 import Battle from './Battle';
 import Brawl from './Brawl';
+import Circuit from './Circuit';
 import Margin1 from './Margin-1';
 import Wanted from './Wanted';
 import OilSlick from './OilSlick';
+import Omen from './Omen';
 import M21 from './M21';
 import CustomNeon from './CustomNeon';
+import CustomDualLands from './CustomDualLands';
+import CustomMagraoKaldheim from './CustomMagraoKaldheim';
 import PlaneswalkerBorderless from './PlaneswalkerBorderless';
 import PlaneswalkerBoxTopper from './PlaneswalkerBoxTopper';
 import PlaneswalkerRegular from './PlaneswalkerRegular';
@@ -109,6 +114,7 @@ import FullArtNew from './FullArtNew-1';
 import SnowNew from './SnowNew-1';
 import M15TransformSnowFront from './M15TransformSnowFront';
 import M15TransformUBFront from './M15TransformUBFront';
+import NEONeonShort from './NEONeonShort';
 import TransformBorderlessFront from './TransformBorderlessFront';
 import TransformExtendedFront from './TransformExtendedFront';
 import SagaDFC from './SagaDFC';
@@ -140,6 +146,7 @@ import NeoBasics from './NeoBasics';
 import StationRegular from './StationRegular';
 import StationBorderless from './StationBorderless';
 import Elemental from './Elemental';
+import EquinoxTextless from './EquinoxTextless';
 import Classicshifted from './Classicshifted';
 import ClassicshiftedNickname from './ClassicshiftedNickname';
 import ClassicshiftedLands from './ClassicshiftedLands';
@@ -150,6 +157,7 @@ import ClassicshiftedDFC from './ClassicshiftedDFC';
 import ClassicshiftedTransform from './ClassicshiftedTransform';
 import StoneCutterDeluxe from './StoneCutterDeluxe';
 import StoneCutterDeluxeNicknameAddons from './StoneCutterDeluxeNicknameAddons';
+import TARDIS from './TARDIS';
 import PlaneswalkerCompleated from './PlaneswalkerCompleated';
 import PlaneswalkerDBL from './PlaneswalkerDBL';
 import PlaneswalkerTallDBL from './PlaneswalkerTallDBL';
@@ -163,11 +171,14 @@ import PlaneswalkerTransformBackDBL from './PlaneswalkerTransformBackDBL';
 import PlaneswalkerTransformIcons from './PlaneswalkerTransformIcons';
 import Room from './Room';
 import RoomUB from './RoomUB';
+import Ring from './Ring';
 import Flip from './Flip';
 import Case from './Case';
 import M15Mutate from './M15Mutate';
 import Prototype from './Prototype';
 import PrototypeExtended from './PrototypeExtended';
+import FeuerAmeiseKaldheim from './FeuerAmeiseKaldheim';
+import TextlessInvention from './TextlessInvention';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -200,6 +211,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15Lands': M15Lands,
   'Spree': Spree,
   'SpreeUB': SpreeUB,
+  'SimpleInventions': SimpleInventions,
   'Adventure': Adventure,
   'Attraction': Attraction,
   'M15Devoid': M15Devoid,
@@ -210,11 +222,15 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Colorshifted': Colorshifted,
   'Battle': Battle,
   'Brawl': Brawl,
+  'Circuit': Circuit,
   'Margin-1': Margin1,
   'Wanted': Wanted,
   'OilSlick': OilSlick,
+  'Omen': Omen,
   'M21': M21,
   'CustomNeon': CustomNeon,
+  'CustomDualLands': CustomDualLands,
+  'CustomMagraoKaldheim': CustomMagraoKaldheim,
   'Flip': Flip,
   'PlaneswalkerBorderless': PlaneswalkerBorderless,
   'PlaneswalkerBoxTopper': PlaneswalkerBoxTopper,
@@ -253,11 +269,14 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PromoGenericShowcase': PromoGenericShowcase,
   'Prototype': Prototype,
   'PrototypeExtended': PrototypeExtended,
+  'FeuerAmeiseKaldheim': FeuerAmeiseKaldheim,
+  'TextlessInvention': TextlessInvention,
   'J22Front': J22Front,
   'JapanShowcaseNicknames': JapanShowcaseNicknames,
   'JMPFront': JMPFront,
   'Room': Room,
   'RoomUB': RoomUB,
+  'Ring': Ring,
   'UB': UB,
   'UBFull': UBFull,
   'UBExtendedArt': UBExtendedArt,
@@ -290,11 +309,14 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'UBLegendCrownsNew': UBLegendCrownsNew,
   'BorderlessStellarSights': BorderlessStellarSights,
   'MiscCustom': MiscCustom,
+  'NEONeonShort': NEONeonShort,
   'StoneCutterDeluxe': StoneCutterDeluxe,
   'StoneCutterDeluxeNicknameAddons': StoneCutterDeluxeNicknameAddons,
+  'TARDIS': TARDIS,
   'StationRegular': StationRegular,
   'StationBorderless': StationBorderless,
   'Elemental': Elemental,
+  'EquinoxTextless': EquinoxTextless,
   'Classicshifted': Classicshifted,
   'ClassicshiftedNickname': ClassicshiftedNickname,
   'ClassicshiftedLands': ClassicshiftedLands,
