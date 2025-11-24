@@ -158,6 +158,8 @@ import PlaneswalkerTransformBack from './PlaneswalkerTransformBack';
 import PlaneswalkerTransformFrontDBL from './PlaneswalkerTransformFrontDBL';
 import PlaneswalkerTransformBackDBL from './PlaneswalkerTransformBackDBL';
 import PlaneswalkerTransformIcons from './PlaneswalkerTransformIcons';
+import Room from './Room';
+import RoomUB from './RoomUB';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -238,6 +240,8 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'J22Front': J22Front,
   'JapanShowcaseNicknames': JapanShowcaseNicknames,
   'JMPFront': JMPFront,
+  'Room': Room,
+  'RoomUB': RoomUB,
   'UB': UB,
   'UBFull': UBFull,
   'UBExtendedArt': UBExtendedArt,
