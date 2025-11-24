@@ -28,8 +28,11 @@ import TheList from './TheList';
 import M15Lands from './M15Lands';
 import Spree from './Spree';
 import SpreeUB from './SpreeUB';
+import Adventure from './Adventure';
 import Attraction from './Attraction';
+import M15Devoid from './M15Devoid';
 import M15Snow from './M15Snow';
+import Leveler from './Leveler';
 import Conspiracy from './Conspiracy';
 import Colorshifted from './Colorshifted';
 import Battle from './Battle';
@@ -160,6 +163,11 @@ import PlaneswalkerTransformBackDBL from './PlaneswalkerTransformBackDBL';
 import PlaneswalkerTransformIcons from './PlaneswalkerTransformIcons';
 import Room from './Room';
 import RoomUB from './RoomUB';
+import Flip from './Flip';
+import Case from './Case';
+import M15Mutate from './M15Mutate';
+import Prototype from './Prototype';
+import PrototypeExtended from './PrototypeExtended';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -183,6 +191,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15Nickname-2': M15Nickname2,
   'M15SmoothNickname': M15SmoothNickname,
   'M15Miracle': M15Miracle,
+  'M15Mutate': M15Mutate,
   'M15HoloStamps': M15HoloStamps,
   'M15DarkPT': M15DarkPT,
   'M15Borders': M15Borders,
@@ -191,9 +200,13 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15Lands': M15Lands,
   'Spree': Spree,
   'SpreeUB': SpreeUB,
+  'Adventure': Adventure,
   'Attraction': Attraction,
+  'M15Devoid': M15Devoid,
   'M15Snow': M15Snow,
+  'Leveler': Leveler,
   'Conspiracy': Conspiracy,
+  'Case': Case,
   'Colorshifted': Colorshifted,
   'Battle': Battle,
   'Brawl': Brawl,
@@ -202,6 +215,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'OilSlick': OilSlick,
   'M21': M21,
   'CustomNeon': CustomNeon,
+  'Flip': Flip,
   'PlaneswalkerBorderless': PlaneswalkerBorderless,
   'PlaneswalkerBoxTopper': PlaneswalkerBoxTopper,
   'PlaneswalkerRegular': PlaneswalkerRegular,
@@ -237,6 +251,8 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PromoExtended': PromoExtended,
   'PromoNickname': PromoNickname,
   'PromoGenericShowcase': PromoGenericShowcase,
+  'Prototype': Prototype,
+  'PrototypeExtended': PrototypeExtended,
   'J22Front': J22Front,
   'JapanShowcaseNicknames': JapanShowcaseNicknames,
   'JMPFront': JMPFront,
