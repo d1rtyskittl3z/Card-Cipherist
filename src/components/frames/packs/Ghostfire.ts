@@ -3,7 +3,7 @@ import type { FramePackTemplate, FrameItem } from './types';
 const frames: FrameItem[] = [
   { name: 'Frame', src: '/img/frames/ghostfire/frame.png' },
   { name: 'Power/Toughness', src: '/img/frames/ghostfire/pt.png', bounds: { x: -0.001, y: -0.003, width: 1, height: 1 } },
-  { name: 'BorderlessFrame', src: '/img/frames/ghostfire/bFrame.png' },
+  // { name: 'BorderlessFrame', src: '/img/frames/ghostfire/bFrame.png' },
 ];
 
 const template: FramePackTemplate = {

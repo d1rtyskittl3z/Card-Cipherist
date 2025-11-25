@@ -38,9 +38,16 @@ import Conspiracy from './Conspiracy';
 import Colorshifted from './Colorshifted';
 import Battle from './Battle';
 import BloomburrowBorderless from './BloomburrowBorderless';
+import Borderless from './Borderless';
 import Brawl from './Brawl';
 import Circuit from './Circuit';
+import CommanderLegends from './CommanderLegends';
+import Crystal from './Crystal';
+import GenericShowcase from './GenericShowcase';
+import M15NyxShowcase from './M15NyxShowcase';
 import Margin1 from './Margin-1';
+import Storybook from './Storybook';
+import ZendikarRising from './ZendikarRising';
 import Wanted from './Wanted';
 import OilSlick from './OilSlick';
 import Omen from './Omen';
@@ -49,6 +56,23 @@ import MemoryCorridor from './MemoryCorridor';
 import CustomNeon from './CustomNeon';
 import CustomDualLands from './CustomDualLands';
 import CustomMagraoKaldheim from './CustomMagraoKaldheim';
+import DMUStainedGlass from './DMUStainedGlass';
+import DNDModule from './DNDModule';
+import DNDSourcebook from './DNDSourcebook';
+import DoubleFeature from './DoubleFeature';
+import DoubleFeatureTransform from './DoubleFeatureTransform';
+import Kaldheim2 from './Kaldheim-2';
+import KaldheimNonleg from './KaldheimNonleg';
+import MH2 from './MH2';
+import Equinox from './Equinox';
+import EquinoxBack from './EquinoxBack';
+import EquinoxFront from './EquinoxFront';
+import EternalNight from './EternalNight';
+import Fang from './Fang';
+import FNM from './FNM';
+import M15BoxTopper from './M15BoxTopper';
+import M15ClearTextboxes from './M15ClearTextboxes';
+import M15ExtendedArtShort from './M15ExtendedArtShort';
 import PlaneswalkerBorderless from './PlaneswalkerBorderless';
 import PlaneswalkerBoxTopper from './PlaneswalkerBoxTopper';
 import PlaneswalkerRegular from './PlaneswalkerRegular';
@@ -148,8 +172,15 @@ import UBLegendCrownsNew from './UBLegendCrownsNew-1';
 import BorderlessStellarSights from './BorderlessStellarSights';
 import MiscCustom from './MiscCustom';
 import NeoBasics from './NeoBasics';
+import NeoNeon from './NeoNeon';
+import NeoNinja from './NeoNinja';
+import NeoSamurai from './NeoSamurai';
 import StationRegular from './StationRegular';
 import StationBorderless from './StationBorderless';
+import SNCSkyscraper from './SNCSkyscraper';
+import StorybookMUL from './StorybookMUL';
+import StorybookWOE from './StorybookWOE';
+import SDCC15 from './SDCC15';
 import Elemental from './Elemental';
 import EquinoxTextless from './EquinoxTextless';
 import Classicshifted from './Classicshifted';
@@ -160,9 +191,24 @@ import ClassicshiftedPlaneswalker from './ClassicshiftedPlaneswalker';
 import ClassicshiftedPlaneswalkerTransform from './ClassicshiftedPlaneswalkerTransform';
 import ClassicshiftedDFC from './ClassicshiftedDFC';
 import ClassicshiftedTransform from './ClassicshiftedTransform';
+import EnchantingTales from './EnchantingTales';
+import Etched from './Etched';
+import EtchedNyx from './EtchedNyx';
+import EtchedSnow from './EtchedSnow';
+import ExpeditionBFZ1 from './ExpeditionBFZ-1';
+import ExpeditionZNR1 from './ExpeditionZNR-1';
+import InnerCrownsEtched from './InnerCrownsEtched';
+import Invention from './Invention';
+import InvocationMUL from './InvocationMUL';
+import Ixalan from './Ixalan';
+import LegendCrownsEtched from './LegendCrownsEtched';
+import Praetors from './Praetors';
+import FullText from './FullText';
+import FullTextAlt from './FullTextAlt';
 import StoneCutterDeluxe from './StoneCutterDeluxe';
 import StoneCutterDeluxeNicknameAddons from './StoneCutterDeluxeNicknameAddons';
 import TARDIS from './TARDIS';
+import Tarkir from './Tarkir';
 import PlaneswalkerCompleated from './PlaneswalkerCompleated';
 import PlaneswalkerDBL from './PlaneswalkerDBL';
 import PlaneswalkerTallDBL from './PlaneswalkerTallDBL';
@@ -175,12 +221,16 @@ import PlaneswalkerTransformFrontDBL from './PlaneswalkerTransformFrontDBL';
 import PlaneswalkerTransformBackDBL from './PlaneswalkerTransformBackDBL';
 import PlaneswalkerTransformIcons from './PlaneswalkerTransformIcons';
 import Pipboy from './Pipboy';
+import Ravnica from './Ravnica';
 import Room from './Room';
 import RoomUB from './RoomUB';
 import Ring from './Ring';
 import Flip from './Flip';
 import Case from './Case';
 import Scroll from './Scroll';
+import ShatteredGlass from './ShatteredGlass';
+import SNCArtDeco from './SNCArtDeco';
+import SNCGilded from './SNCGilded';
 import M15Mutate from './M15Mutate';
 import Prototype from './Prototype';
 import PrototypeExtended from './PrototypeExtended';
@@ -188,6 +238,7 @@ import FeuerAmeiseKaldheim from './FeuerAmeiseKaldheim';
 import TextlessInvention from './TextlessInvention';
 import Woodland from './Woodland';
 import Ghostfire from './Ghostfire';
+import IxalanCoin from './IxalanCoin';
 import IxalanLegends1 from './IxalanLegends1';
 import IxalanLegends2 from './IxalanLegends2';
 import IxalanLegends3 from './IxalanLegends3';
@@ -207,6 +258,9 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'SagaCreatureUB': SagaCreatureUB,
   'SagaLTR': SagaLTR,
   'NeoBasics': NeoBasics,
+  'NeoNeon': NeoNeon,
+  'NeoNinja': NeoNinja,
+  'NeoSamurai': NeoSamurai,
   'M15LegendCrowns': M15LegendCrowns,
   'M15LegendCrownsFloating': M15LegendCrownsFloating,
   'M15InnerCrowns': M15InnerCrowns,
@@ -234,18 +288,40 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Colorshifted': Colorshifted,
   'Battle': Battle,
   'BloomburrowBorderless': BloomburrowBorderless,
+  'Borderless': Borderless,
   'Brawl': Brawl,
   'Circuit': Circuit,
+  'CommanderLegends': CommanderLegends,
+  'Crystal': Crystal,
+  'GenericShowcase': GenericShowcase,
+  'M15NyxShowcase': M15NyxShowcase,
   'Margin-1': Margin1,
+  'Storybook': Storybook,
+  'ZendikarRising': ZendikarRising,
   'Wanted': Wanted,
   'OilSlick': OilSlick,
   'Omen': Omen,
   'M21': M21,
+  'MH2': MH2,
   'MemoryCorridor': MemoryCorridor,
   'CustomNeon': CustomNeon,
   'CustomDualLands': CustomDualLands,
   'CustomMagraoKaldheim': CustomMagraoKaldheim,
+  'DMUStainedGlass': DMUStainedGlass,
+  'DNDModule': DNDModule,
+  'DNDSourcebook': DNDSourcebook,
+  'DoubleFeature': DoubleFeature,
+  'DoubleFeatureTransform': DoubleFeatureTransform,
+  'Equinox': Equinox,
+  'EquinoxBack': EquinoxBack,
+  'EquinoxFront': EquinoxFront,
+  'EternalNight': EternalNight,
+  'Fang': Fang,
+  'FNM': FNM,
   'Flip': Flip,
+  'M15BoxTopper': M15BoxTopper,
+  'M15ClearTextboxes': M15ClearTextboxes,
+  'M15ExtendedArtShort': M15ExtendedArtShort,
   'PlaneswalkerBorderless': PlaneswalkerBorderless,
   'PlaneswalkerBoxTopper': PlaneswalkerBoxTopper,
   'PlaneswalkerRegular': PlaneswalkerRegular,
@@ -290,10 +366,17 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'JapanShowcaseNicknames': JapanShowcaseNicknames,
   'Paranormal': Paranormal,
   'JMPFront': JMPFront,
+  'Kaldheim-2': Kaldheim2,
+  'KaldheimNonleg': KaldheimNonleg,
   'Room': Room,
   'RoomUB': RoomUB,
   'Ring': Ring,
   'Scroll': Scroll,
+  'ShatteredGlass': ShatteredGlass,
+  'SNCArtDeco': SNCArtDeco,
+  'SNCGilded': SNCGilded,
+  'SNCSkyscraper': SNCSkyscraper,
+  'SDCC15': SDCC15,
   'UB': UB,
   'UBFull': UBFull,
   'UBExtendedArt': UBExtendedArt,
@@ -322,6 +405,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15InnerCrownsNew': M15InnerCrownsNew,
   'FullArtNew': FullArtNew,
   'Ghostfire': Ghostfire,
+  'IxalanCoin': IxalanCoin,
   'IxalanLegends1': IxalanLegends1,
   'IxalanLegends2': IxalanLegends2,
   'IxalanLegends3': IxalanLegends3,
@@ -335,10 +419,27 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'StoneCutterDeluxe': StoneCutterDeluxe,
   'StoneCutterDeluxeNicknameAddons': StoneCutterDeluxeNicknameAddons,
   'TARDIS': TARDIS,
+  'Tarkir': Tarkir,
   'StationRegular': StationRegular,
   'StationBorderless': StationBorderless,
+  'StorybookMUL': StorybookMUL,
+  'StorybookWOE': StorybookWOE,
   'Elemental': Elemental,
+  'EnchantingTales': EnchantingTales,
   'EquinoxTextless': EquinoxTextless,
+  'Etched': Etched,
+  'EtchedNyx': EtchedNyx,
+  'EtchedSnow': EtchedSnow,
+  'ExpeditionBFZ-1': ExpeditionBFZ1,
+  'ExpeditionZNR-1': ExpeditionZNR1,
+  'InnerCrownsEtched': InnerCrownsEtched,
+  'Invention': Invention,
+  'InvocationMUL': InvocationMUL,
+  'Ixalan': Ixalan,
+  'LegendCrownsEtched': LegendCrownsEtched,
+  'Praetors': Praetors,
+  'FullText': FullText,
+  'FullTextAlt': FullTextAlt,
   'Classicshifted': Classicshifted,
   'ClassicshiftedNickname': ClassicshiftedNickname,
   'ClassicshiftedLands': ClassicshiftedLands,
@@ -359,6 +460,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PlaneswalkerTransformBackDBL': PlaneswalkerTransformBackDBL,
   'PlaneswalkerTransformIcons': PlaneswalkerTransformIcons,
   'Pipboy': Pipboy,
+  'Ravnica': Ravnica,
   'M15TransformSnowFront': M15TransformSnowFront,
   'M15TransformUBFront': M15TransformUBFront,
   'TransformBorderlessFront': TransformBorderlessFront,

@@ -1,4 +1,4 @@
-import type { FramePackTemplate, Mask, FrameItem } from './types';
+import type { FramePackTemplate, FrameItem } from './types';
 
 const frames: FrameItem[] = [
   { name: 'Creature Frame', src: '/img/frames/bloomburrowBorderless/creature.png' },

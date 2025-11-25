@@ -51,7 +51,6 @@ const template: FramePackTemplate = {
   id: 'Ring',
   label: 'Ring (LTR)',
   version: 'ring',
-  notice: 'This pack uses replacement masks for special layout options. UI may provide mask override functionality.',
   artBounds: { x: 149 / 1500, y: 252 / 2100, width: 1202 / 1500, height: 918 / 2100 },
   setSymbolBounds: { x: 1376 / 1500, y: 1242 / 2100, width: 0.12, height: 0.0410, vertical: 'center', horizontal: 'right' },
   watermarkBounds: { x: 0.5, y: 0.7762, width: 0.75, height: 0.2305 },
