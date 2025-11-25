@@ -414,6 +414,9 @@ const TextTabComponent = () => {
                   }}
                   rows={6}
                   placeholder="Enter text..."
+                  css={{
+                    textTransform: loadedPack?.text?.[field.key]?.allCaps ? 'uppercase' : 'none',
+                  }}
                 />
 
               <HStack gap={2} align="end">

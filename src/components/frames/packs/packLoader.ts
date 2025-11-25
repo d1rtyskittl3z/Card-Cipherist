@@ -37,6 +37,7 @@ import Leveler from './Leveler';
 import Conspiracy from './Conspiracy';
 import Colorshifted from './Colorshifted';
 import Battle from './Battle';
+import BloomburrowBorderless from './BloomburrowBorderless';
 import Brawl from './Brawl';
 import Circuit from './Circuit';
 import Margin1 from './Margin-1';
@@ -44,6 +45,7 @@ import Wanted from './Wanted';
 import OilSlick from './OilSlick';
 import Omen from './Omen';
 import M21 from './M21';
+import MemoryCorridor from './MemoryCorridor';
 import CustomNeon from './CustomNeon';
 import CustomDualLands from './CustomDualLands';
 import CustomMagraoKaldheim from './CustomMagraoKaldheim';
@@ -84,6 +86,8 @@ import PromoNickname from './PromoNickname';
 import PromoGenericShowcase from './PromoGenericShowcase';
 import J22Front from './J22Front';
 import JapanShowcaseNicknames from './JapanShowcaseNicknames';
+import JapanShowcase from './JapanShowcase';
+import Paranormal from './Paranormal';
 import JMPFront from './JMPFront';
 import UB from './UB';
 import UBFull from './UBFull';
@@ -106,6 +110,7 @@ import ModalNickname from './ModalNickname';
 import ModalShort from './ModalShort';
 import ModalShortNickname from './ModalShortNickname';
 import UBLegendCrownsFloating from './UBLegendCrownsFloating';
+import Vault from './Vault';
 import M15RegularNew from './M15RegularNew';
 import M15ExtendedArtNew from './M15ExtendedArtNew-1';
 import M15LegendCrownsNew from './M15LegendCrownsNew-1';
@@ -179,6 +184,10 @@ import Prototype from './Prototype';
 import PrototypeExtended from './PrototypeExtended';
 import FeuerAmeiseKaldheim from './FeuerAmeiseKaldheim';
 import TextlessInvention from './TextlessInvention';
+import Woodland from './Woodland';
+import IxalanLegends1 from './IxalanLegends1';
+import IxalanLegends2 from './IxalanLegends2';
+import IxalanLegends3 from './IxalanLegends3';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -221,6 +230,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Case': Case,
   'Colorshifted': Colorshifted,
   'Battle': Battle,
+  'BloomburrowBorderless': BloomburrowBorderless,
   'Brawl': Brawl,
   'Circuit': Circuit,
   'Margin-1': Margin1,
@@ -228,6 +238,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'OilSlick': OilSlick,
   'Omen': Omen,
   'M21': M21,
+  'MemoryCorridor': MemoryCorridor,
   'CustomNeon': CustomNeon,
   'CustomDualLands': CustomDualLands,
   'CustomMagraoKaldheim': CustomMagraoKaldheim,
@@ -272,7 +283,9 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'FeuerAmeiseKaldheim': FeuerAmeiseKaldheim,
   'TextlessInvention': TextlessInvention,
   'J22Front': J22Front,
+  'JapanShowcase': JapanShowcase,
   'JapanShowcaseNicknames': JapanShowcaseNicknames,
+  'Paranormal': Paranormal,
   'JMPFront': JMPFront,
   'Room': Room,
   'RoomUB': RoomUB,
@@ -298,11 +311,15 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'ModalShort': ModalShort,
   'ModalShortNickname': ModalShortNickname,
   'UBLegendCrownsFloating': UBLegendCrownsFloating,
+  'Vault': Vault,
   'M15RegularNew': M15RegularNew,
   'M15ExtendedArtNew': M15ExtendedArtNew,
   'M15LegendCrownsNew': M15LegendCrownsNew,
   'M15InnerCrownsNew': M15InnerCrownsNew,
   'FullArtNew': FullArtNew,
+  'IxalanLegends1': IxalanLegends1,
+  'IxalanLegends2': IxalanLegends2,
+  'IxalanLegends3': IxalanLegends3,
   'SnowNew': SnowNew,
   'M15NyxNew': M15NyxNew,
   'UBNew': UBNew,
@@ -360,6 +377,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'TransformLegendCrowns': TransformLegendCrowns,
   'TransformLegendCrownsFloating': TransformLegendCrownsFloating,
   'TransformLegendCrownsNickname': TransformLegendCrownsNickname,
+  'Woodland': Woodland,
 };
 
 /**

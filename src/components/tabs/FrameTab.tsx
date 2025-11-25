@@ -273,18 +273,19 @@ const FrameTabComponent = () => {
         const textFields: Record<string, TextObject> = {};
         for (const [key, config] of Object.entries(pack.text)) {
           // Spread all properties from config, then fill in required fields with defaults if missing
-          const baseConfig = config as TextObject;
           textFields[key] = {
-            ...baseConfig,
+            ...config,
             // Preserve existing text content if it exists
-            text: currentTextFields[key]?.text || baseConfig.text || '',
-            x: baseConfig.x ?? 0,
-            y: baseConfig.y ?? 0,
-            width: baseConfig.width ?? 0,
-            height: baseConfig.height ?? 0,
-            font: baseConfig.font ?? 'beleren',
-            color: baseConfig.color ?? 'black',
-          };
+            text: currentTextFields[key]?.text || config.text || '',
+            x: config.x ?? 0,
+            y: config.y ?? 0,
+            width: config.width ?? 0,
+            height: config.height ?? 0,
+            font: config.font ?? 'beleren',
+            color: config.color ?? 'black',
+            // Explicitly preserve optional properties that might not be in TextObject
+            ...(config.allCaps !== undefined && { allCaps: config.allCaps }),
+          } as TextObject;
         }
         for (const [key, config] of Object.entries(currentTextFields)) {
           if (!pack.text[key]) {

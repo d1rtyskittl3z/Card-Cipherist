@@ -193,6 +193,8 @@ export interface TextObject {
   manaSpacing?: number;
   /** Rotation applied to the entire text block */
   rotation?: number;
+  /** If true, render text in all uppercase */
+  allCaps?: boolean;
 }
 
 export interface ManaSymbol {

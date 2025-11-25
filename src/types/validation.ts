@@ -590,6 +590,7 @@ export const framePackTextConfigSchema = z.object({
   shadowColor: z.string().optional(),
   conditionalColor: z.string().optional(),
   rotation: z.number().optional(),
+  allCaps: z.boolean().optional(),
 });
 
 /**
