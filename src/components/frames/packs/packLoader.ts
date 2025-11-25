@@ -43,6 +43,7 @@ import Brawl from './Brawl';
 import Circuit from './Circuit';
 import CommanderLegends from './CommanderLegends';
 import Crystal from './Crystal';
+import Draconic from './Draconic';
 import GenericShowcase from './GenericShowcase';
 import M15NyxShowcase from './M15NyxShowcase';
 import Margin1 from './Margin-1';
@@ -310,6 +311,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'DMUStainedGlass': DMUStainedGlass,
   'DNDModule': DNDModule,
   'DNDSourcebook': DNDSourcebook,
+  'Draconic': Draconic,
   'DoubleFeature': DoubleFeature,
   'DoubleFeatureTransform': DoubleFeatureTransform,
   'Equinox': Equinox,
