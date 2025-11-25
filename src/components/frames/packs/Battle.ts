@@ -49,6 +49,7 @@ const template: FramePackTemplate = {
   artBounds: { x: 0.1689, y: 0.1369, width: 0.682, height: 0.675, rotation: -90 },
   setSymbolBounds: { x: 1242 / 2010, y: 310 / 2814, width: 0.12, height: 0.036, vertical: 'center', horizontal: 'center', rotation: -90 },
   watermarkBounds: { x: 0, y: 0, width: 0.1, height: 0.1 },
+  replacementMasks: { 'Right Half': '/img/frames/m15/battle/maskRightHalf.png' },
   frames,
   text,
 };

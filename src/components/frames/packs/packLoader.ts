@@ -174,17 +174,20 @@ import PlaneswalkerTransformBack from './PlaneswalkerTransformBack';
 import PlaneswalkerTransformFrontDBL from './PlaneswalkerTransformFrontDBL';
 import PlaneswalkerTransformBackDBL from './PlaneswalkerTransformBackDBL';
 import PlaneswalkerTransformIcons from './PlaneswalkerTransformIcons';
+import Pipboy from './Pipboy';
 import Room from './Room';
 import RoomUB from './RoomUB';
 import Ring from './Ring';
 import Flip from './Flip';
 import Case from './Case';
+import Scroll from './Scroll';
 import M15Mutate from './M15Mutate';
 import Prototype from './Prototype';
 import PrototypeExtended from './PrototypeExtended';
 import FeuerAmeiseKaldheim from './FeuerAmeiseKaldheim';
 import TextlessInvention from './TextlessInvention';
 import Woodland from './Woodland';
+import Ghostfire from './Ghostfire';
 import IxalanLegends1 from './IxalanLegends1';
 import IxalanLegends2 from './IxalanLegends2';
 import IxalanLegends3 from './IxalanLegends3';
@@ -290,6 +293,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Room': Room,
   'RoomUB': RoomUB,
   'Ring': Ring,
+  'Scroll': Scroll,
   'UB': UB,
   'UBFull': UBFull,
   'UBExtendedArt': UBExtendedArt,
@@ -317,6 +321,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15LegendCrownsNew': M15LegendCrownsNew,
   'M15InnerCrownsNew': M15InnerCrownsNew,
   'FullArtNew': FullArtNew,
+  'Ghostfire': Ghostfire,
   'IxalanLegends1': IxalanLegends1,
   'IxalanLegends2': IxalanLegends2,
   'IxalanLegends3': IxalanLegends3,
@@ -353,6 +358,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PlaneswalkerTransformFrontDBL': PlaneswalkerTransformFrontDBL,
   'PlaneswalkerTransformBackDBL': PlaneswalkerTransformBackDBL,
   'PlaneswalkerTransformIcons': PlaneswalkerTransformIcons,
+  'Pipboy': Pipboy,
   'M15TransformSnowFront': M15TransformSnowFront,
   'M15TransformUBFront': M15TransformUBFront,
   'TransformBorderlessFront': TransformBorderlessFront,

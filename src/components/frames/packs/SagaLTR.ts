@@ -43,6 +43,7 @@ const template: FramePackTemplate = {
   artBounds: { x: 997 / 2010, y: 313 / 2814, width: 857 / 2010, height: 2046 / 2814 },
   setSymbolBounds: { x: 0.9227, y: 0.8739, width: 0.12, height: 0.0381, vertical: 'center', horizontal: 'right' },
   watermarkBounds: { x: 0.3027, y: 0.4748, width: 0.3547, height: 0.6767 },
+  replacementMasks: { 'Right Half': '/img/frames/saga/ltr/maskRightHalf.png' },  
   saga: { x: 0.1, width: 0.3947, defaultAbilities: [1, 1, 1, 1], defaultCount: 3 },
   frames,
   text,

@@ -97,6 +97,7 @@ export interface FramePackTemplate {
   watermarkBounds?: Bounds; // Optional for addon-only packs
   saga?: SagaPackConfig; // Optional Saga configuration (lore counter placement)
   planeswalker?: PlaneswalkerPackConfig; // Optional Planeswalker configuration (loyalty layout defaults)
+  replacementMasks?: Record<string, string>; // Optional position mask overrides (e.g., 'Right Half': '/img/custom/mask.png')
   frames: FrameItem[];
   text?: {
     [key: string]: TextConfig;

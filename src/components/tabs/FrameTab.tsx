@@ -138,6 +138,17 @@ const FrameTabComponent = () => {
   // Track the previous group ID to detect actual changes
   const previousGroupId = useRef(selectedGroupId);
 
+  // Position masks - default paths (can be overridden by pack replacementMasks)
+  const defaultPositionMasks = useRef({
+    'Left Half': '/img/frames/maskLeftHalf.png',
+    'Right Half': '/img/frames/maskRightHalf.png',
+    'Middle': '/img/frames/maskMiddleThird.png',
+    'Top Half': '/img/frames/maskTopHalf.png',
+    'Bottom Half': '/img/frames/maskBottomHalf.png',
+  });
+
+  const [positionMasks, setPositionMasks] = useState(defaultPositionMasks.current);
+
   // Define frame group sections with labels
   const frameGroupSections = useMemo(
     () => [
@@ -454,6 +465,14 @@ const FrameTabComponent = () => {
           type: 'info',
           duration: 8000,
         });
+      }
+
+      // Handle replacementMasks - override position masks if pack specifies custom ones
+      if (pack?.replacementMasks) {
+        setPositionMasks({ ...defaultPositionMasks.current, ...pack.replacementMasks });
+      } else {
+        // Reset to default masks when pack doesn't have replacements
+        setPositionMasks(defaultPositionMasks.current);
       }
     });
 
@@ -1563,7 +1582,7 @@ const FrameTabComponent = () => {
             variant="outline"
             size="sm"
             disabled={selectedFrameIndex === null}
-            onClick={() => handleAddFrameToCard(undefined, { name: 'Left Half', src: '/img/frames/maskLeftHalf.png' })}
+            onClick={() => handleAddFrameToCard(undefined, { name: 'Left Half', src: positionMasks['Left Half'] })}
           >
             Left Half
           </Button>
@@ -1572,7 +1591,7 @@ const FrameTabComponent = () => {
             variant="outline"
             size="sm"
             disabled={selectedFrameIndex === null}
-            onClick={() => handleAddFrameToCard(undefined, { name: 'Right Half', src: '/img/frames/maskRightHalf.png' })}
+            onClick={() => handleAddFrameToCard(undefined, { name: 'Right Half', src: positionMasks['Right Half'] })}
           >
             Right Half
           </Button>
@@ -1581,7 +1600,7 @@ const FrameTabComponent = () => {
             variant="outline"
             size="sm"
             disabled={selectedFrameIndex === null}
-            onClick={() => handleAddFrameToCard(undefined, { name: 'Middle', src: '/img/frames/maskMiddleThird.png' })}
+            onClick={() => handleAddFrameToCard(undefined, { name: 'Middle', src: positionMasks['Middle'] })}
           >
             Middle
           </Button>
@@ -1590,7 +1609,7 @@ const FrameTabComponent = () => {
             variant="outline"
             size="sm"
             disabled={selectedFrameIndex === null}
-            onClick={() => handleAddFrameToCard(undefined, { name: 'Top Half', src: '/img/frames/maskTopHalf.png' })}
+            onClick={() => handleAddFrameToCard(undefined, { name: 'Top Half', src: positionMasks['Top Half'] })}
           >
             Top Half
           </Button>
@@ -1599,7 +1618,7 @@ const FrameTabComponent = () => {
             variant="outline"
             size="sm"
             disabled={selectedFrameIndex === null}
-            onClick={() => handleAddFrameToCard(undefined, { name: 'Bottom Half', src: '/img/frames/maskBottomHalf.png' })}
+            onClick={() => handleAddFrameToCard(undefined, { name: 'Bottom Half', src: positionMasks['Bottom Half'] })}
           >
             Bottom Half
           </Button>

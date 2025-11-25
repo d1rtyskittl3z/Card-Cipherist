@@ -638,6 +638,7 @@ export const framePackTemplateSchema = z.object({
   watermarkBounds: framePackBoundsSchema.optional(),
   saga: sagaPackConfigSchema.optional(),
   planeswalker: planeswalkerPackConfigSchema.optional(),
+  replacementMasks: z.record(z.string(), z.string()).optional(),
   frames: z.array(framePackFrameItemSchema).min(1, 'Frame pack must have at least one frame'),
   text: z.record(z.string(), framePackTextConfigSchema).optional(),
 });

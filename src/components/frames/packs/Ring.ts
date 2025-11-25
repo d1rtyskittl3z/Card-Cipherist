@@ -55,6 +55,7 @@ const template: FramePackTemplate = {
   artBounds: { x: 149 / 1500, y: 252 / 2100, width: 1202 / 1500, height: 918 / 2100 },
   setSymbolBounds: { x: 1376 / 1500, y: 1242 / 2100, width: 0.12, height: 0.0410, vertical: 'center', horizontal: 'right' },
   watermarkBounds: { x: 0.5, y: 0.7762, width: 0.75, height: 0.2305 },
+  replacementMasks: { 'Right Half': 'img/frames/lotr/maskRightHalf.png' },  
   frames,
   text: {
     mana: { name: 'Mana Cost', text: '', y: 143 / 2100, width: 1384 / 1500, height: 71 / 2100, oneLine: true, size: 71 / 1638, align: 'right', shadowX: -0.001, shadowY: 0.0029, manaCost: true, manaSpacing: 0 },
