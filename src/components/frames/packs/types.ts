@@ -88,6 +88,7 @@ export interface FramePackTemplate {
   version?: string; // Optional for addon-only packs
   notice?: string;
   artBounds?: Bounds; // Optional for addon-only packs
+  artBounds2?: Bounds; // Specifically for the three packs that need a second slot for art
   setSymbolBounds?: Bounds & {
     vertical?: 'top' | 'center' | 'bottom';
     horizontal?: 'left' | 'center' | 'right';

@@ -66,6 +66,9 @@ interface UIState {
   /** Whether auto-fit art is enabled (object-fit: cover behavior) */
   autoFitArt: boolean;
 
+  /** Active art slot for dual-art cards ('art1' or 'art2') */
+  activeArtSlot: 'art1' | 'art2';
+
   /** Whether the preview canvas should be rotated 90 degrees in the UI */
   rotateCanvasPreview: boolean;
 
@@ -128,6 +131,12 @@ interface UIState {
    * @param enabled - True to enable auto-fit, false to disable
    */
   setAutoFitArt: (enabled: boolean) => void;
+
+  /**
+   * Set the active art slot for dual-art cards
+   * @param slot - Which art slot is active ('art1' or 'art2')
+   */
+  setActiveArtSlot: (slot: 'art1' | 'art2') => void;
 
   /**
    * Toggle rotating the preview canvas 90 degrees (UI only)
@@ -195,6 +204,7 @@ export const useUIStore = create<UIState>()(
       customArtBounds: null,
       showSerialNumbers: false,
       autoFitArt: true,
+      activeArtSlot: 'art1',
       rotateCanvasPreview: false,
       selectedTextIndex: 0,
       hasShownSagaTab: false,
@@ -237,6 +247,12 @@ export const useUIStore = create<UIState>()(
       setAutoFitArt: (enabled) =>
         set((draft) => {
           draft.autoFitArt = enabled;
+        }),
+
+      // Active Art Slot
+      setActiveArtSlot: (slot) =>
+        set((draft) => {
+          draft.activeArtSlot = slot;
         }),
 
       // Canvas Orientation

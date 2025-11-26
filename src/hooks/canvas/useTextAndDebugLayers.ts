@@ -68,34 +68,42 @@ export const useTextAndDebugLayers = ({
     const guidelinesContext = contextRefs.guidelines;
     if (!guidelinesContext) return;
 
+    // Always clear the guidelines canvas at the start
+    guidelinesContext.clearRect(0, 0, guidelinesContext.canvas.width, guidelinesContext.canvas.height);
+
+    // Draw guidelines if enabled
     if (showGuidelines && loadedPack) {
       drawGuidelines(guidelinesContext, card, loadedPack);
-    } else {
-      // Clear guidelines if disabled
-      guidelinesContext.clearRect(0, 0, guidelinesContext.canvas.width, guidelinesContext.canvas.height);
     }
   }, [contextRefs, showGuidelines, loadedPack, card]);
 
   /**
    * Render art bounds debugging layer
+   * NOTE: This renders on the same canvas as guidelines, so it should be called AFTER renderGuidelines
    */
   const renderArtBoundsDebug = useCallback(() => {
     const guidelinesContext = contextRefs.guidelines;
-    if (!guidelinesContext || !showArtBoundsDebug) return;
 
-    // Get the art bounds to visualize (custom bounds or pack bounds)
-    const bounds = customArtBounds ?? loadedPack?.artBounds;
-    if (!bounds) return;
+    if (!guidelinesContext || !showArtBoundsDebug) {
+      return;
+    }
+
+    // Don't clear the canvas - renderGuidelines already cleared it
+    // We're adding art bounds on top of guidelines (if any)
+
+    // Use customArtBounds if provided, otherwise use pack artBounds
+    const boundsToDisplay = customArtBounds || loadedPack?.artBounds;
+    if (!boundsToDisplay) return;
 
     // Calculate pixel coordinates from normalized bounds
-    const x = (bounds.x + card.marginX) * card.width;
-    const y = (bounds.y + card.marginY) * card.height;
-    const width = bounds.width * card.width;
-    const height = bounds.height * card.height;
+    const x = (boundsToDisplay.x + card.marginX) * card.width;
+    const y = (boundsToDisplay.y + card.marginY) * card.height;
+    const width = boundsToDisplay.width * card.width;
+    const height = boundsToDisplay.height * card.height;
 
     // Draw the bounds rectangle
     guidelinesContext.save();
-    guidelinesContext.strokeStyle = '#00ff00'; // Green color for art bounds
+    guidelinesContext.strokeStyle = '#00ff00'; // Green
     guidelinesContext.lineWidth = 3;
     guidelinesContext.setLineDash([10, 5]); // Dashed line
     guidelinesContext.strokeRect(x, y, width, height);
@@ -115,7 +123,8 @@ export const useTextAndDebugLayers = ({
     // Draw label
     guidelinesContext.fillStyle = '#00ff00';
     guidelinesContext.font = '16px sans-serif';
-    guidelinesContext.fillText('Art Bounds', x + 5, y - 10);
+    const label = customArtBounds ? 'Custom Art Bounds' : 'Art Bounds';
+    guidelinesContext.fillText(label, x + 5, y - 10);
 
     guidelinesContext.restore();
   }, [contextRefs, showArtBoundsDebug, customArtBounds, loadedPack, card]);

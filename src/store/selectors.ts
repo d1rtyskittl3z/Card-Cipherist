@@ -164,6 +164,53 @@ export const useArtPosition = () => {
 };
 
 // ============================================================================
+// Second Art Selectors (from mediaStore)
+// ============================================================================
+
+/**
+ * Get all second art state properties
+ * Use this for components that need multiple second art properties
+ */
+export const useArt2State = () => {
+  return useMediaStore(
+    useShallow((state) => ({
+      artX2: state.artX2,
+      artY2: state.artY2,
+      artZoom2: state.artZoom2,
+      artRotate2: state.artRotate2,
+      artGrayscale2: state.artGrayscale2,
+      artImage2: state.artImage2,
+    }))
+  );
+};
+
+/**
+ * Get individual second art properties
+ */
+export const useArtX2 = () => useMediaStore((state) => state.artX2);
+export const useArtY2 = () => useMediaStore((state) => state.artY2);
+export const useArtZoom2 = () => useMediaStore((state) => state.artZoom2);
+export const useArtRotation2 = () => useMediaStore((state) => state.artRotate2);
+export const useArtImage2 = () => useMediaStore((state) => state.artImage2);
+
+/**
+ * Get second art grayscale setting (from mediaStore)
+ */
+export const useArtGrayscale2 = () => useMediaStore((state) => state.artGrayscale2);
+
+/**
+ * Get second art position only (x, y)
+ */
+export const useArt2Position = () => {
+  return useMediaStore(
+    useShallow((state) => ({
+      x: state.artX2,
+      y: state.artY2,
+    }))
+  );
+};
+
+// ============================================================================
 // Set Symbol Selectors (from mediaStore)
 // ============================================================================
 
@@ -290,9 +337,10 @@ export const useLoadedPack = () => {
  * Get UI flags
  */
 export const useShowGuidelines = () => useCardStore((state) => state.showGuidelines);
-export const useShowArtBoundsDebug = () => useCardStore((state) => state.showArtBoundsDebug);
+export const useShowArtBoundsDebug = () => useUIStore((state) => state.showArtBoundsDebug);
 export const useShowTransparencies = () => useCardStore((state) => state.showTransparencies);
 export const useAutoFitArt = () => useUIStore((state) => state.autoFitArt);
+export const useActiveArtSlot = () => useUIStore((state) => state.activeArtSlot);
 export const useRotateCanvasPreview = () => useUIStore((state) => state.rotateCanvasPreview);
 
 // ============================================================================

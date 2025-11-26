@@ -27,9 +27,11 @@ import M15CIPips from './M15CIPips';
 import TheList from './TheList';
 import M15Lands from './M15Lands';
 import Spree from './Spree';
+import Split from './Split';
 import SpreeUB from './SpreeUB';
 import SimpleInventions from './SimpleInventions';
 import Adventure from './Adventure';
+import Aftermath from './Aftermath';
 import Attraction from './Attraction';
 import M15Devoid from './M15Devoid';
 import M15Snow from './M15Snow';
@@ -71,6 +73,7 @@ import EquinoxFront from './EquinoxFront';
 import EternalNight from './EternalNight';
 import Fang from './Fang';
 import FNM from './FNM';
+import Fuse from './Fuse';
 import M15BoxTopper from './M15BoxTopper';
 import M15ClearTextboxes from './M15ClearTextboxes';
 import M15ExtendedArtShort from './M15ExtendedArtShort';
@@ -277,9 +280,11 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'TheList': TheList,
   'M15Lands': M15Lands,
   'Spree': Spree,
+  'Split': Split,
   'SpreeUB': SpreeUB,
   'SimpleInventions': SimpleInventions,
   'Adventure': Adventure,
+  'Aftermath': Aftermath,
   'Attraction': Attraction,
   'M15Devoid': M15Devoid,
   'M15Snow': M15Snow,
@@ -320,6 +325,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'EternalNight': EternalNight,
   'Fang': Fang,
   'FNM': FNM,
+  'Fuse': Fuse,
   'Flip': Flip,
   'M15BoxTopper': M15BoxTopper,
   'M15ClearTextboxes': M15ClearTextboxes,

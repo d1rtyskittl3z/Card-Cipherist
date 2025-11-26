@@ -23,9 +23,12 @@ import { SLIDER_DEBOUNCE_MS } from '../../constants/canvas';
 import {
   useCardDimensions,
   useArtGrayscale,
+  useArtGrayscale2,
   usePreviewCanvasRef,
   useArtState,
+  useArt2State,
   useAutoFitArt,
+  useActiveArtSlot,
   // useLoadedPack, // Unused - removed in Phase 8
 } from '../../store/selectors';
 
@@ -52,25 +55,64 @@ const ArtTabComponent = () => {
   // Use fine-grained selectors to prevent unnecessary re-renders
   const { width: cardWidth, height: cardHeight, marginX: cardMarginX, marginY: cardMarginY } = useCardDimensions();
   const artGrayscale = useArtGrayscale();
+  const artGrayscale2 = useArtGrayscale2();
   const updateCard = useCardStore((state) => state.updateCard);
   const setCollectorArtist = useCardStore((state) => state.setCollectorArtist);
   const previewCanvasRef = usePreviewCanvasRef();
 
-  // Media store - use fine-grained art selector
-  const { artX, artY, artZoom, artRotate, artImage } = useArtState();
+  // Media store - use fine-grained art selectors for both slots
+  const artState = useArtState();
+  const art2State = useArt2State();
   const updateArt = useMediaStore((state) => state.updateArt);
+  const updateArt2 = useMediaStore((state) => state.updateArt2);
   const resetArt = useMediaStore((state) => state.resetArt);
+  const resetArt2 = useMediaStore((state) => state.resetArt2);
   const artImageLoading = useMediaStore((state) => state.artImageLoading);
   const artImageError = useMediaStore((state) => state.artImageError);
+  const artImageLoading2 = useMediaStore((state) => state.artImageLoading2);
+  const artImageError2 = useMediaStore((state) => state.artImageError2);
 
   // UI store - use fine-grained selector
   const autoFitArt = useAutoFitArt();
+  const activeArtSlot = useActiveArtSlot();
   const setAutoFitArt = useUIStore((state) => state.setAutoFitArt);
+  const setActiveArtSlot = useUIStore((state) => state.setActiveArtSlot);
 
   // Frame store - use fine-grained selector with fallback
   const loadedPackFromFrameStore = useFrameStore((state) => state.loadedPack);
   const loadedPackFromCardStore = useCardStore((state) => state.loadedPack);
   const loadedPack = loadedPackFromFrameStore || loadedPackFromCardStore;
+
+  // Determine if this pack supports dual art (Split, Fuse, Aftermath)
+  const supportsDualArt = useMemo(() => {
+    return loadedPack?.id === 'Split' || loadedPack?.id === 'Fuse' || loadedPack?.id === 'Aftermath';
+  }, [loadedPack?.id]);
+
+  // Switch art properties based on active slot
+  const { artX, artY, artZoom, artRotate, artImage, artGrayscale: currentArtGrayscale } = useMemo(() => {
+    if (activeArtSlot === 'art2') {
+      return {
+        artX: art2State.artX2,
+        artY: art2State.artY2,
+        artZoom: art2State.artZoom2,
+        artRotate: art2State.artRotate2,
+        artImage: art2State.artImage2,
+        artGrayscale: artGrayscale2,
+      };
+    }
+    return {
+      artX: artState.artX,
+      artY: artState.artY,
+      artZoom: artState.artZoom,
+      artRotate: artState.artRotate,
+      artImage: artState.artImage,
+      artGrayscale: artGrayscale,
+    };
+  }, [activeArtSlot, artState, art2State, artGrayscale, artGrayscale2]);
+
+  const currentResetArt = activeArtSlot === 'art1' ? resetArt : resetArt2;
+  const currentArtImageLoading = activeArtSlot === 'art1' ? artImageLoading : artImageLoading2;
+  const currentArtImageError = activeArtSlot === 'art1' ? artImageError : artImageError2;
 
   const { loadArt, loadFromFile, loadFromClipboard, loading, error } = useImageLoader();
   const [urlInputValue, setUrlInputValue] = useState('');
@@ -86,22 +128,46 @@ const ArtTabComponent = () => {
   // Debounced update callbacks for slider inputs
   // Provides smooth UI updates without laggy re-renders
   const debouncedUpdateArtX = useDebouncedCallback(
-    (val: number) => updateArt({ artX: val }),
+    (val: number) => {
+      if (activeArtSlot === 'art1') {
+        updateArt({ artX: val });
+      } else {
+        updateArt2({ artX2: val });
+      }
+    },
     SLIDER_DEBOUNCE_MS
   );
 
   const debouncedUpdateArtY = useDebouncedCallback(
-    (val: number) => updateArt({ artY: val }),
+    (val: number) => {
+      if (activeArtSlot === 'art1') {
+        updateArt({ artY: val });
+      } else {
+        updateArt2({ artY2: val });
+      }
+    },
     SLIDER_DEBOUNCE_MS
   );
 
   const debouncedUpdateArtZoom = useDebouncedCallback(
-    (val: number) => updateArt({ artZoom: val }),
+    (val: number) => {
+      if (activeArtSlot === 'art1') {
+        updateArt({ artZoom: val });
+      } else {
+        updateArt2({ artZoom2: val });
+      }
+    },
     SLIDER_DEBOUNCE_MS
   );
 
   const debouncedUpdateArtRotate = useDebouncedCallback(
-    (val: number) => updateArt({ artRotate: val }),
+    (val: number) => {
+      if (activeArtSlot === 'art1') {
+        updateArt({ artRotate: val });
+      } else {
+        updateArt2({ artRotate2: val });
+      }
+    },
     SLIDER_DEBOUNCE_MS
   );
 
@@ -158,7 +224,7 @@ const ArtTabComponent = () => {
 
     // Load art from art_crop
     if (apiCard.image_uris?.art_crop) {
-      loadArt(apiCard.image_uris.art_crop);
+      loadArt(apiCard.image_uris.art_crop, activeArtSlot);
     } else {
       // Show toast notification if art_crop is not available
       toaster.create({
@@ -177,13 +243,25 @@ const ArtTabComponent = () => {
     enabled: dragEnabled,
     mode: 'art',
     onPositionChange: (x, y) => {
-      updateArt({ artX: x, artY: y });
+      if (activeArtSlot === 'art1') {
+        updateArt({ artX: x, artY: y });
+      } else {
+        updateArt2({ artX2: x, artY2: y });
+      }
     },
     onZoomChange: (zoom) => {
-      updateArt({ artZoom: zoom });
+      if (activeArtSlot === 'art1') {
+        updateArt({ artZoom: zoom });
+      } else {
+        updateArt2({ artZoom2: zoom });
+      }
     },
     onRotateChange: (rotation) => {
-      updateArt({ artRotate: rotation });
+      if (activeArtSlot === 'art1') {
+        updateArt({ artRotate: rotation });
+      } else {
+        updateArt2({ artRotate2: rotation });
+      }
     },
     getCurrentPosition: () => ({
       x: artX,
@@ -206,18 +284,18 @@ const ArtTabComponent = () => {
       return;
     }
 
-    await loadFromFile(file, 'art');
+    await loadFromFile(file, 'art', activeArtSlot);
   };
 
   const handleUrlUpload = () => {
     if (!urlInputValue.trim()) return;
 
-    loadArt(urlInputValue);
+    loadArt(urlInputValue, activeArtSlot);
     setUrlInputValue(''); // Clear input after upload
   };
 
   const handleClipboard = async () => {
-    await loadFromClipboard('art');
+    await loadFromClipboard('art', activeArtSlot);
   };
 
   const handleSearch = async () => {
@@ -272,9 +350,36 @@ const ArtTabComponent = () => {
 
   return (
     <VStack align="stretch" gap={4}>
+      {/* Art Slot Switcher - Only show for Split/Fuse/Aftermath packs */}
+      {supportsDualArt && (
+        <Box>
+          <Heading size="sm" mb={3}>
+            Art Slot Selection
+          </Heading>
+          <HStack gap={2}>
+            <Button
+              colorPalette={activeArtSlot === 'art1' ? 'blue' : 'gray'}
+              variant={activeArtSlot === 'art1' ? 'solid' : 'outline'}
+              onClick={() => setActiveArtSlot('art1')}
+              size="sm"
+            >
+              Art 1 {activeArtSlot === 'art1' && '(Active)'}
+            </Button>
+            <Button
+              colorPalette={activeArtSlot === 'art2' ? 'blue' : 'gray'}
+              variant={activeArtSlot === 'art2' ? 'solid' : 'outline'}
+              onClick={() => setActiveArtSlot('art2')}
+              size="sm"
+            >
+              Art 2 {activeArtSlot === 'art2' && '(Active)'}
+            </Button>
+          </HStack>
+        </Box>
+      )}
+
       <Box>
         <Heading size="md" mb={4}>
-          Art Upload
+          Art Upload {supportsDualArt && `(${activeArtSlot === 'art1' ? 'Art 1' : 'Art 2'})`}
         </Heading>
 
         {/* Drag and drop zone */}
@@ -357,16 +462,16 @@ const ArtTabComponent = () => {
         </Box>
 
         {/* Loading/Error States */}
-        {artImageLoading && (
+        {currentArtImageLoading && (
           <HStack p={3} bg="blue.900" color="blue.100" borderRadius="md" mb={4}>
             <Spinner size="sm" />
             <Box>Loading art image...</Box>
           </HStack>
         )}
 
-        {artImageError && (
+        {currentArtImageError && (
           <Box p={3} bg="red.900" color="red.100" borderRadius="md" mb={4}>
-            <strong>Art Loading Error:</strong> {artImageError}
+            <strong>Art Loading Error:</strong> {currentArtImageError}
           </Box>
         )}
 
@@ -393,8 +498,14 @@ const ArtTabComponent = () => {
 
         <LabeledSwitch
           label="Make the art grayscale"
-          checked={artGrayscale}
-          onCheckedChange={(checked) => updateArt({ artGrayscale: checked })}
+          checked={currentArtGrayscale}
+          onCheckedChange={(checked) => {
+            if (activeArtSlot === 'art1') {
+              updateArt({ artGrayscale: checked });
+            } else {
+              updateArt2({ artGrayscale2: checked });
+            }
+          }}
         />
 
         <VStack align="stretch" gap={3}>
@@ -434,8 +545,9 @@ const ArtTabComponent = () => {
           <ActionButtonGroup layout="grid" columns={2} gap={3}>
             <Button
               onClick={() => {
+                const artBounds = activeArtSlot === 'art1' ? loadedPack?.artBounds : loadedPack?.artBounds2;
                 // If we have an art image and artBounds, apply auto-fit
-                if (artImage && loadedPack?.artBounds) {
+                if (artImage && artBounds) {
                   // Create minimal card object for auto-fit calculation
                   const cardForAutoFit = {
                     width: cardWidth,
@@ -445,25 +557,45 @@ const ArtTabComponent = () => {
                   } as Card;
                   const { artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate } = calculateAutoFitArt(
                     artImage,
-                    loadedPack.artBounds,
+                    artBounds,
                     cardForAutoFit
                   );
-                  updateArt({
-                    artX: newX,
-                    artY: newY,
-                    artZoom: newZoom,
-                    artRotate: newRotate,
-                    artGrayscale: false,
-                  });
+                  if (activeArtSlot === 'art1') {
+                    updateArt({
+                      artX: newX,
+                      artY: newY,
+                      artZoom: newZoom,
+                      artRotate: newRotate,
+                      artGrayscale: false,
+                    });
+                  } else {
+                    updateArt2({
+                      artX2: newX,
+                      artY2: newY,
+                      artZoom2: newZoom,
+                      artRotate2: newRotate,
+                      artGrayscale2: false,
+                    });
+                  }
                 } else {
                   // Fallback to default position if no auto-fit available
-                  updateArt({
-                    artX: 0,
-                    artY: 0,
-                    artZoom: 1,
-                    artRotate: 0,
-                    artGrayscale: false,
-                  });
+                  if (activeArtSlot === 'art1') {
+                    updateArt({
+                      artX: 0,
+                      artY: 0,
+                      artZoom: 1,
+                      artRotate: 0,
+                      artGrayscale: false,
+                    });
+                  } else {
+                    updateArt2({
+                      artX2: 0,
+                      artY2: 0,
+                      artZoom2: 1,
+                      artRotate2: 0,
+                      artGrayscale2: false,
+                    });
+                  }
                 }
               }}
               colorPalette="blue"
@@ -472,7 +604,7 @@ const ArtTabComponent = () => {
             </Button>
 
             <Button
-              onClick={resetArt}
+              onClick={currentResetArt}
               colorPalette="red"
             >
               Remove Art

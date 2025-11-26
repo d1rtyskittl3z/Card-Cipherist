@@ -70,6 +70,33 @@ interface MediaState {
   /** Art image error message (null if no error) */
   artImageError: string | null;
 
+  /** Second art image source URL or file path */
+  artSource2: string;
+
+  /** Second art X position (normalized 0-1, relative to artBounds2) */
+  artX2: number;
+
+  /** Second art Y position (normalized 0-1, relative to artBounds2) */
+  artY2: number;
+
+  /** Second art zoom factor (1.0 = 100%, >1 = zoomed in) */
+  artZoom2: number;
+
+  /** Second art rotation in degrees (0-360) */
+  artRotate2: number;
+
+  /** Second art grayscale filter enabled */
+  artGrayscale2: boolean;
+
+  /** Loaded second art image element (null if not loaded) */
+  artImage2: HTMLImageElement | null;
+
+  /** Second art image loading state */
+  artImageLoading2: boolean;
+
+  /** Second art image error message (null if no error) */
+  artImageError2: string | null;
+
   /** Set symbol image source URL or file path */
   setSymbolSource: string;
 
@@ -165,6 +192,37 @@ interface MediaState {
   setArtImageError: (error: string | null) => void;
 
   /**
+   * Update second art transformation properties
+   * @param updates - Partial second art properties to update
+   */
+  updateArt2: (updates: {
+    artSource2?: string;
+    artX2?: number;
+    artY2?: number;
+    artZoom2?: number;
+    artRotate2?: number;
+    artGrayscale2?: boolean;
+  }) => void;
+
+  /**
+   * Set the loaded second art image element
+   * @param image - Image element (or null to clear)
+   */
+  setArtImage2: (image: HTMLImageElement | null) => void;
+
+  /**
+   * Set second art image loading state
+   * @param loading - Loading state
+   */
+  setArtImageLoading2: (loading: boolean) => void;
+
+  /**
+   * Set second art image error state
+   * @param error - Error message (null to clear)
+   */
+  setArtImageError2: (error: string | null) => void;
+
+  /**
    * Update set symbol transformation properties
    * @param updates - Partial set symbol properties to update
    */
@@ -250,6 +308,11 @@ interface MediaState {
   resetArt: () => void;
 
   /**
+   * Reset second art to default state (blank image, centered, no zoom/rotation)
+   */
+  resetArt2: () => void;
+
+  /**
    * Reset set symbol to default state (no symbol loaded)
    */
   resetSetSymbol: () => void;
@@ -267,6 +330,15 @@ const DEFAULT_ART_STATE = {
   artZoom: 1,
   artRotate: 0,
   artGrayscale: false,
+};
+
+const DEFAULT_ART2_STATE = {
+  artSource2: '/img/blank.png',
+  artX2: 0,
+  artY2: 0,
+  artZoom2: 1,
+  artRotate2: 0,
+  artGrayscale2: false,
 };
 
 const DEFAULT_SET_SYMBOL_STATE = {
@@ -295,6 +367,12 @@ export const useMediaStore = create<MediaState>()(
       artImage: null,
       artImageLoading: false,
       artImageError: null,
+
+      // Initial state - Second Art
+      ...DEFAULT_ART2_STATE,
+      artImage2: null,
+      artImageLoading2: false,
+      artImageError2: null,
 
       // Initial state - Set Symbol
       ...DEFAULT_SET_SYMBOL_STATE,
@@ -340,6 +418,36 @@ export const useMediaStore = create<MediaState>()(
       setArtImageError: (error) => {
         set((draft) => {
           draft.artImageError = error;
+        });
+      },
+
+      // Second Art Management
+      updateArt2: (updates) => {
+        set((draft) => {
+          if (updates.artSource2 !== undefined) draft.artSource2 = updates.artSource2;
+          if (updates.artX2 !== undefined) draft.artX2 = updates.artX2;
+          if (updates.artY2 !== undefined) draft.artY2 = updates.artY2;
+          if (updates.artZoom2 !== undefined) draft.artZoom2 = updates.artZoom2;
+          if (updates.artRotate2 !== undefined) draft.artRotate2 = updates.artRotate2;
+          if (updates.artGrayscale2 !== undefined) draft.artGrayscale2 = updates.artGrayscale2;
+        });
+      },
+
+      setArtImage2: (image) => {
+        set((draft) => {
+          draft.artImage2 = castDraft(image);
+        });
+      },
+
+      setArtImageLoading2: (loading) => {
+        set((draft) => {
+          draft.artImageLoading2 = loading;
+        });
+      },
+
+      setArtImageError2: (error) => {
+        set((draft) => {
+          draft.artImageError2 = error;
         });
       },
 
@@ -429,6 +537,15 @@ export const useMediaStore = create<MediaState>()(
           draft.artImage = null;
           draft.artImageLoading = false;
           draft.artImageError = null;
+        });
+      },
+
+      resetArt2: () => {
+        set((draft) => {
+          Object.assign(draft, DEFAULT_ART2_STATE);
+          draft.artImage2 = null;
+          draft.artImageLoading2 = false;
+          draft.artImageError2 = null;
         });
       },
 

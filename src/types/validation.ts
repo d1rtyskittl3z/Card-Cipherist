@@ -374,6 +374,7 @@ export const cardSchema = z.object({
 
   // Bounds
   artBounds: cardBoundsSchema.optional(),
+  artBounds2: cardBoundsSchema.optional(),
   setSymbolBounds: cardBoundsSchema.optional(),
   watermarkBounds: cardBoundsSchema.optional(),
 
@@ -634,6 +635,7 @@ export const framePackTemplateSchema = z.object({
   version: z.string().optional(),
   notice: z.string().optional(),
   artBounds: framePackBoundsSchema.optional(),
+  artBounds2: framePackBoundsSchema.optional(),
   setSymbolBounds: setSymbolBoundsSchema.optional(),
   watermarkBounds: framePackBoundsSchema.optional(),
   saga: sagaPackConfigSchema.optional(),

@@ -23,13 +23,21 @@ export const useLayerRenderers = ({
   // Get canvas references from context
   const { canvasRefs, contextRefs, canvasesReady } = useCanvasContext();
   // Get media state with fine-grained selectors
-  // Art state
+  // Art state (first art)
   const artImage = useMediaStore((state) => state.artImage);
   const artX = useMediaStore((state) => state.artX);
   const artY = useMediaStore((state) => state.artY);
   const artZoom = useMediaStore((state) => state.artZoom);
   const artRotate = useMediaStore((state) => state.artRotate);
   const artGrayscale = useMediaStore((state) => state.artGrayscale);
+
+  // Second art state
+  const artImage2 = useMediaStore((state) => state.artImage2);
+  const artX2 = useMediaStore((state) => state.artX2);
+  const artY2 = useMediaStore((state) => state.artY2);
+  const artZoom2 = useMediaStore((state) => state.artZoom2);
+  const artRotate2 = useMediaStore((state) => state.artRotate2);
+  const artGrayscale2 = useMediaStore((state) => state.artGrayscale2);
 
   // Set symbol state
   const setSymbolImage = useMediaStore((state) => state.setSymbolImage);
@@ -87,35 +95,63 @@ export const useLayerRenderers = ({
 
   /**
    * Render art layer with transforms
+   * Renders both art1 and art2 if available
    */
   const renderArtLayer = useCallback(() => {
     const artCanvas = canvasRefs.card;
-    if (!artCanvas || !artImage) return;
+    if (!artCanvas) return;
 
     const ctx = artCanvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.save();
+    // Render first art image if available
+    if (artImage) {
+      ctx.save();
 
-    // Apply grayscale filter if enabled
-    if (artGrayscale) {
-      ctx.filter = 'grayscale(100%)';
+      // Apply grayscale filter if enabled
+      if (artGrayscale) {
+        ctx.filter = 'grayscale(100%)';
+      }
+
+      // Apply transformations (read from mediaStore)
+      const centerX = artCanvas.width / 2 + artX;
+      const centerY = artCanvas.height / 2 + artY;
+
+      ctx.translate(centerX, centerY);
+      ctx.rotate((artRotate * Math.PI) / 180);
+      ctx.scale(artZoom, artZoom);
+
+      const width = artImage.width;
+      const height = artImage.height;
+
+      ctx.drawImage(artImage, -width / 2, -height / 2, width, height);
+      ctx.restore();
     }
 
-    // Apply transformations (read from mediaStore)
-    const centerX = artCanvas.width / 2 + artX;
-    const centerY = artCanvas.height / 2 + artY;
+    // Render second art image if available (for Split/Fuse/Aftermath cards)
+    if (artImage2) {
+      ctx.save();
 
-    ctx.translate(centerX, centerY);
-    ctx.rotate((artRotate * Math.PI) / 180);
-    ctx.scale(artZoom, artZoom);
+      // Apply grayscale filter if enabled
+      if (artGrayscale2) {
+        ctx.filter = 'grayscale(100%)';
+      }
 
-    const width = artImage.width;
-    const height = artImage.height;
+      // Apply transformations (read from mediaStore)
+      const centerX2 = artCanvas.width / 2 + artX2;
+      const centerY2 = artCanvas.height / 2 + artY2;
 
-    ctx.drawImage(artImage, -width / 2, -height / 2, width, height);
-    ctx.restore();
-  }, [canvasRefs, artImage, artX, artY, artZoom, artRotate, artGrayscale]);
+      ctx.translate(centerX2, centerY2);
+      ctx.rotate((artRotate2 * Math.PI) / 180);
+      ctx.scale(artZoom2, artZoom2);
+
+      const width2 = artImage2.width;
+      const height2 = artImage2.height;
+
+      ctx.drawImage(artImage2, -width2 / 2, -height2 / 2, width2, height2);
+      ctx.restore();
+    }
+  }, [canvasRefs, artImage, artX, artY, artZoom, artRotate, artGrayscale, artImage2, artX2, artY2, artZoom2, artRotate2, artGrayscale2]);
 
   /**
    * Render set symbol layer
