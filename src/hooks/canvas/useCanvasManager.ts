@@ -31,6 +31,7 @@ export const useCanvasManager = () => {
       'frameMasking',
       'frameCompositing',
       'saga',
+      'class',
       'planeswalkerPre',
       'planeswalkerPost',
       'stationPre',

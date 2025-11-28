@@ -31,6 +31,7 @@ export const TABS = {
   SAGA: 'saga',
   PLANESWALKER: 'planeswalker',
   KAMIGAWA: 'kamigawa',
+  CLASS: 'class',
   STATIONS: 'stations',
   TEXT: 'text',
   ART: 'art',

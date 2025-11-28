@@ -52,7 +52,7 @@ export const useCanvasRender = () => {
   });
 
   // Initialize special card type layers
-  const { renderSaga, renderPlaneswalker, renderStation, renderSerial } = useSpecialLayers({
+  const { renderSaga, renderClass, renderPlaneswalker, renderStation, renderSerial } = useSpecialLayers({
     showSerialNumbers,
   });
 
@@ -87,6 +87,7 @@ export const useCanvasRender = () => {
     await perfMonitor.measureAsync('canvas:renderStation', () => renderStation(card));
     perfMonitor.measure('canvas:renderWatermark', () => renderWatermark());
     await perfMonitor.measureAsync('canvas:renderSaga', () => renderSaga(card));
+    await perfMonitor.measureAsync('canvas:renderClass', () => renderClass(card));
     await perfMonitor.measureAsync('canvas:renderPlaneswalker', () => renderPlaneswalker(card));
     await perfMonitor.measureAsync('canvas:renderTextLayer', () => renderTextLayer());
     await perfMonitor.measureAsync('canvas:renderBottomInfo', () => renderBottomInfo());
@@ -111,6 +112,7 @@ export const useCanvasRender = () => {
     renderStation,
     renderWatermark,
     renderSaga,
+    renderClass,
     renderPlaneswalker,
     renderTextLayer,
     renderBottomInfo,
@@ -129,7 +131,7 @@ export const useCanvasRender = () => {
         render();
       }
     },
-    [render, canvasesReady, imagesLoaded, width, height, marginX, marginY, frames.length],
+    [render, canvasesReady, imagesLoaded, width, height, marginX, marginY, frames.length, card.version, card.class, card.saga, card.planeswalker, card.station],
     { fps: 60, immediate: false }
   );
 

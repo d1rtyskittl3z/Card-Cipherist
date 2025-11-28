@@ -403,6 +403,25 @@ export const useIsStationCard = () => {
 };
 
 // ============================================================================
+// Class Selectors
+// ============================================================================
+
+/**
+ * Get class info
+ */
+export const useClassInfo = () => useCardStore((state) => state.card.class);
+
+/**
+ * Check if current card is a class card
+ */
+export const useIsClassCard = () => {
+  return useCardStore((state) => {
+    const version = state.card.version?.toLowerCase();
+    return Boolean(version?.includes('class') && state.card.class);
+  });
+};
+
+// ============================================================================
 // Neo Basics (Kamigawa) Selectors
 // ============================================================================
 

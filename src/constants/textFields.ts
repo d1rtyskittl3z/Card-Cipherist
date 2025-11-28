@@ -77,3 +77,15 @@ export const STATION_ABILITY_KEYS = [
   TEXT_FIELDS.STATION_ABILITY_1,
   TEXT_FIELDS.STATION_ABILITY_2,
 ] as const;
+
+/**
+ * Class level text field keys
+ * Each level has: a (cost), b (name), c (text)
+ * Level 0 only has c (text)
+ */
+export const CLASS_LEVEL_KEYS = [
+  'level0c',
+  'level1a', 'level1b', 'level1c',
+  'level2a', 'level2b', 'level2c',
+  'level3a', 'level3b', 'level3c',
+] as const;

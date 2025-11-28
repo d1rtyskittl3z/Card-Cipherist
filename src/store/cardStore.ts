@@ -13,6 +13,7 @@ import type {
   CardBounds,
   SagaInfo,
   PlaneswalkerInfo,
+  ClassInfo,
   FrameColorOverride,
   StationState,
 } from '../types/card.types';
@@ -58,6 +59,7 @@ interface CardState {
   hasShownSagaTab: boolean;
   hasShownPlaneswalkerTab: boolean;
   hasShownKamigawaTab: boolean;
+  hasShownClassTab: boolean;
   hasShownStationsTab: boolean;
   neoBasicsTitleHeight: number;
   neoBasicsElements: string[];
@@ -158,6 +160,7 @@ interface CardState {
   setHasShownSagaTab: (shown: boolean) => void;
   setHasShownPlaneswalkerTab: (shown: boolean) => void;
   setHasShownKamigawaTab: (shown: boolean) => void;
+  setHasShownClassTab: (shown: boolean) => void;
   setHasShownStationsTab: (shown: boolean) => void;
   initializeNeoBasicsControls: (elements: string[]) => void;
   setNeoBasicsTitleHeight: (value: number) => void;
@@ -171,6 +174,8 @@ interface CardState {
   resetSagaInfo: (preset?: SagaInfo | null) => void;
   setPlaneswalkerInfo: (updates: Partial<PlaneswalkerInfo>) => void;
   resetPlaneswalkerInfo: (preset?: PlaneswalkerInfo | null) => void;
+  setClassInfo: (updates: Partial<ClassInfo>) => void;
+  resetClassInfo: (preset?: ClassInfo | null) => void;
   // Serial visibility
   showSerialNumbers: boolean;
   setShowSerialNumbers: (show: boolean) => void;
@@ -396,6 +401,7 @@ export const useCardStore = create<CardState>()(
         hasShownSagaTab: false,
         hasShownPlaneswalkerTab: false,
         hasShownKamigawaTab: false,
+        hasShownClassTab: false,
         hasShownStationsTab: false,
   neoBasicsTitleHeight: NEO_BASICS_MIN_TITLE_HEIGHT,
   neoBasicsElements: [],
@@ -640,6 +646,10 @@ export const useCardStore = create<CardState>()(
           set({ hasShownKamigawaTab: shown });
         },
 
+        setHasShownClassTab: (shown) => {
+          set({ hasShownClassTab: shown });
+        },
+
         setHasShownStationsTab: (shown) => {
           set({ hasShownStationsTab: shown });
         },
@@ -765,6 +775,37 @@ export const useCardStore = create<CardState>()(
             },
           }));
         },
+
+        setClassInfo: (updates) => {
+          set((state) => {
+            const currentClass = state.card.class || null;
+            const updatedClass = currentClass
+              ? { ...currentClass, ...updates }
+              : {
+                  levelHeights: [0, 0, 0, 0] as [number, number, number, number],
+                  count: 1,
+                  x: 0.5014,
+                  width: 0.422,
+                  ...updates,
+                };
+            return {
+              card: {
+                ...state.card,
+                class: updatedClass,
+              },
+            };
+          });
+        },
+
+        resetClassInfo: (preset) => {
+          set((state) => ({
+            card: {
+              ...state.card,
+              class: preset ?? null,
+            },
+          }));
+        },
+
         initializeStation: (version) => {
           set((state) => {
             const nextStation = applyStationVersionPreset(
@@ -865,6 +906,7 @@ export const useCardStore = create<CardState>()(
             marginY: 0, // Don't persist margins - they're derived from frames
             saga: null,
             planeswalker: null,
+            class: null,
             station: null,
             text: {}, // Don't persist text - reset on refresh
             bottomInfo: {}, // Don't persist bottom info - reset on refresh

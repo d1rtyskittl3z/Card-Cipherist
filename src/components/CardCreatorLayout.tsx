@@ -13,6 +13,7 @@ import { TextTab } from './tabs/TextTab';
 import { SagaTab } from './tabs/SagaTab';
 import { PlaneswalkerTab } from './tabs/PlaneswalkerTab';
 import { KamigawaTab } from './tabs/KamigawaTab';
+import { ClassTab } from './tabs/ClassTab';
 import { StationsTab } from './tabs/StationsTab';
 import { ArtTab } from './tabs/ArtTab';
 import { SetSymbolTab } from './tabs/SetSymbolTab';
@@ -29,6 +30,7 @@ const CardCreatorLayoutComponent = () => {
   const hasShownSagaTab = useCardStore((state) => state.hasShownSagaTab);
   const hasShownPlaneswalkerTab = useCardStore((state) => state.hasShownPlaneswalkerTab);
   const hasShownKamigawaTab = useCardStore((state) => state.hasShownKamigawaTab);
+  const hasShownClassTab = useCardStore((state) => state.hasShownClassTab);
   const hasShownStationsTab = useCardStore((state) => state.hasShownStationsTab);
   const rotateCanvasPreview = useRotateCanvasPreview();
   const accordionWidth = rotateCanvasPreview ? '1000px' : '1200px';
@@ -197,6 +199,27 @@ const CardCreatorLayoutComponent = () => {
                   <Accordion.ItemContent>
                     <Accordion.ItemBody p={4}>
                       <KamigawaTab />
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+              )}
+
+              {/* Conditionally show Class accordion item */}
+              {hasShownClassTab && (
+                <Accordion.Item value={TABS.CLASS}>
+                  <Accordion.ItemTrigger
+                    fontSize="md"
+                    fontWeight="semibold"
+                    py={4}
+                  >
+                    <Box flex="1" textAlign="start">
+                      Class
+                    </Box>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent>
+                    <Accordion.ItemBody p={4}>
+                      <ClassTab />
                     </Accordion.ItemBody>
                   </Accordion.ItemContent>
                 </Accordion.Item>

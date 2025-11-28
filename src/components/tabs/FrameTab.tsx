@@ -34,6 +34,7 @@ import {
   applyPlaneswalkerLayout,
   computePlaneswalkerCount,
 } from '../../utils/planeswalkerHelpers';
+import { applyClassLayout } from '../../utils/classHelpers';
 import { PLANESWALKER_ABILITY_KEYS } from '../../constants';
 import { DEFAULT_COLOR_OVERRIDE } from '../../utils/neoBasics';
 
@@ -97,6 +98,7 @@ const FrameTabComponent = () => {
   const closeFrameEditor = useCardStore((state) => state.closeFrameEditor);
   const setHasShownSagaTab = useCardStore((state) => state.setHasShownSagaTab);
   const setHasShownPlaneswalkerTab = useCardStore((state) => state.setHasShownPlaneswalkerTab);
+  const setHasShownClassTab = useCardStore((state) => state.setHasShownClassTab);
   const setHasShownKamigawaTab = useCardStore((state) => state.setHasShownKamigawaTab);
   const setHasShownStationsTab = useCardStore((state) => state.setHasShownStationsTab);
   const initializeNeoBasicsControls = useCardStore((state) => state.initializeNeoBasicsControls);
@@ -441,9 +443,47 @@ const FrameTabComponent = () => {
         } else {
           store.resetPlaneswalkerInfo(null);
         }
+
+        const isClassPack = pack.version?.toLowerCase().includes('class');
+        if (isClassPack) {
+          setHasShownClassTab(true);
+
+          const defaults = pack.class ?? {
+            x: 0.5014,
+            width: 0.422,
+            defaultHeights: [0.2096, 0.2091, 0.2091, 0] as [number, number, number, number],
+          };
+
+          const cardForHeights = useCardStore.getState().card;
+          
+          // Convert normalized heights from pack to pixel values for storage
+          const pixelHeights = (defaults.defaultHeights ?? [0.2096, 0.2091, 0.2091, 0]).map(
+            (h) => h * cardForHeights.height
+          ) as [number, number, number, number];
+
+          const defaultCount = pixelHeights.filter((value) => value > 0).length;
+
+          // First set up the class info
+          store.resetClassInfo({
+            levelHeights: pixelHeights,
+            count: defaultCount,
+            x: defaults.x,
+            width: defaults.width,
+          });
+
+          // Now get fresh card state with class info and apply layout
+          if (pixelHeights.some((value) => value > 0)) {
+            const freshCard = useCardStore.getState().card;
+            const textWithClass = applyClassLayout(freshCard, pixelHeights);
+            store.setText(textWithClass);
+          }
+        } else {
+          store.resetClassInfo(null);
+        }
       } else {
         store.resetSagaInfo(null);
         store.resetPlaneswalkerInfo(null);
+        store.resetClassInfo(null);
       }
 
       if (pack?.id === 'NeoBasics') {
@@ -479,7 +519,7 @@ const FrameTabComponent = () => {
     // Clear custom masks when pack changes (they're tied to the loaded pack)
     setCustomMasks([]);
     setCustomMaskCounter(1);
-  }, [selectedPackId, setLoadedPackStore, setHasShownKamigawaTab, setHasShownSagaTab, setHasShownPlaneswalkerTab, setHasShownStationsTab, initializeNeoBasicsControls]);
+  }, [selectedPackId, setLoadedPackStore, setHasShownKamigawaTab, setHasShownSagaTab, setHasShownPlaneswalkerTab, setHasShownClassTab, setHasShownStationsTab, initializeNeoBasicsControls]);
 
   // Get frames and masks from loaded pack
   const availableFrames = useMemo(() => {

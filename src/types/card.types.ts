@@ -238,6 +238,13 @@ export interface PlaneswalkerInfo {
   defaultAbilityAdjust?: [number, number, number, number];
 }
 
+export interface ClassInfo {
+  levelHeights: [number, number, number, number];
+  count: number;
+  x: number;
+  width: number;
+}
+
 export type StationColorMode =
   | 'auto'
   | 'white'
@@ -456,6 +463,8 @@ export interface Card {
   saga?: SagaInfo | null;
   /** Planeswalker-specific state (null for non-planeswalker cards) */
   planeswalker?: PlaneswalkerInfo | null;
+  /** Class-specific state (null for non-class cards) */
+  class?: ClassInfo | null;
   /** Station-specific state (null for non-station cards) */
   station?: StationState | null;
 }
@@ -499,6 +508,7 @@ export interface CanvasRefs {
   frameMasking: HTMLCanvasElement;
   frameCompositing: HTMLCanvasElement;
   saga: HTMLCanvasElement;
+  class: HTMLCanvasElement;
   planeswalkerPre: HTMLCanvasElement;
   planeswalkerPost: HTMLCanvasElement;
   stationPre: HTMLCanvasElement;
@@ -519,6 +529,7 @@ export interface CanvasContextRefs {
   frameMasking: CanvasRenderingContext2D;
   frameCompositing: CanvasRenderingContext2D;
   saga: CanvasRenderingContext2D;
+  class: CanvasRenderingContext2D;
   planeswalkerPre: CanvasRenderingContext2D;
   planeswalkerPost: CanvasRenderingContext2D;
   stationPre: CanvasRenderingContext2D;

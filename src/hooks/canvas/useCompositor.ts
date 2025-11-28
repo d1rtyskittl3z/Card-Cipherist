@@ -35,6 +35,7 @@ export const useCompositor = ({
     const stationPostCanvas = canvasRefs.stationPost;
     const watermarkCanvas = canvasRefs.watermark;
     const sagaCanvas = canvasRefs.saga;
+    const classCanvas = canvasRefs.class;
     const textCanvas = canvasRefs.text;
     const bottomInfoCanvas = canvasRefs.bottomInfo;
     const guidelinesCanvas = canvasRefs.guidelines;
@@ -79,6 +80,11 @@ export const useCompositor = ({
     // Draw saga layer (chapter markers)
     if (sagaCanvas && card.version?.toLowerCase().includes('saga')) {
       cardContext.drawImage(sagaCanvas, 0, 0);
+    }
+
+    // Draw class layer (level headers)
+    if (classCanvas && card.version?.toLowerCase().includes('class')) {
+      cardContext.drawImage(classCanvas, 0, 0);
     }
 
     // Draw text

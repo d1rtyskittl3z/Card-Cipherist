@@ -190,6 +190,7 @@ import EquinoxTextless from './EquinoxTextless';
 import Classicshifted from './Classicshifted';
 import ClassicshiftedNickname from './ClassicshiftedNickname';
 import ClassicshiftedLands from './ClassicshiftedLands';
+import Class from './Class';
 import ClassicshiftedCIPips from './ClassicshiftedCIPips';
 import ClassicshiftedPlaneswalker from './ClassicshiftedPlaneswalker';
 import ClassicshiftedPlaneswalkerTransform from './ClassicshiftedPlaneswalkerTransform';
@@ -430,6 +431,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Tarkir': Tarkir,
   'StationRegular': StationRegular,
   'StationBorderless': StationBorderless,
+  'Class': Class,
   'StorybookMUL': StorybookMUL,
   'StorybookWOE': StorybookWOE,
   'Elemental': Elemental,

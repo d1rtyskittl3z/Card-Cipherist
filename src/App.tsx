@@ -8,6 +8,7 @@ import { PerformanceProfiler } from './components/PerformanceProfiler';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
+  console.log('[App] Rendering App component');
   return (
     <ErrorBoundary name="App">
       <PerformanceProfiler id="App">

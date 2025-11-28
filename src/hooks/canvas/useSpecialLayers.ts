@@ -6,6 +6,7 @@
 import { useCallback } from 'react';
 import { useCanvasContext } from '../../contexts/useCanvasContext';
 import { drawSagaLayer } from '../../utils/sagaHelpers';
+import { drawClassLayer } from '../../utils/classHelpers';
 import {
   drawPlaneswalkerPreLayer,
   drawPlaneswalkerPostLayer,
@@ -44,6 +45,30 @@ export const useSpecialLayers = ({
       await drawSagaLayer(sagaContext, card);
     } catch (error) {
       console.error('Failed to render saga layer:', error);
+    }
+  }, [canvasRefs, contextRefs]);
+
+  /**
+   * Render class overlay layer (level headers)
+   */
+  const renderClass = useCallback(async (card: Card) => {
+    const classCanvas = canvasRefs.class;
+    const classContext = contextRefs.class;
+    if (!classCanvas || !classContext) {
+      return;
+    }
+
+    // Always clear the class canvas before drawing
+    classContext.clearRect(0, 0, classCanvas.width, classCanvas.height);
+
+    if (!card.version?.toLowerCase().includes('class') || !card.class) {
+      return;
+    }
+
+    try {
+      await drawClassLayer(classContext, card);
+    } catch (error) {
+      console.error('Failed to render class layer:', error);
     }
   }, [canvasRefs, contextRefs]);
 
@@ -294,6 +319,7 @@ export const useSpecialLayers = ({
 
   return {
     renderSaga,
+    renderClass,
     renderPlaneswalker,
     renderStation,
     renderSerial,

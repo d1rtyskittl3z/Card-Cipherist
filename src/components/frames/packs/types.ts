@@ -82,6 +82,12 @@ export interface PlaneswalkerPackConfig {
   invert?: boolean;
 }
 
+export interface ClassPackConfig {
+  x: number;
+  width: number;
+  defaultHeights?: [number, number, number, number];
+}
+
 export interface FramePackTemplate {
   id: string;
   label: string;
@@ -98,6 +104,7 @@ export interface FramePackTemplate {
   watermarkBounds?: Bounds; // Optional for addon-only packs
   saga?: SagaPackConfig; // Optional Saga configuration (lore counter placement)
   planeswalker?: PlaneswalkerPackConfig; // Optional Planeswalker configuration (loyalty layout defaults)
+  class?: ClassPackConfig; // Optional Class configuration (level layout defaults)
   replacementMasks?: Record<string, string>; // Optional position mask overrides (e.g., 'Right Half': '/img/custom/mask.png')
   frames: FrameItem[];
   text?: {
