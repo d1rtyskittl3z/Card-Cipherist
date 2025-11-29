@@ -39,6 +39,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/coverage-v8": "^4.0.9",
     "@vitest/ui": "^4.0.9",
+    "baseline-browser-mapping": "^2.8.32",
     "cross-env": "^10.1.0",
     "electron": "^30.0.1",
     "electron-builder": "^26.0.12",

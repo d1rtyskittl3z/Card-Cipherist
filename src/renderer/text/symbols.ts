@@ -190,6 +190,9 @@ const PACK_PREFIX_CONFIGS: Record<string, PrefixConfig> = {
   wanted: {},
   m21: {},
   neon: {},
+  breakingNews: {},
+  outlineAlt: {},
+  outline: {},
   oilslick: {
     codes: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', 'w', 'u', 'b', 'r', 'g', 'c', 'x', 'p', 'wp', 'up', 'bp', 'rp', 'gp', ],
     extensions: ['.png', '.svg'],

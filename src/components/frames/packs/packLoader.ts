@@ -42,6 +42,7 @@ import Battle from './Battle';
 import BloomburrowBorderless from './BloomburrowBorderless';
 import Borderless from './Borderless';
 import Brawl from './Brawl';
+import BreakingNews from './BreakingNews';
 import Circuit from './Circuit';
 import CommanderLegends from './CommanderLegends';
 import Crystal from './Crystal';
@@ -62,6 +63,7 @@ import CustomMagraoKaldheim from './CustomMagraoKaldheim';
 import DMUStainedGlass from './DMUStainedGlass';
 import DNDModule from './DNDModule';
 import DNDSourcebook from './DNDSourcebook';
+import Dossier from './Dossier';
 import DoubleFeature from './DoubleFeature';
 import DoubleFeatureTransform from './DoubleFeatureTransform';
 import Kaldheim2 from './Kaldheim-2';
@@ -175,6 +177,7 @@ import UBNew from './UBNew-1';
 import UBLegendCrownsNew from './UBLegendCrownsNew-1';
 import BorderlessStellarSights from './BorderlessStellarSights';
 import MiscCustom from './MiscCustom';
+import MysticalArchive from './MysticalArchive';
 import NeoBasics from './NeoBasics';
 import NeoNeon from './NeoNeon';
 import NeoNinja from './NeoNinja';
@@ -234,6 +237,7 @@ import Flip from './Flip';
 import Case from './Case';
 import Scroll from './Scroll';
 import ShatteredGlass from './ShatteredGlass';
+import SignatureSpellbook from './SignatureSpellbook';
 import SNCArtDeco from './SNCArtDeco';
 import SNCGilded from './SNCGilded';
 import M15Mutate from './M15Mutate';
@@ -297,6 +301,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'BloomburrowBorderless': BloomburrowBorderless,
   'Borderless': Borderless,
   'Brawl': Brawl,
+  'BreakingNews': BreakingNews,
   'Circuit': Circuit,
   'CommanderLegends': CommanderLegends,
   'Crystal': Crystal,
@@ -317,6 +322,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'DMUStainedGlass': DMUStainedGlass,
   'DNDModule': DNDModule,
   'DNDSourcebook': DNDSourcebook,
+  'Dossier': Dossier,
   'Draconic': Draconic,
   'DoubleFeature': DoubleFeature,
   'DoubleFeatureTransform': DoubleFeatureTransform,
@@ -382,6 +388,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Ring': Ring,
   'Scroll': Scroll,
   'ShatteredGlass': ShatteredGlass,
+  'SignatureSpellbook': SignatureSpellbook,
   'SNCArtDeco': SNCArtDeco,
   'SNCGilded': SNCGilded,
   'SNCSkyscraper': SNCSkyscraper,
@@ -424,6 +431,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'UBLegendCrownsNew': UBLegendCrownsNew,
   'BorderlessStellarSights': BorderlessStellarSights,
   'MiscCustom': MiscCustom,
+  'MysticalArchive': MysticalArchive,
   'NEONeonShort': NEONeonShort,
   'StoneCutterDeluxe': StoneCutterDeluxe,
   'StoneCutterDeluxeNicknameAddons': StoneCutterDeluxeNicknameAddons,
