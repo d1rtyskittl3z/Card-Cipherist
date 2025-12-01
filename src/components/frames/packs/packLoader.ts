@@ -43,6 +43,7 @@ import BloomburrowBorderless from './BloomburrowBorderless';
 import Borderless from './Borderless';
 import Brawl from './Brawl';
 import BreakingNews from './BreakingNews';
+import BurningRevelation from './BurningRevelation';
 import Circuit from './Circuit';
 import CommanderLegends from './CommanderLegends';
 import Crystal from './Crystal';
@@ -76,6 +77,7 @@ import EternalNight from './EternalNight';
 import Fang from './Fang';
 import FNM from './FNM';
 import Fuse from './Fuse';
+import FeuerAmeiseIxalan from './FeuerAmeiseIxalan';
 import M15BoxTopper from './M15BoxTopper';
 import M15ClearTextboxes from './M15ClearTextboxes';
 import M15ExtendedArtShort from './M15ExtendedArtShort';
@@ -193,6 +195,7 @@ import EquinoxTextless from './EquinoxTextless';
 import Classicshifted from './Classicshifted';
 import ClassicshiftedNickname from './ClassicshiftedNickname';
 import ClassicshiftedLands from './ClassicshiftedLands';
+import ClassicshiftedSaga from './ClassicshiftedSaga';
 import Class from './Class';
 import ClassicshiftedCIPips from './ClassicshiftedCIPips';
 import ClassicshiftedPlaneswalker from './ClassicshiftedPlaneswalker';
@@ -257,6 +260,14 @@ import NeonInkTransformFront from './NeonInkTransformFront';
 import NeonInkTransformBack from './NeonInkTransformBack';
 import NeonInkTransformFrontTextless from './NeonInkTransformFrontTextless';
 import NeonInkTransformBackTextless from './NeonInkTransformBackTextless';
+import SNCGildedColored from './SNCGildedColored';
+import SNCGildedTextless from './SNCGildedTextless';
+import StoneCutterDeluxeCase from './StoneCutterDeluxeCase';
+import StoneCutterDeluxeDFC from './StoneCutterDeluxeDFC';
+import StoneCutterDeluxeTransformAddons from './StoneCutterDeluxeTransformAddons';
+import StoneCutterDeluxeSaga from './StoneCutterDeluxeSaga';
+import StoneCutterDeluxeClass from './StoneCutterDeluxeClass';
+import StoneCutterDeluxeExtended from './StoneCutterDeluxeExtended';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -308,6 +319,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Borderless': Borderless,
   'Brawl': Brawl,
   'BreakingNews': BreakingNews,
+  'BurningRevelation': BurningRevelation,
   'Circuit': Circuit,
   'CommanderLegends': CommanderLegends,
   'Crystal': Crystal,
@@ -380,6 +392,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PromoGenericShowcase': PromoGenericShowcase,
   'Prototype': Prototype,
   'PrototypeExtended': PrototypeExtended,
+  'FeuerAmeiseIxalan': FeuerAmeiseIxalan,
   'FeuerAmeiseKaldheim': FeuerAmeiseKaldheim,
   'TextlessInvention': TextlessInvention,
   'J22Front': J22Front,
@@ -445,6 +458,14 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'NeonInkTransformBack': NeonInkTransformBack,
   'NeonInkTransformFrontTextless': NeonInkTransformFrontTextless,
   'NeonInkTransformBackTextless': NeonInkTransformBackTextless,
+  'SNCGildedColored': SNCGildedColored,
+  'SNCGildedTextless': SNCGildedTextless,
+  'StoneCutterDeluxeCase': StoneCutterDeluxeCase,
+  'StoneCutterDeluxeDFC': StoneCutterDeluxeDFC,
+  'StoneCutterDeluxeTransformAddons': StoneCutterDeluxeTransformAddons,
+  'StoneCutterDeluxeSaga': StoneCutterDeluxeSaga,
+  'StoneCutterDeluxeClass': StoneCutterDeluxeClass,
+  'StoneCutterDeluxeExtended': StoneCutterDeluxeExtended,
   'StoneCutterDeluxe': StoneCutterDeluxe,
   'StoneCutterDeluxeNicknameAddons': StoneCutterDeluxeNicknameAddons,
   'TARDIS': TARDIS,
@@ -473,6 +494,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Classicshifted': Classicshifted,
   'ClassicshiftedNickname': ClassicshiftedNickname,
   'ClassicshiftedLands': ClassicshiftedLands,
+  'ClassicshiftedSaga': ClassicshiftedSaga,
   'ClassicshiftedCIPips': ClassicshiftedCIPips,
   'ClassicshiftedPlaneswalker': ClassicshiftedPlaneswalker,
   'ClassicshiftedPlaneswalkerTransform': ClassicshiftedPlaneswalkerTransform,
