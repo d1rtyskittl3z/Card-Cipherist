@@ -5,6 +5,7 @@ const group: LegacyGroup = {
   label: 'Showcase Frames',
   packs: [
     { kind: 'label', label: 'Set Showcase Frames (Chronological)' },
+    { kind: 'pack', label: 'Neon Ink (TLA)', id:'NeonInk' },
     { kind: 'pack', label: 'Avatar Elemental (TLA)', id:'Elemental' },
     { kind: 'pack', label: 'Borderless Stellar Sights (EOS)', id:'BorderlessStellarSights' },
     { kind: 'pack', label: 'Borderless Source Material', id:'FCA' },

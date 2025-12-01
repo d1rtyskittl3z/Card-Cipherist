@@ -251,6 +251,12 @@ import IxalanCoin from './IxalanCoin';
 import IxalanLegends1 from './IxalanLegends1';
 import IxalanLegends2 from './IxalanLegends2';
 import IxalanLegends3 from './IxalanLegends3';
+import NeonInk from './NeonInk';
+import NeonInkTextless from './NeonInkTextless';
+import NeonInkTransformFront from './NeonInkTransformFront';
+import NeonInkTransformBack from './NeonInkTransformBack';
+import NeonInkTransformFrontTextless from './NeonInkTransformFrontTextless';
+import NeonInkTransformBackTextless from './NeonInkTransformBackTextless';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -433,6 +439,12 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'MiscCustom': MiscCustom,
   'MysticalArchive': MysticalArchive,
   'NEONeonShort': NEONeonShort,
+  'NeonInk': NeonInk,
+  'NeonInkTextless': NeonInkTextless,
+  'NeonInkTransformFront': NeonInkTransformFront,
+  'NeonInkTransformBack': NeonInkTransformBack,
+  'NeonInkTransformFrontTextless': NeonInkTransformFrontTextless,
+  'NeonInkTransformBackTextless': NeonInkTransformBackTextless,
   'StoneCutterDeluxe': StoneCutterDeluxe,
   'StoneCutterDeluxeNicknameAddons': StoneCutterDeluxeNicknameAddons,
   'TARDIS': TARDIS,

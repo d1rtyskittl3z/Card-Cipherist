@@ -16,6 +16,8 @@ const group: LegacyGroup = {
     { kind: 'pack', label: 'Saga Creatures (Back)', id: 'SagaCreatureBack' },
     { kind: 'pack', label: 'Saga Creatures (Universes Beyond) (Front)', id: 'SagaCreatureUBFront' },
     { kind: 'pack', label: 'Saga Creatures (Universes Beyond) (Back)', id: 'SagaCreatureUBBack' },
+    { kind: 'pack', label: 'Neon Ink Transform (Front) (TLA)', id: 'NeonInkTransformFront' },
+    { kind: 'pack', label: 'Neon Ink Transform (Back) (TLA)', id: 'NeonInkTransformBack' },
 
     { kind: 'label', label: 'Back' },
     { kind: 'pack', label: 'Regular (Back)', id:'M15TransformBackNew' },

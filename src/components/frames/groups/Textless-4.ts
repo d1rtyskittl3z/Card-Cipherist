@@ -5,6 +5,9 @@ const group: LegacyGroup = {
   label: 'Textless/Fullart',
   packs: [
     { kind: 'label', label: 'Basic Lands' },
+    { kind: 'pack', label:'Neon Ink (TLA)', id:'NeonInkTextless'},
+    { kind: 'pack', label:'Neon Ink Transform (Front) (TLA)', id:'NeonInkTransformFrontTextless'},
+    { kind: 'pack', label:'Neon Ink Transform (Back) (TLA)', id:'NeonInkTransformBackTextless'},
     { kind: 'pack', label:'Edge of Eternities Basics (EOE)', id:'EOEBasics'},    
     { kind: 'pack', label:'Kamigawa Basics (NEO)', id:'NeoBasics'},
     { kind: 'pack', label:'Fullart Basics (2022)', id:'TextlessBasics2022'},
