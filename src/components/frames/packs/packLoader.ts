@@ -268,6 +268,24 @@ import StoneCutterDeluxeTransformAddons from './StoneCutterDeluxeTransformAddons
 import StoneCutterDeluxeSaga from './StoneCutterDeluxeSaga';
 import StoneCutterDeluxeClass from './StoneCutterDeluxeClass';
 import StoneCutterDeluxeExtended from './StoneCutterDeluxeExtended';
+import MarginEOEBasics from './MarginEOEBasics';
+import MarginBorderlessStellarSights from './MarginBorderlessStellarSights';
+import MarginDraconic from './MarginDraconic';
+import MarginIxalanLegends from './MarginIxalanLegends';
+import MarginMemoryCorridor from './MarginMemoryCorridor';
+import MarginBreakingNews from './MarginBreakingNews';
+import MarginVault from './MarginVault';
+import MarginWanted from './MarginWanted';
+import MarginJapanShowcase from './MarginJapanShowcase';
+import MarginEnchantingTales from './MarginEnchantingTales';
+import MarginRing from './MarginRing';
+import MarginDNDModule from './MarginDNDModule';
+import MarginMysticalArchive from './MarginMysticalArchive';
+import MarginUnfinity from './MarginUnfinity';
+import MarginUnstable from './MarginUnstable';
+import MarginInvocation from './MarginInvocation';
+import MarginNew from './MarginNew';
+import MarginElemental from './MarginElemental';
 
 /**
  * Pack registry - maps pack IDs to their modules
@@ -326,6 +344,24 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'GenericShowcase': GenericShowcase,
   'M15NyxShowcase': M15NyxShowcase,
   'Margin-1': Margin1,
+  'MarginBorderlessStellarSights': MarginBorderlessStellarSights,
+  'MarginBreakingNews': MarginBreakingNews,
+  'MarginDraconic': MarginDraconic,
+  'MarginEOEBasics': MarginEOEBasics,
+  'MarginIxalanLegends': MarginIxalanLegends,
+  'MarginMemoryCorridor': MarginMemoryCorridor,
+  'MarginVault': MarginVault,
+  'MarginWanted': MarginWanted,
+  'MarginJapanShowcase': MarginJapanShowcase,
+  'MarginEnchantingTales': MarginEnchantingTales,
+  'MarginRing': MarginRing,
+  'MarginDNDModule': MarginDNDModule,
+  'MarginMysticalArchive': MarginMysticalArchive,
+  'MarginUnfinity': MarginUnfinity,
+  'MarginUnstable': MarginUnstable,
+  'MarginInvocation': MarginInvocation,
+  'MarginNew': MarginNew,
+  'MarginElemental': MarginElemental,
   'Storybook': Storybook,
   'ZendikarRising': ZendikarRising,
   'Wanted': Wanted,

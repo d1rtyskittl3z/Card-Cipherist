@@ -13,9 +13,9 @@ const frames: FrameItem[] = [
   { name: 'Black Frame', src: '/img/frames/unfinity/b.png', masks },
   { name: 'Red Frame', src: '/img/frames/unfinity/r.png', masks },
   { name: 'Green Frame', src: '/img/frames/unfinity/g.png', masks },
-  { name: 'Multicolored Frame', src: '/img/frames/unfinity/m.png', masks },
-  { name: 'Artifact Frame', src: '/img/frames/unfinity/a.png', masks },
-  { name: 'Colorless Frame', src: '/img/frames/unfinity/c.png', masks },
+  // { name: 'Multicolored Frame', src: '/img/frames/unfinity/m.png', masks },
+  // { name: 'Artifact Frame', src: '/img/frames/unfinity/a.png', masks },
+  // { name: 'Colorless Frame', src: '/img/frames/unfinity/c.png', masks },
   { name:'Waste Frame', src:'/img/frames/unfinity/L.png', masks},
 ];
 

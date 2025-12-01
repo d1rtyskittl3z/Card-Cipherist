@@ -25,7 +25,7 @@ const group: LegacyGroup = {
     { kind: 'pack', label: 'Unstable Basics Margins', id:'MarginUnstable' },
     { kind: 'pack', label: 'Invocation Margins', id:'MarginInvocation' },
     { kind: 'pack', label: 'Accurate Frame Margins', id:'MarginNew' },
-    { kind: 'pack', label: 'Custom Margins', id:'disabled' },
+    { kind: 'label', label: 'Custom Margins' },
     { kind: 'pack', label: 'Celid\'s Asap Margins', id:'CustomMarginCelidAsap' }
   ],
 }
