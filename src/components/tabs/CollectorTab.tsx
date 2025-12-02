@@ -27,6 +27,18 @@ const CollectorTabComponent = () => {
   const [middleRight, setMiddleRight] = useState('');
   const [bottomLeft, setBottomLeft] = useState('');
   const [bottomRight, setBottomRight] = useState('');
+  const [showPositionControls, setShowPositionControls] = useState(false);
+  
+  // Position offsets (normalized coordinates) - reset on page reload
+  const [positionOffsets, setPositionOffsets] = useState<Record<string, { x: number; y: number }>>({
+    topLeft: { x: 0, y: 0 },
+    rarity: { x: 0, y: 0 },
+    note: { x: 0, y: 0 },
+    midLeft: { x: 0, y: 0 },
+    middleRight: { x: 0, y: 0 },
+    bottomLeft: { x: 0, y: 0 },
+    bottomRight: { x: 0, y: 0 },
+  });
   // removed local state; now using store-backed showSerialNumbers
 
   // Get collector info from store
@@ -79,11 +91,14 @@ const CollectorTabComponent = () => {
         replacedText = replacedText.replace(/\u2022/g, '{fontbelerenbsc}{fontrel85}\u2605{fontbase}{fontgothammedium}');
       }
 
+      // Apply position offsets
+      const offset = positionOffsets[key] || { x: 0, y: 0 };
+
       bottomInfo[key] = {
         name: key,
         text: replacedText,
-        x: textConfig.x,
-        y: textConfig.y,
+        x: textConfig.x + offset.x,
+        y: textConfig.y + offset.y,
         width: textConfig.width,
         height: textConfig.height,
         size: textConfig.size,
@@ -97,7 +112,7 @@ const CollectorTabComponent = () => {
 
     updateCard({ bottomInfo });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames]);
+  }, [showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets]);
 
   // Ensure the switch is off by default on first mount
   useEffect(() => {
@@ -129,6 +144,49 @@ const CollectorTabComponent = () => {
         duration: 5000,
       });
     }
+  };
+
+  const updatePositionOffset = (field: string, axis: 'x' | 'y', value: number) => {
+    setPositionOffsets((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        [axis]: value,
+      },
+    }));
+  };
+
+  const resetAllPositions = () => {
+    setPositionOffsets({
+      topLeft: { x: 0, y: 0 },
+      rarity: { x: 0, y: 0 },
+      note: { x: 0, y: 0 },
+      midLeft: { x: 0, y: 0 },
+      middleRight: { x: 0, y: 0 },
+      bottomLeft: { x: 0, y: 0 },
+      bottomRight: { x: 0, y: 0 },
+    });
+  };
+
+  const resetFieldPosition = (field: string) => {
+    setPositionOffsets((prev) => ({
+      ...prev,
+      [field]: { x: 0, y: 0 },
+    }));
+  };
+
+  // Get field labels for display
+  const getFieldLabel = (key: string): string => {
+    const labels: Record<string, string> = {
+      topLeft: 'Number',
+      rarity: 'Rarity',
+      note: 'Note',
+      midLeft: 'Set/Language/Artist',
+      middleRight: 'Middle Right',
+      bottomLeft: 'Bottom Left',
+      bottomRight: 'Bottom Right',
+    };
+    return labels[key] || key;
   };
 
   return (
@@ -336,6 +394,72 @@ const CollectorTabComponent = () => {
               mb={2}
             />
           </Box>
+
+          {/* Position Controls Section */}
+          <Box gridColumn="1 / -1">
+            <LabeledSwitch
+              label="Adjust Field Positions"
+              checked={showPositionControls}
+              onCheckedChange={setShowPositionControls}
+              colorPalette="purple"
+              size="lg"
+              mb={2}
+            />
+          </Box>
+
+          {showPositionControls && (
+            <Box gridColumn="1 / -1" p={3} bg="gray.800" borderRadius="md">
+              <VStack align="stretch" gap={3}>
+                <HStack justify="space-between">
+                  <Box fontSize="sm" fontWeight="bold">Fine-tune text positions (normalized coordinates)</Box>
+                  <Button size="sm" colorPalette="red" onClick={resetAllPositions}>
+                    Reset All
+                  </Button>
+                </HStack>
+
+                {Object.keys(positionOffsets).map((field) => {
+                  // Only show controls for fields that are actually rendered based on current style
+                  const shouldShow = 
+                    (field === 'topLeft' && collectorInfoStyle === 'default') ||
+                    (field === 'rarity' && collectorInfoStyle === 'default') ||
+                    (field === 'note' && (collectorInfoStyle === 'default' || collectorInfoStyle === 'new')) ||
+                    (field === 'midLeft') ||
+                    (field === 'middleRight' && enableAdditionalFields) ||
+                    (field === 'bottomLeft' && enableAdditionalFields) ||
+                    (field === 'bottomRight' && enableAdditionalFields);
+
+                  if (!shouldShow) return null;
+
+                  return (
+                    <Box key={field} p={2} bg="gray.700" borderRadius="sm">
+                      <HStack justify="space-between" mb={2}>
+                        <Box fontSize="sm" fontWeight="semibold">{getFieldLabel(field)}</Box>
+                        <Button size="xs" colorPalette="orange" onClick={() => resetFieldPosition(field)}>
+                          Reset
+                        </Button>
+                      </HStack>
+                      <ControlGrid columns={2} gap={2}>
+                        <LabeledInput
+                          label="X Offset"
+                          type="number"
+                          step={0.001}
+                          value={positionOffsets[field].x}
+                          onChange={(val) => updatePositionOffset(field, 'x', Number(val) || 0)}
+                        />
+                        <LabeledInput
+                          label="Y Offset"
+                          type="number"
+                          step={0.001}
+                          value={positionOffsets[field].y}
+                          onChange={(val) => updatePositionOffset(field, 'y', Number(val) || 0)}
+                        />
+                      </ControlGrid>
+                    </Box>
+                  );
+                })}
+              </VStack>
+            </Box>
+          )}
 
           {/* Row 3 */}
           <Field label="Bottom Info Color">

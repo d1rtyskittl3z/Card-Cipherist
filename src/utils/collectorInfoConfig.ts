@@ -59,6 +59,7 @@ export const STAR_X_NEW = {
  * - {elemidinfo-rarity} → Rarity input
  * - {elemidinfo-number} → Year input
  * - {elemidinfo-note} → Note input
+ * - {conditional-brush} → Artist brush symbol (only rendered if artist field has content)
  *
  * Position/cursor control:
  * - {savex} → Save current X position for later restoration
@@ -150,7 +151,7 @@ export const getCollectorInfoConfig = (
           outlineWidth: 0.003,
         },
         midLeft: {
-          text: `{fontgothammedium}{elemidinfo-set} \u2022 {elemidinfo-language}  \uFFEE {fontbelerenbsc}{elemidinfo-artist}`,
+          text: `{fontgothammedium}{elemidinfo-set} \u2022 {elemidinfo-language}{conditional-brush}{fontbelerenbsc}{elemidinfo-artist}`,
           x: 0.0647,
           y: 0.9548,
           width: 0.8707,
@@ -240,7 +241,7 @@ export const getCollectorInfoConfig = (
           outlineWidth: 0.003,
         },
         midLeft: {
-          text: `{fontgothammedium}{elemidinfo-set} \u2022 {elemidinfo-language}  \uFFEE {fontbelerenbsc}{elemidinfo-artist}`,
+          text: `{fontgothammedium}{elemidinfo-set} \u2022 {elemidinfo-language}{conditional-brush}{fontbelerenbsc}{elemidinfo-artist}`,
           x: 0.0647,
           y: 0.9548,
           width: 0.8707,
@@ -304,7 +305,7 @@ export const getCollectorInfoConfig = (
     case 'artist':
       return {
         midLeft: {
-          text: `\uFFEE {fontbelerenbsc}{elemidinfo-artist}`,
+          text: `{conditional-brush}{fontbelerenbsc}{elemidinfo-artist}`,
           x: 0.0647,
           y: 0.9548,
           width: 0.8707,
@@ -337,11 +338,15 @@ export const replaceCollectorTokens = (
     digits?: string;
   }
 ): string => {
+  // Only include the brush symbol if artist has content
+  const brushSymbol = values.artist ? '  \uFFEE ' : '';
+  
   return text
     .replace('{elemidinfo-number}', values.number || '')
     .replace('{elemidinfo-set}', values.set || '')
     .replace('{elemidinfo-language}', values.language || '')
     .replace('{elemidinfo-artist}', values.artist || '')
     .replace('{elemidinfo-rarity}', values.rarity || '')
-    .replace('{elemidinfo-note}', values.note || '');
+    .replace('{elemidinfo-note}', values.note || '')
+    .replace('{conditional-brush}', brushSymbol);
 };
