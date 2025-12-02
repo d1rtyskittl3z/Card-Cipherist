@@ -19,6 +19,7 @@
  * - NEO_BASICS: Shows Kamigawa tab, enables frame stretching
  * - STATION_REGULAR: Shows Stations tab
  * - STATION_BORDERLESS: Shows Stations tab (borderless variant)
+ * - MYSTICAL_ARCHIVE_JP: Shows Japanese Mystical Archive tab, enables title/type stretching
  */
 export const CARD_VERSIONS = {
   // Standard versions
@@ -50,6 +51,9 @@ export const CARD_VERSIONS = {
   // Station versions
   STATION_REGULAR: 'stationRegular',
   STATION_BORDERLESS: 'stationBorderless',
+
+  // Mystical Archive JP
+  MYSTICAL_ARCHIVE_JP: 'mysticalArchiveJP',
 
   // Token versions
   TOKEN_REGULAR: 'tokenRegular',
@@ -164,6 +168,16 @@ export const isStationVersion = (version: string | undefined): boolean => {
 export const isNeoBasicsVersion = (version: string | undefined): boolean => {
   if (!version) return false;
   return version === CARD_VERSIONS.NEO_BASICS;
+};
+
+/**
+ * Check if a version string indicates a Mystical Archive JP card
+ * @param version - The version string to check
+ * @returns True if the version is a Mystical Archive JP variant
+ */
+export const isMysticalArchiveJPVersion = (version: string | undefined): boolean => {
+  if (!version) return false;
+  return version === CARD_VERSIONS.MYSTICAL_ARCHIVE_JP;
 };
 
 /**

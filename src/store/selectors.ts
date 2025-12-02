@@ -457,6 +457,34 @@ export const useIsNeoBasicsCard = () => {
 };
 
 // ============================================================================
+// Mystical Archive JP Selectors
+// ============================================================================
+
+/**
+ * Get Mystical Archive JP title height
+ */
+export const useMysticalArchiveTitleHeight = () => {
+  return useCardStore((state) => state.mysticalArchiveTitleHeight);
+};
+
+/**
+ * Get Mystical Archive JP type width
+ */
+export const useMysticalArchiveTypeWidth = () => {
+  return useCardStore((state) => state.mysticalArchiveTypeWidth);
+};
+
+/**
+ * Check if current card is Mystical Archive JP
+ */
+export const useIsMysticalArchiveJPCard = () => {
+  return useCardStore((state) => {
+    const version = state.card.version?.toLowerCase();
+    return version === 'mysticalarchivejp';
+  });
+};
+
+// ============================================================================
 // Canvas Ref Selectors
 // ============================================================================
 

@@ -139,6 +139,10 @@ export interface Frame {
   ogScale?: number;
   /** Flag indicating Neo Basics frame has been modified */
   neoBasicsModified?: boolean;
+  /** Flag indicating Mystical Archive JP frame has been modified */
+  mysticalArchiveModified?: boolean;
+  /** Flag indicating Mystical Archive JP Horizontal frame has been modified */
+  mysticalArchiveHorizontalModified?: boolean;
 }
 
 /**

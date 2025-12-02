@@ -180,6 +180,8 @@ import UBLegendCrownsNew from './UBLegendCrownsNew-1';
 import BorderlessStellarSights from './BorderlessStellarSights';
 import MiscCustom from './MiscCustom';
 import MysticalArchive from './MysticalArchive';
+import MysticalArchiveJP from './MysticalArchiveJP';
+import MysticalArchiveJPHorizontal from './MysticalArchiveJPHorizontal';
 import NeoBasics from './NeoBasics';
 import NeoNeon from './NeoNeon';
 import NeoNinja from './NeoNinja';
@@ -487,6 +489,8 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'BorderlessStellarSights': BorderlessStellarSights,
   'MiscCustom': MiscCustom,
   'MysticalArchive': MysticalArchive,
+  'MysticalArchiveJP': MysticalArchiveJP,
+  'MysticalArchiveJPHorizontal': MysticalArchiveJPHorizontal,
   'NEONeonShort': NEONeonShort,
   'NeonInk': NeonInk,
   'NeonInkTextless': NeonInkTextless,

@@ -101,7 +101,11 @@ const FrameTabComponent = () => {
   const setHasShownClassTab = useCardStore((state) => state.setHasShownClassTab);
   const setHasShownKamigawaTab = useCardStore((state) => state.setHasShownKamigawaTab);
   const setHasShownStationsTab = useCardStore((state) => state.setHasShownStationsTab);
+  const setHasShownMysticalArchiveTab = useCardStore((state) => state.setHasShownMysticalArchiveTab);
+  const setHasShownMysticalArchiveHorizontalTab = useCardStore((state) => state.setHasShownMysticalArchiveHorizontalTab);
   const initializeNeoBasicsControls = useCardStore((state) => state.initializeNeoBasicsControls);
+  const initializeMysticalArchiveControls = useCardStore((state) => state.initializeMysticalArchiveControls);
+  const initializeMysticalArchiveHorizontalControls = useCardStore((state) => state.initializeMysticalArchiveHorizontalControls);
   const applyNeoBasicsAdjustments = useCardStore((state) => state.applyNeoBasicsAdjustments);
   const rotateCanvasPreview = useRotateCanvasPreview();
   const setRotateCanvasPreview = useUIStore((state) => state.setRotateCanvasPreview);
@@ -507,6 +511,30 @@ const FrameTabComponent = () => {
         });
       }
 
+      // Show Mystical Archive tab for Japanese Mystical Archive pack
+      if (pack?.id === 'MysticalArchiveJP') {
+        setHasShownMysticalArchiveTab(true);
+        initializeMysticalArchiveControls();
+        toaster.create({
+          title: 'Japanese Mystical Archive Pack Selected',
+          description: 'A "Japanese Mystical Archive" tab has appeared with controls for the title bar height and type bar width. For a better Japanese font, use {fontjapanese-title} or {fontjapanese}.',
+          type: 'info',
+          duration: 10000,
+        });
+      }
+
+      // Show Mystical Archive Horizontal tab for Horizontal Japanese Mystical Archive pack
+      if (pack?.id === 'MysticalArchiveJPHorizontal') {
+        setHasShownMysticalArchiveHorizontalTab(true);
+        initializeMysticalArchiveHorizontalControls();
+        toaster.create({
+          title: 'Horizontal Japanese Mystical Archive Pack Selected',
+          description: 'A "Japanese Mystical Archive Horizontal" tab has appeared with controls for the title bar height and type bar width. For a better Japanese font, use {fontjapanese-title} or {fontjapanese}.',
+          type: 'info',
+          duration: 10000,
+        });
+      }
+
       // Handle replacementMasks - override position masks if pack specifies custom ones
       if (pack?.replacementMasks) {
         setPositionMasks({ ...defaultPositionMasks.current, ...pack.replacementMasks });
@@ -519,7 +547,7 @@ const FrameTabComponent = () => {
     // Clear custom masks when pack changes (they're tied to the loaded pack)
     setCustomMasks([]);
     setCustomMaskCounter(1);
-  }, [selectedPackId, setLoadedPackStore, setHasShownKamigawaTab, setHasShownSagaTab, setHasShownPlaneswalkerTab, setHasShownClassTab, setHasShownStationsTab, initializeNeoBasicsControls]);
+  }, [selectedPackId, setLoadedPackStore, setHasShownKamigawaTab, setHasShownSagaTab, setHasShownPlaneswalkerTab, setHasShownClassTab, setHasShownStationsTab, setHasShownMysticalArchiveTab, setHasShownMysticalArchiveHorizontalTab, initializeNeoBasicsControls, initializeMysticalArchiveControls, initializeMysticalArchiveHorizontalControls]);
 
   // Get frames and masks from loaded pack
   const availableFrames = useMemo(() => {

@@ -28,6 +28,30 @@ import {
   computeNeoBasicsChange,
   generateStretchedFrameImage,
 } from '../utils/neoBasics';
+import {
+  MYSTICAL_ARCHIVE_JP_FRAME_PREFIX,
+  MYSTICAL_ARCHIVE_JP_DEFAULT_TITLE_HEIGHT,
+  MYSTICAL_ARCHIVE_JP_DEFAULT_TYPE_WIDTH,
+  MYSTICAL_ARCHIVE_JP_BASE_TITLE_HEIGHT,
+  MYSTICAL_ARCHIVE_JP_BASE_TYPE_WIDTH,
+  clampMysticalArchiveTitleHeight,
+  clampMysticalArchiveTypeWidth,
+  computeMysticalArchiveTitleChange,
+  computeMysticalArchiveTypeChange,
+  generateMysticalArchiveStretchedImage,
+} from '../utils/mysticalArchiveJP';
+import {
+  MYSTICAL_ARCHIVE_JP_HORIZONTAL_FRAME_PREFIX,
+  MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TITLE_WIDTH,
+  MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TYPE_WIDTH,
+  MYSTICAL_ARCHIVE_JP_HORIZONTAL_BASE_TITLE_WIDTH,
+  MYSTICAL_ARCHIVE_JP_HORIZONTAL_BASE_TYPE_WIDTH,
+  clampMysticalArchiveHorizontalTitleWidth,
+  clampMysticalArchiveHorizontalTypeWidth,
+  computeMysticalArchiveHorizontalTitleChange,
+  computeMysticalArchiveHorizontalTypeChange,
+  generateMysticalArchiveHorizontalStretchedImage,
+} from '../utils/mysticalArchiveJPHorizontal';
 import { loadImage } from '../utils/canvasHelpers';
 import {
   applyStationVersionPreset,
@@ -61,9 +85,19 @@ interface CardState {
   hasShownKamigawaTab: boolean;
   hasShownClassTab: boolean;
   hasShownStationsTab: boolean;
+  hasShownMysticalArchiveTab: boolean;
+  hasShownMysticalArchiveHorizontalTab: boolean;
   neoBasicsTitleHeight: number;
   neoBasicsElements: string[];
   neoBasicsColorOverrides: Record<string, FrameColorOverride>;
+
+  // Mystical Archive JP state
+  mysticalArchiveTitleHeight: number;
+  mysticalArchiveTypeWidth: number;
+
+  // Mystical Archive JP Horizontal state
+  mysticalArchiveHorizontalTitleWidth: number;
+  mysticalArchiveHorizontalTypeWidth: number;
 
   // Set Symbol inputs (not persisted - reset on reload)
   setCode: string;
@@ -162,6 +196,8 @@ interface CardState {
   setHasShownKamigawaTab: (shown: boolean) => void;
   setHasShownClassTab: (shown: boolean) => void;
   setHasShownStationsTab: (shown: boolean) => void;
+  setHasShownMysticalArchiveTab: (shown: boolean) => void;
+  setHasShownMysticalArchiveHorizontalTab: (shown: boolean) => void;
   initializeNeoBasicsControls: (elements: string[]) => void;
   setNeoBasicsTitleHeight: (value: number) => void;
   setNeoBasicsColorOverride: (
@@ -170,6 +206,21 @@ interface CardState {
   ) => void;
   resetNeoBasicsColors: () => void;
   applyNeoBasicsAdjustments: () => void;
+
+  // Mystical Archive JP actions
+  initializeMysticalArchiveControls: () => void;
+  setMysticalArchiveTitleHeight: (value: number) => void;
+  setMysticalArchiveTypeWidth: (value: number) => void;
+  resetMysticalArchiveSettings: () => void;
+  applyMysticalArchiveAdjustments: () => void;
+
+  // Mystical Archive JP Horizontal actions
+  initializeMysticalArchiveHorizontalControls: () => void;
+  setMysticalArchiveHorizontalTitleWidth: (value: number) => void;
+  setMysticalArchiveHorizontalTypeWidth: (value: number) => void;
+  resetMysticalArchiveHorizontalSettings: () => void;
+  applyMysticalArchiveHorizontalAdjustments: () => void;
+
   setSagaInfo: (updates: Partial<SagaInfo>) => void;
   resetSagaInfo: (preset?: SagaInfo | null) => void;
   setPlaneswalkerInfo: (updates: Partial<PlaneswalkerInfo>) => void;
@@ -403,9 +454,15 @@ export const useCardStore = create<CardState>()(
         hasShownKamigawaTab: false,
         hasShownClassTab: false,
         hasShownStationsTab: false,
+        hasShownMysticalArchiveTab: false,
+        hasShownMysticalArchiveHorizontalTab: false,
   neoBasicsTitleHeight: NEO_BASICS_MIN_TITLE_HEIGHT,
   neoBasicsElements: [],
   neoBasicsColorOverrides: {},
+        mysticalArchiveTitleHeight: MYSTICAL_ARCHIVE_JP_DEFAULT_TITLE_HEIGHT,
+        mysticalArchiveTypeWidth: MYSTICAL_ARCHIVE_JP_DEFAULT_TYPE_WIDTH,
+        mysticalArchiveHorizontalTitleWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TITLE_WIDTH,
+        mysticalArchiveHorizontalTypeWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TYPE_WIDTH,
         setCode: '',
         rarity: '',
         collectorSetCode: 'MTG',
@@ -654,6 +711,14 @@ export const useCardStore = create<CardState>()(
           set({ hasShownStationsTab: shown });
         },
 
+        setHasShownMysticalArchiveTab: (shown) => {
+          set({ hasShownMysticalArchiveTab: shown });
+        },
+
+        setHasShownMysticalArchiveHorizontalTab: (shown) => {
+          set({ hasShownMysticalArchiveHorizontalTab: shown });
+        },
+
         initializeNeoBasicsControls: (elements) => {
           set(() => {
             const overrides = elements.reduce<Record<string, FrameColorOverride>>((acc, name) => {
@@ -734,6 +799,180 @@ export const useCardStore = create<CardState>()(
         applyNeoBasicsAdjustments: () => {
           refreshNeoBasicsFrames().catch((error: unknown) => {
             console.error('Failed to apply Neo Basics adjustments:', error);
+          });
+        },
+
+        // Mystical Archive JP actions
+        initializeMysticalArchiveControls: () => {
+          set({
+            mysticalArchiveTitleHeight: MYSTICAL_ARCHIVE_JP_DEFAULT_TITLE_HEIGHT,
+            mysticalArchiveTypeWidth: MYSTICAL_ARCHIVE_JP_DEFAULT_TYPE_WIDTH,
+          });
+
+          const store = useCardStore.getState();
+          if (store.card.version === 'mysticalArchiveJP' && store.card.text?.title) {
+            const titleChange = computeMysticalArchiveTitleChange(MYSTICAL_ARCHIVE_JP_DEFAULT_TITLE_HEIGHT);
+            store.updateText(TEXT_FIELDS.TITLE, {
+              height: titleChange[1] + MYSTICAL_ARCHIVE_JP_BASE_TITLE_HEIGHT,
+            });
+          }
+
+          refreshMysticalArchiveJPFrames().catch((error: unknown) => {
+            console.error('Failed to initialize Mystical Archive JP stretch state:', error);
+          });
+        },
+
+        setMysticalArchiveTitleHeight: (value) => {
+          const clamped = clampMysticalArchiveTitleHeight(value);
+          set({ mysticalArchiveTitleHeight: clamped });
+
+          const store = useCardStore.getState();
+          if (store.card.version === 'mysticalArchiveJP' && store.card.text?.title) {
+            const titleChange = computeMysticalArchiveTitleChange(clamped);
+            store.updateText(TEXT_FIELDS.TITLE, {
+              height: titleChange[1] + MYSTICAL_ARCHIVE_JP_BASE_TITLE_HEIGHT,
+            });
+          }
+
+          refreshMysticalArchiveJPFrames().catch((error: unknown) => {
+            console.error('Failed to update Mystical Archive JP title stretch:', error);
+          });
+        },
+
+        setMysticalArchiveTypeWidth: (value) => {
+          const clamped = clampMysticalArchiveTypeWidth(value);
+          set({ mysticalArchiveTypeWidth: clamped });
+
+          const store = useCardStore.getState();
+          if (store.card.version === 'mysticalArchiveJP' && store.card.text?.type) {
+            const typeChange = computeMysticalArchiveTypeChange(clamped);
+            store.updateText('type', {
+              width: typeChange[0] + MYSTICAL_ARCHIVE_JP_BASE_TYPE_WIDTH,
+            });
+          }
+
+          refreshMysticalArchiveJPFrames().catch((error: unknown) => {
+            console.error('Failed to update Mystical Archive JP type stretch:', error);
+          });
+        },
+
+        resetMysticalArchiveSettings: () => {
+          set({
+            mysticalArchiveTitleHeight: MYSTICAL_ARCHIVE_JP_DEFAULT_TITLE_HEIGHT,
+            mysticalArchiveTypeWidth: MYSTICAL_ARCHIVE_JP_DEFAULT_TYPE_WIDTH,
+          });
+
+          const store = useCardStore.getState();
+          if (store.card.version === 'mysticalArchiveJP') {
+            if (store.card.text?.title) {
+              const titleChange = computeMysticalArchiveTitleChange(MYSTICAL_ARCHIVE_JP_DEFAULT_TITLE_HEIGHT);
+              store.updateText(TEXT_FIELDS.TITLE, {
+                height: titleChange[1] + MYSTICAL_ARCHIVE_JP_BASE_TITLE_HEIGHT,
+              });
+            }
+            if (store.card.text?.type) {
+              const typeChange = computeMysticalArchiveTypeChange(MYSTICAL_ARCHIVE_JP_DEFAULT_TYPE_WIDTH);
+              store.updateText('type', {
+                width: typeChange[0] + MYSTICAL_ARCHIVE_JP_BASE_TYPE_WIDTH,
+              });
+            }
+          }
+
+          refreshMysticalArchiveJPFrames().catch((error: unknown) => {
+            console.error('Failed to reset Mystical Archive JP settings:', error);
+          });
+        },
+
+        applyMysticalArchiveAdjustments: () => {
+          refreshMysticalArchiveJPFrames().catch((error: unknown) => {
+            console.error('Failed to apply Mystical Archive JP adjustments:', error);
+          });
+        },
+
+        // Mystical Archive JP Horizontal actions
+        initializeMysticalArchiveHorizontalControls: () => {
+          set({
+            mysticalArchiveHorizontalTitleWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TITLE_WIDTH,
+            mysticalArchiveHorizontalTypeWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TYPE_WIDTH,
+          });
+
+          const store = useCardStore.getState();
+          if (store.card.version === 'mysticalArchiveJPHorizontal' && store.card.text?.title) {
+            const titleChange = computeMysticalArchiveHorizontalTitleChange(MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TITLE_WIDTH);
+            store.updateText(TEXT_FIELDS.TITLE, {
+              width: titleChange[0] + MYSTICAL_ARCHIVE_JP_HORIZONTAL_BASE_TITLE_WIDTH,
+            });
+          }
+
+          refreshMysticalArchiveJPHorizontalFrames().catch((error: unknown) => {
+            console.error('Failed to initialize Mystical Archive JP Horizontal stretch state:', error);
+          });
+        },
+
+        setMysticalArchiveHorizontalTitleWidth: (value) => {
+          const clamped = clampMysticalArchiveHorizontalTitleWidth(value);
+          set({ mysticalArchiveHorizontalTitleWidth: clamped });
+
+          const store = useCardStore.getState();
+          if (store.card.version === 'mysticalArchiveJPHorizontal' && store.card.text?.title) {
+            const titleChange = computeMysticalArchiveHorizontalTitleChange(clamped);
+            store.updateText(TEXT_FIELDS.TITLE, {
+              width: titleChange[0] + MYSTICAL_ARCHIVE_JP_HORIZONTAL_BASE_TITLE_WIDTH,
+            });
+          }
+
+          refreshMysticalArchiveJPHorizontalFrames().catch((error: unknown) => {
+            console.error('Failed to update Mystical Archive JP Horizontal title stretch:', error);
+          });
+        },
+
+        setMysticalArchiveHorizontalTypeWidth: (value) => {
+          const clamped = clampMysticalArchiveHorizontalTypeWidth(value);
+          set({ mysticalArchiveHorizontalTypeWidth: clamped });
+
+          const store = useCardStore.getState();
+          if (store.card.version === 'mysticalArchiveJPHorizontal' && store.card.text?.type) {
+            const typeChange = computeMysticalArchiveHorizontalTypeChange(clamped);
+            store.updateText('type', {
+              width: typeChange[0] + MYSTICAL_ARCHIVE_JP_HORIZONTAL_BASE_TYPE_WIDTH,
+            });
+          }
+
+          refreshMysticalArchiveJPHorizontalFrames().catch((error: unknown) => {
+            console.error('Failed to update Mystical Archive JP Horizontal type stretch:', error);
+          });
+        },
+
+        resetMysticalArchiveHorizontalSettings: () => {
+          set({
+            mysticalArchiveHorizontalTitleWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TITLE_WIDTH,
+            mysticalArchiveHorizontalTypeWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TYPE_WIDTH,
+          });
+
+          const store = useCardStore.getState();
+          if (store.card.version === 'mysticalArchiveJPHorizontal') {
+            if (store.card.text?.title) {
+              const titleChange = computeMysticalArchiveHorizontalTitleChange(MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TITLE_WIDTH);
+              store.updateText(TEXT_FIELDS.TITLE, {
+                width: titleChange[0] + MYSTICAL_ARCHIVE_JP_HORIZONTAL_BASE_TITLE_WIDTH,
+              });
+            }
+            if (store.card.text?.type) {
+              const typeChange = computeMysticalArchiveHorizontalTypeChange(MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TYPE_WIDTH);
+              store.updateText('type', {
+                width: typeChange[0] + MYSTICAL_ARCHIVE_JP_HORIZONTAL_BASE_TYPE_WIDTH,
+              });
+            }
+          }
+
+          refreshMysticalArchiveJPHorizontalFrames().catch((error: unknown) => {
+            console.error('Failed to reset Mystical Archive JP Horizontal settings:', error);
+          });
+        },
+
+        applyMysticalArchiveHorizontalAdjustments: () => {
+          refreshMysticalArchiveJPHorizontalFrames().catch((error: unknown) => {
+            console.error('Failed to apply Mystical Archive JP Horizontal adjustments:', error);
           });
         },
 
@@ -1002,6 +1241,161 @@ async function refreshNeoBasicsFrames(): Promise<void> {
       useCardStore.getState().updateFrame(index, { image, neoBasicsModified: true });
     } catch (error) {
       console.error(`Failed to stretch Neo Basics frame: ${frame.name}`, error);
+    }
+  });
+
+  await Promise.all(tasks);
+}
+
+async function refreshMysticalArchiveJPFrames(): Promise<void> {
+  const state = useCardStore.getState();
+  if (state.card.version !== 'mysticalArchiveJP') {
+    return;
+  }
+
+  const titleChange = computeMysticalArchiveTitleChange(state.mysticalArchiveTitleHeight);
+  const typeChange = computeMysticalArchiveTypeChange(state.mysticalArchiveTypeWidth);
+  const EPSILON = 0.000001;
+
+  const tasks = state.card.frames.map(async (frame, index) => {
+    if (!frame.src.includes(MYSTICAL_ARCHIVE_JP_FRAME_PREFIX) || !frame.stretch) {
+      return;
+    }
+
+    // Update stretch configs based on element name
+    const updatedStretch = frame.stretch.map((entry) => {
+      if (entry.name === 'adjustable') {
+        return {
+          name: entry.name,
+          targets: [...entry.targets],
+          change: [...titleChange] as [number, number],
+        };
+      } else if (entry.name === 'typePinline' || entry.name === 'type') {
+        return {
+          name: entry.name,
+          targets: [...entry.targets],
+          change: [...typeChange] as [number, number],
+        };
+      }
+      return {
+        name: entry.name,
+        targets: [...entry.targets],
+        change: entry.change as [number, number],
+      };
+    });
+
+    const shouldStretchTitle = Math.abs(titleChange[0]) > EPSILON || Math.abs(titleChange[1]) > EPSILON;
+    const shouldStretchType = Math.abs(typeChange[0]) > EPSILON || Math.abs(typeChange[1]) > EPSILON;
+    const needsCustomImage = shouldStretchTitle || shouldStretchType;
+
+    useCardStore.getState().updateFrame(index, {
+      stretch: updatedStretch,
+    });
+
+    if (!needsCustomImage) {
+      if (frame.mysticalArchiveModified) {
+        try {
+          const baseImage = await loadImage(frame.src);
+          useCardStore.getState().updateFrame(index, {
+            image: baseImage,
+            mysticalArchiveModified: false,
+          });
+        } catch (error) {
+          console.error(`Failed to restore Mystical Archive JP frame: ${frame.name}`, error);
+        }
+      }
+      return;
+    }
+
+    try {
+      const cardSnapshot = useCardStore.getState().card;
+      const image = await generateMysticalArchiveStretchedImage({
+        src: frame.src,
+        card: cardSnapshot,
+        stretch: updatedStretch,
+      });
+
+      useCardStore.getState().updateFrame(index, { image, mysticalArchiveModified: true });
+    } catch (error) {
+      console.error(`Failed to stretch Mystical Archive JP frame: ${frame.name}`, error);
+    }
+  });
+
+  await Promise.all(tasks);
+}
+
+async function refreshMysticalArchiveJPHorizontalFrames(): Promise<void> {
+  const state = useCardStore.getState();
+  if (state.card.version !== 'mysticalArchiveJPHorizontal') {
+    return;
+  }
+
+  const titleChange = computeMysticalArchiveHorizontalTitleChange(state.mysticalArchiveHorizontalTitleWidth);
+  const typeChange = computeMysticalArchiveHorizontalTypeChange(state.mysticalArchiveHorizontalTypeWidth);
+  const EPSILON = 0.000001;
+
+  const tasks = state.card.frames.map(async (frame, index) => {
+    if (!frame.src.includes(MYSTICAL_ARCHIVE_JP_HORIZONTAL_FRAME_PREFIX) || !frame.stretch) {
+      return;
+    }
+
+    // Update stretch configs based on element name
+    // Note: Horizontal version uses 'adjustableHorizontal' instead of 'adjustable'
+    const updatedStretch = frame.stretch.map((entry) => {
+      if (entry.name === 'adjustableHorizontal') {
+        return {
+          name: entry.name,
+          targets: [...entry.targets],
+          change: [...titleChange] as [number, number],
+        };
+      } else if (entry.name === 'typePinline' || entry.name === 'type') {
+        return {
+          name: entry.name,
+          targets: [...entry.targets],
+          change: [...typeChange] as [number, number],
+        };
+      }
+      return {
+        name: entry.name,
+        targets: [...entry.targets],
+        change: entry.change as [number, number],
+      };
+    });
+
+    const shouldStretchTitle = Math.abs(titleChange[0]) > EPSILON || Math.abs(titleChange[1]) > EPSILON;
+    const shouldStretchType = Math.abs(typeChange[0]) > EPSILON || Math.abs(typeChange[1]) > EPSILON;
+    const needsCustomImage = shouldStretchTitle || shouldStretchType;
+
+    useCardStore.getState().updateFrame(index, {
+      stretch: updatedStretch,
+    });
+
+    if (!needsCustomImage) {
+      if (frame.mysticalArchiveHorizontalModified) {
+        try {
+          const baseImage = await loadImage(frame.src);
+          useCardStore.getState().updateFrame(index, {
+            image: baseImage,
+            mysticalArchiveHorizontalModified: false,
+          });
+        } catch (error) {
+          console.error(`Failed to restore Mystical Archive JP Horizontal frame: ${frame.name}`, error);
+        }
+      }
+      return;
+    }
+
+    try {
+      const cardSnapshot = useCardStore.getState().card;
+      const image = await generateMysticalArchiveHorizontalStretchedImage({
+        src: frame.src,
+        card: cardSnapshot,
+        stretch: updatedStretch,
+      });
+
+      useCardStore.getState().updateFrame(index, { image, mysticalArchiveHorizontalModified: true });
+    } catch (error) {
+      console.error(`Failed to stretch Mystical Archive JP Horizontal frame: ${frame.name}`, error);
     }
   });
 

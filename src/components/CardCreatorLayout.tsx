@@ -15,6 +15,8 @@ import { PlaneswalkerTab } from './tabs/PlaneswalkerTab';
 import { KamigawaTab } from './tabs/KamigawaTab';
 import { ClassTab } from './tabs/ClassTab';
 import { StationsTab } from './tabs/StationsTab';
+import { MysticalArchiveTab } from './tabs/MysticalArchiveTab';
+import { MysticalArchiveHorizontalTab } from './tabs/MysticalArchiveHorizontalTab';
 import { ArtTab } from './tabs/ArtTab';
 import { SetSymbolTab } from './tabs/SetSymbolTab';
 import { WatermarkTab } from './tabs/WatermarkTab';
@@ -32,6 +34,8 @@ const CardCreatorLayoutComponent = () => {
   const hasShownKamigawaTab = useCardStore((state) => state.hasShownKamigawaTab);
   const hasShownClassTab = useCardStore((state) => state.hasShownClassTab);
   const hasShownStationsTab = useCardStore((state) => state.hasShownStationsTab);
+  const hasShownMysticalArchiveTab = useCardStore((state) => state.hasShownMysticalArchiveTab);
+  const hasShownMysticalArchiveHorizontalTab = useCardStore((state) => state.hasShownMysticalArchiveHorizontalTab);
   const rotateCanvasPreview = useRotateCanvasPreview();
   const accordionWidth = rotateCanvasPreview ? '1000px' : '1200px';
 
@@ -241,6 +245,48 @@ const CardCreatorLayoutComponent = () => {
                   <Accordion.ItemContent>
                     <Accordion.ItemBody p={4}>
                       <StationsTab />
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+              )}
+
+              {/* Conditionally show Japanese Mystical Archive accordion item */}
+              {hasShownMysticalArchiveTab && (
+                <Accordion.Item value={TABS.MYSTICAL_ARCHIVE}>
+                  <Accordion.ItemTrigger
+                    fontSize="md"
+                    fontWeight="semibold"
+                    py={4}
+                  >
+                    <Box flex="1" textAlign="start">
+                      Japanese Mystical Archive
+                    </Box>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent>
+                    <Accordion.ItemBody p={4}>
+                      <MysticalArchiveTab />
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+              )}
+
+              {/* Conditionally show Japanese Mystical Archive Horizontal accordion item */}
+              {hasShownMysticalArchiveHorizontalTab && (
+                <Accordion.Item value={TABS.MYSTICAL_ARCHIVE_HORIZONTAL}>
+                  <Accordion.ItemTrigger
+                    fontSize="md"
+                    fontWeight="semibold"
+                    py={4}
+                  >
+                    <Box flex="1" textAlign="start">
+                      Japanese Mystical Archive Horizontal
+                    </Box>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent>
+                    <Accordion.ItemBody p={4}>
+                      <MysticalArchiveHorizontalTab />
                     </Accordion.ItemBody>
                   </Accordion.ItemContent>
                 </Accordion.Item>

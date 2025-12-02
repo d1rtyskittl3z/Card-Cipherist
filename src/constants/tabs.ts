@@ -33,6 +33,8 @@ export const TABS = {
   KAMIGAWA: 'kamigawa',
   CLASS: 'class',
   STATIONS: 'stations',
+  MYSTICAL_ARCHIVE: 'mysticalArchive',
+  MYSTICAL_ARCHIVE_HORIZONTAL: 'mysticalArchiveHorizontal',
   TEXT: 'text',
   ART: 'art',
   SET_SYMBOL: 'setSymbol',
