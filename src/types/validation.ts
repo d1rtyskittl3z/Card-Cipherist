@@ -592,6 +592,9 @@ export const framePackTextConfigSchema = z.object({
   conditionalColor: z.string().optional(),
   rotation: z.number().optional(),
   allCaps: z.boolean().optional(),
+  kerning: z.number().optional(),
+  italics: z.boolean().optional(),
+  bold: z.boolean().optional(),
 });
 
 /**
@@ -643,6 +646,7 @@ export const framePackTemplateSchema = z.object({
   replacementMasks: z.record(z.string(), z.string()).optional(),
   frames: z.array(framePackFrameItemSchema).min(1, 'Frame pack must have at least one frame'),
   text: z.record(z.string(), framePackTextConfigSchema).optional(),
+  loadBottomInfo: z.record(z.string(), framePackTextConfigSchema).optional(),
 });
 
 /**

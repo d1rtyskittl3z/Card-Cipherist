@@ -99,6 +99,8 @@ import TokenDayNight from './TokenDayNight';
 import Emblem from './Emblem';
 import TokenRegularM15 from './TokenRegularM15';
 import TokenTextlessM15 from './TokenTextlessM15';
+import TokenUnglued from './TokenUnglued';
+import TokenOld from './TokenOld';
 import EOEBasics from './EOEBasics';
 import TextlessBasics2022 from './TextlessBasics2022';
 import TextlessBasics2022UB from './TextlessBasics2022UB';
@@ -107,6 +109,7 @@ import TextlessBasics from './TextlessBasics-1';
 import ZendikarBasic1 from './ZendikarBasic-1';
 import FullartBasicRoundBottom from './FullartBasicRoundBottom';
 import Unfinity from './Unfinity';
+import Unhinged from './Unhinged';
 import Unstable from './Unstable';
 import TextlessGenericShowcase from './TextlessGenericShowcase';
 import MagicFest from './MagicFest';
@@ -142,6 +145,7 @@ import ModalNickname from './ModalNickname';
 import ModalShort from './ModalShort';
 import ModalShortNickname from './ModalShortNickname';
 import UBLegendCrownsFloating from './UBLegendCrownsFloating';
+import Vanguard from './Vanguard';
 import Vault from './Vault';
 import M15RegularNew from './M15RegularNew';
 import M15ExtendedArtNew from './M15ExtendedArtNew-1';
@@ -411,6 +415,8 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Emblem': Emblem,
   'TokenRegularM15': TokenRegularM15,
   'TokenTextlessM15': TokenTextlessM15,
+  'TokenUnglued': TokenUnglued,
+  'TokenOld': TokenOld,
   'EOEBasics': EOEBasics,
   'TextlessBasics2022': TextlessBasics2022,
   'TextlessBasics2022UB': TextlessBasics2022UB,
@@ -419,6 +425,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'ZendikarBasic-1': ZendikarBasic1,
   'FullartBasicRoundBottom': FullartBasicRoundBottom,
   'Unfinity': Unfinity,
+  'Unhinged': Unhinged,
   'Unstable': Unstable,
   'TextlessGenericShowcase': TextlessGenericShowcase,
   'MagicFest': MagicFest,
@@ -471,6 +478,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'ModalShort': ModalShort,
   'ModalShortNickname': ModalShortNickname,
   'UBLegendCrownsFloating': UBLegendCrownsFloating,
+  'Vanguard': Vanguard,
   'Vault': Vault,
   'M15RegularNew': M15RegularNew,
   'M15ExtendedArtNew': M15ExtendedArtNew,

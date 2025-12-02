@@ -64,6 +64,9 @@ export interface TextConfig {
   conditionalColor?: string; // Color adjustments based on frame/mask selections (e.g., '(Back):white' or 'Frame1,Frame2:black')
   rotation?: number;
   allCaps?: boolean; // Render text in all uppercase
+  kerning?: number; // Letter spacing adjustment
+  italics?: boolean; // Render text in italic style
+  bold?: boolean; // Render text in bold style
 }
 
 export interface SagaPackConfig {
@@ -110,6 +113,9 @@ export interface FramePackTemplate {
   text?: {
     [key: string]: TextConfig;
   }; // Optional for addon-only packs (but can include special fields like nickname)
+  loadBottomInfo?: {
+    [key: string]: TextConfig;
+  }; // Optional original collector info configuration for legacy packs (Unhinged, 8th Edition, etc.)
 }
 
 /**

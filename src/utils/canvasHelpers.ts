@@ -1290,8 +1290,6 @@ export const drawBottomInfo = async (
   // Clear bottom info canvas
   bottomInfoContext.clearRect(0, 0, bottomInfoCanvas.width, bottomInfoCanvas.height);
 
-  if (!card.bottomInfo || !card.showCollectorInfo) return;
-
   // Ensure custom fonts are loaded before drawing to canvas (prevents fallback fonts)
   try {
     // These are commonly used in collector info lines
@@ -1305,18 +1303,37 @@ export const drawBottomInfo = async (
     // Non-fatal: if fonts API is unavailable, continue; canvas will use fallbacks
   }
 
-  // Load artist brush symbol (reuse existing loadImage function)
+  // Load artist brush symbols (both white and black variants, plus original SVG)
   let artistBrushImage: HTMLImageElement | null = null;
+  let whiteBrushImage: HTMLImageElement | null = null;
+  let blackBrushImage: HTMLImageElement | null = null;
+  
   try {
     artistBrushImage = await loadImage('/img/manaSymbols/artistbrush.svg');
   } catch (error) {
     console.warn('Failed to load artist brush symbol, continuing without it:', error);
-    // Continue rendering even if the artist brush fails to load
+  }
+
+  try {
+    whiteBrushImage = await loadImage('/img/manaSymbols/whiteBrush.png');
+  } catch (error) {
+    console.warn('Failed to load white brush symbol, continuing without it:', error);
+  }
+
+  try {
+    blackBrushImage = await loadImage('/img/manaSymbols/blackBrush.png');
+  } catch (error) {
+    console.warn('Failed to load black brush symbol, continuing without it:', error);
   }
 
   // Position save/load system
   let savedX: number | null = null;
   let savedX2: number | null = null;
+
+  // Render bottomInfo if it exists (independent of showCollectorInfo)
+  if (!card.bottomInfo || Object.keys(card.bottomInfo).length === 0) {
+    return;
+  }
 
   // Iterate through bottom info text objects
   for (const textObj of Object.values(card.bottomInfo)) {
@@ -1331,6 +1348,10 @@ export const drawBottomInfo = async (
   let fontFamily = textObj.font || 'gothammedium';
   const chosenColor = card.bottomInfoColor || textObj.color || 'white';
   const outlineWidth = textObj.outlineWidth ? scaleWidth(card, textObj.outlineWidth) : 0;
+  // Shadow properties
+  const shadowX = textObj.shadowX ? scaleWidth(card, textObj.shadowX) : 0;
+  const shadowY = textObj.shadowY ? scaleHeight(card, textObj.shadowY) : 0;
+  const hasShadow = shadowX !== 0 || shadowY !== 0;
 
     // Set initial text properties
   bottomInfoContext.fillStyle = chosenColor;
@@ -1457,17 +1478,57 @@ export const drawBottomInfo = async (
           const segmentSize = segment.size || fontSize;
           bottomInfoContext.font = `${segmentSize}px ${segmentFont}`;
           totalWidth += bottomInfoContext.measureText(segment.content).width + kerning;
-        } else if (segment.type === 'artistbrush' && artistBrushImage) {
-          const targetHeight = baseFontSize * 0.7;
-          const naturalW = artistBrushImage.naturalWidth || artistBrushImage.width || 1;
-          const naturalH = artistBrushImage.naturalHeight || artistBrushImage.height || 1;
-          const aspect = naturalW / naturalH;
-          const symbolWidth = targetHeight * aspect;
-          totalWidth += symbolWidth + 2;
+        } else if (segment.type === 'artistbrush') {
+          // Choose brush image based on text color
+          let brushImage = artistBrushImage;
+          if (chosenColor === 'white' && whiteBrushImage) {
+            brushImage = whiteBrushImage;
+          } else if (chosenColor === 'black' && blackBrushImage) {
+            brushImage = blackBrushImage;
+          }
+          
+          if (brushImage) {
+            const targetHeight = baseFontSize * 0.5;
+            const naturalW = brushImage.naturalWidth || brushImage.width || 1;
+            const naturalH = brushImage.naturalHeight || brushImage.height || 1;
+            const aspect = naturalW / naturalH;
+            const symbolWidth = targetHeight * aspect;
+            totalWidth += symbolWidth + 2;
+          }
         }
       }
       // Start from the right edge minus total width
       currentX = currentX - totalWidth;
+    }
+
+    // For center-aligned text, calculate total width and adjust starting X
+    if (textAlign === 'center') {
+      let totalWidth = 0;
+      for (const segment of segments) {
+        if (segment.type === 'text') {
+          const segmentFont = segment.font || fontFamily;
+          const segmentSize = segment.size || fontSize;
+          bottomInfoContext.font = `${segmentSize}px ${segmentFont}`;
+          totalWidth += bottomInfoContext.measureText(segment.content).width + kerning;
+        } else if (segment.type === 'artistbrush') {
+          let brushImage = artistBrushImage;
+          if (chosenColor === 'white' && whiteBrushImage) {
+            brushImage = whiteBrushImage;
+          } else if (chosenColor === 'black' && blackBrushImage) {
+            brushImage = blackBrushImage;
+          }
+          if (brushImage) {
+            const targetHeight = baseFontSize * 0.5;
+            const naturalW = brushImage.naturalWidth || brushImage.width || 1;
+            const naturalH = brushImage.naturalHeight || brushImage.height || 1;
+            const aspect = naturalW / naturalH;
+            const symbolWidth = targetHeight * aspect;
+            totalWidth += symbolWidth + 2;
+          }
+        }
+      }
+      // Center: start at center point minus half the total width
+      currentX = currentX - totalWidth / 2;
     }
 
     // Render segments
@@ -1479,6 +1540,12 @@ export const drawBottomInfo = async (
         const segmentFont = segment.font || fontFamily;
         const segmentSize = segment.size || fontSize;
         bottomInfoContext.font = `${segmentSize}px ${segmentFont}`;
+
+        // Draw shadow first (if specified)
+        if (hasShadow) {
+          bottomInfoContext.fillStyle = 'black';
+          bottomInfoContext.fillText(textContent, currentX + shadowX, currentY + verticalOffset + shadowY);
+        }
 
         // Apply outline/stroke if specified
         if (outlineWidth > 0) {
@@ -1495,16 +1562,24 @@ export const drawBottomInfo = async (
         const textWidth = bottomInfoContext.measureText(textContent).width;
         currentX += textWidth + kerning;
       } else if (segment.type === 'artistbrush') {
+        // Choose brush image based on text color
+        let brushImage = artistBrushImage;
+        if (chosenColor === 'white' && whiteBrushImage) {
+          brushImage = whiteBrushImage;
+        } else if (chosenColor === 'black' && blackBrushImage) {
+          brushImage = blackBrushImage;
+        }
+        
         // Draw artist brush symbol (only if it loaded successfully)
-        if (artistBrushImage) {
+        if (brushImage) {
           // Preserve original aspect ratio of the brush symbol
-          const targetHeight = fontSize * 0.7;
-          const naturalW = artistBrushImage.naturalWidth || artistBrushImage.width || 1;
-          const naturalH = artistBrushImage.naturalHeight || artistBrushImage.height || 1;
+          const targetHeight = fontSize * 0.45;
+          const naturalW = brushImage.naturalWidth || brushImage.width || 1;
+          const naturalH = brushImage.naturalHeight || brushImage.height || 1;
           const aspect = naturalW / naturalH;
           const symbolWidth = targetHeight * aspect;
           const symbolHeight = targetHeight;
-          const symbolY = currentY + verticalOffset + fontSize * 0.1;
+          const symbolY = currentY + verticalOffset + (fontSize - symbolHeight) / 2;
           // If an outline is specified, draw a black outline behind the symbol
           if (outlineWidth > 0) {
             // Create a black-tinted version of the brush symbol
@@ -1514,7 +1589,7 @@ export const drawBottomInfo = async (
             const outlineCtx = outlineCanvas.getContext('2d');
             if (outlineCtx) {
               outlineCtx.clearRect(0, 0, outlineCanvas.width, outlineCanvas.height);
-              outlineCtx.drawImage(artistBrushImage, 0, 0, outlineCanvas.width, outlineCanvas.height);
+              outlineCtx.drawImage(brushImage, 0, 0, outlineCanvas.width, outlineCanvas.height);
               outlineCtx.globalCompositeOperation = 'source-in';
               outlineCtx.fillStyle = (chosenColor === 'black') ? 'white' : 'black';
               outlineCtx.fillRect(0, 0, outlineCanvas.width, outlineCanvas.height);
@@ -1535,14 +1610,16 @@ export const drawBottomInfo = async (
             }
           }
 
-          // Draw main symbol on top; tint to black when chosenColor is black
-          if (chosenColor === 'black') {
+          // Draw main symbol on top
+          // If using whiteBrush.png or blackBrush.png, draw directly without tinting
+          // Only tint to black if using the original SVG artistbrush
+          if (chosenColor === 'black' && brushImage === artistBrushImage) {
             const mainCanvas = document.createElement('canvas');
             mainCanvas.width = Math.ceil(symbolWidth);
             mainCanvas.height = Math.ceil(symbolHeight);
             const mainCtx = mainCanvas.getContext('2d');
             if (mainCtx) {
-              mainCtx.drawImage(artistBrushImage, 0, 0, mainCanvas.width, mainCanvas.height);
+              mainCtx.drawImage(brushImage, 0, 0, mainCanvas.width, mainCanvas.height);
               mainCtx.globalCompositeOperation = 'source-in';
               mainCtx.fillStyle = 'black';
               mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
@@ -1550,7 +1627,7 @@ export const drawBottomInfo = async (
             }
           } else {
             bottomInfoContext.drawImage(
-              artistBrushImage,
+              brushImage,
               currentX,
               symbolY,
               symbolWidth,

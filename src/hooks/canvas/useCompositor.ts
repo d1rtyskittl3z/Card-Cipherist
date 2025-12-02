@@ -97,8 +97,8 @@ export const useCompositor = ({
       cardContext.drawImage(planeswalkerPostCanvas, 0, 0);
     }
 
-    // Draw bottom info (collector information)
-    if (bottomInfoCanvas && card.showCollectorInfo) {
+    // Draw bottom info (collector information or original bottomInfo from pack)
+    if (bottomInfoCanvas && (card.showCollectorInfo || (card.bottomInfo && Object.keys(card.bottomInfo).length > 0))) {
       cardContext.drawImage(bottomInfoCanvas, 0, 0);
     }
 

@@ -8,7 +8,7 @@ import { Box, HStack, RadioGroup, VStack, Button } from '@chakra-ui/react';
 import { Field } from '../ui/field';
 import { LabeledInput, ControlGrid, LabeledSwitch } from '../ui';
 import { useCardStore } from '../../store/cardStore';
-import { useCollectorInfo, useSerialNumbers, useFrames } from '../../store/selectors';
+import { useCollectorInfo, useSerialNumbers, useFrames, useLoadedPack } from '../../store/selectors';
 import { getCollectorInfoConfig, replaceCollectorTokens } from '../../utils/collectorInfoConfig';
 import { toaster } from '../ui/toaster-instance';
 import type { Card } from '../../types/card.types';
@@ -16,6 +16,7 @@ import type { Card } from '../../types/card.types';
 const CollectorTabComponent = () => {
   // Use fine-grained selectors
   const frames = useFrames();
+  const loadedPack = useLoadedPack();
   const showCollectorInfo = useCardStore((state) => state.card.showCollectorInfo ?? false);
   const collectorInfoStyle = useCardStore((state) => state.card.collectorInfoStyle ?? 'default');
   const { show: showSerialNumbers, number: serialNumber, total: serialTotal, x: serialX, y: serialY, scale: serialScale } = useSerialNumbers();
@@ -28,6 +29,8 @@ const CollectorTabComponent = () => {
   const [bottomLeft, setBottomLeft] = useState('');
   const [bottomRight, setBottomRight] = useState('');
   const [showPositionControls, setShowPositionControls] = useState(false);
+  const [useOriginalCollectorInfo, setUseOriginalCollectorInfo] = useState(false);
+  const [originalArtist, setOriginalArtist] = useState('');
   
   // Position offsets (normalized coordinates) - reset on page reload
   const [positionOffsets, setPositionOffsets] = useState<Record<string, { x: number; y: number }>>({
@@ -52,15 +55,16 @@ const CollectorTabComponent = () => {
   // Local state for note (not hydrated from Scryfall)
   const [note, setNote] = useState('');
 
-
-  // Apply collector info configuration when style changes
+  // Auto-enable original collector info when a pack with loadBottomInfo is loaded
   useEffect(() => {
-    if (!showCollectorInfo) return;
+    if (loadedPack?.loadBottomInfo) {
+      setUseOriginalCollectorInfo(true);
+    }
+  }, [loadedPack]);
 
-  // Create minimal card object for config function
-  const cardForConfig = { bottomInfoColor, frames };
-  const config = getCollectorInfoConfig(cardForConfig as Card, collectorInfoStyle, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight);
-    const bottomInfo: Record<string, {
+  // Combined effect to handle both original and standard collector info
+  useEffect(() => {
+    const finalBottomInfo: Record<string, {
       name: string;
       text: string;
       x: number;
@@ -73,46 +77,80 @@ const CollectorTabComponent = () => {
       oneLine: boolean;
       align?: 'left' | 'center' | 'right';
       outlineWidth?: number;
+      shadowX?: number;
+      shadowY?: number;
     }> = {};
 
-    // Build the bottomInfo object with replaced tokens
-    Object.entries(config).forEach(([key, textConfig]) => {
-      let replacedText = replaceCollectorTokens(textConfig.text, {
-        set: setCode,
-        language,
-        artist,
-        rarity,
-        number: digits,
-        note,
+    // Add original collector info if enabled
+    if (useOriginalCollectorInfo && loadedPack?.loadBottomInfo) {
+      Object.entries(loadedPack.loadBottomInfo).forEach(([key, textConfig]) => {
+        const replacedText = textConfig.text
+          .replace('{elemidinfo-artist}', originalArtist || '')
+          .replace(/\{ptshift[^}]*\}/g, ''); // Remove ptshift codes (not needed for collector info)
+        
+        finalBottomInfo[key] = {
+          name: key,
+          text: replacedText,
+          x: textConfig.x || 0,
+          y: textConfig.y || 0,
+          width: textConfig.width || 0,
+          height: textConfig.height || 0,
+          size: textConfig.size,
+          font: textConfig.font || 'gothammedium',
+          color: textConfig.color || 'white',
+          oneLine: textConfig.oneLine || false,
+          align: textConfig.align,
+          outlineWidth: textConfig.outlineWidth,
+          shadowX: textConfig.shadowX,
+          shadowY: textConfig.shadowY,
+        };
       });
+    }
 
-      // Toggle star/dot: replace bullet with a slightly smaller star (U+2605) in belerenbsc, then restore base font and gotham
-      if (useStar) {
-        replacedText = replacedText.replace(/\u2022/g, '{fontbelerenbsc}{fontrel85}\u2605{fontbase}{fontgothammedium}');
-      }
+    // Add standard collector info if enabled
+    if (showCollectorInfo) {
+      const cardForConfig = { bottomInfoColor, frames };
+      const config = getCollectorInfoConfig(cardForConfig as Card, collectorInfoStyle, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight);
 
-      // Apply position offsets
-      const offset = positionOffsets[key] || { x: 0, y: 0 };
+      Object.entries(config).forEach(([key, textConfig]) => {
+        let replacedText = replaceCollectorTokens(textConfig.text, {
+          set: setCode,
+          language,
+          artist,
+          rarity,
+          number: digits,
+          note,
+        });
 
-      bottomInfo[key] = {
-        name: key,
-        text: replacedText,
-        x: textConfig.x + offset.x,
-        y: textConfig.y + offset.y,
-        width: textConfig.width,
-        height: textConfig.height,
-        size: textConfig.size,
-        font: textConfig.font,
-        color: textConfig.color,
-        oneLine: textConfig.oneLine,
-        align: textConfig.align,
-        outlineWidth: textConfig.outlineWidth,
-      };
-    });
+        // Toggle star/dot: replace bullet with a slightly smaller star (U+2605) in belerenbsc, then restore base font and gotham
+        if (useStar) {
+          replacedText = replacedText.replace(/\u2022/g, '{fontbelerenbsc}{fontrel85}\u2605{fontbase}{fontgothammedium}');
+        }
 
-    updateCard({ bottomInfo });
+        // Apply position offsets
+        const offset = positionOffsets[key] || { x: 0, y: 0 };
+
+        finalBottomInfo[key] = {
+          name: key,
+          text: replacedText,
+          x: textConfig.x + offset.x,
+          y: textConfig.y + offset.y,
+          width: textConfig.width,
+          height: textConfig.height,
+          size: textConfig.size,
+          font: textConfig.font,
+          color: textConfig.color,
+          oneLine: textConfig.oneLine,
+          align: textConfig.align,
+          outlineWidth: textConfig.outlineWidth,
+        };
+      });
+    }
+
+    // Update card with the combined bottomInfo
+    updateCard({ bottomInfo: finalBottomInfo });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets]);
+  }, [useOriginalCollectorInfo, originalArtist, loadedPack, showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets, bottomInfoColor]);
 
   // Ensure the switch is off by default on first mount
   useEffect(() => {
@@ -192,6 +230,31 @@ const CollectorTabComponent = () => {
   return (
     <VStack align="stretch" gap={4}>
       <Box>
+        {/* Show "Original Collector Info" switch when pack has loadBottomInfo */}
+        {loadedPack?.loadBottomInfo && (
+          <Box mb={3}>
+            <LabeledSwitch
+              label="Original Collector Info"
+              checked={useOriginalCollectorInfo}
+              onCheckedChange={setUseOriginalCollectorInfo}
+              colorPalette="purple"
+              size="lg"
+            />
+
+            {useOriginalCollectorInfo && (
+              <ControlGrid columns={1} gap={3} mt={3}>
+                <LabeledInput
+                  label="Artist"
+                  type="text"
+                  placeholder="Artist name"
+                  value={originalArtist}
+                  onChange={setOriginalArtist}
+                />
+              </ControlGrid>
+            )}
+          </Box>
+        )}
+
         <LabeledSwitch
           label="Show Collector Information"
           checked={showCollectorInfo}
