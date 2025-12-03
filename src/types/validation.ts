@@ -648,6 +648,7 @@ export const framePackTemplateSchema = z.object({
   frames: z.array(framePackFrameItemSchema).min(1, 'Frame pack must have at least one frame'),
   text: z.record(z.string(), framePackTextConfigSchema).optional(),
   loadBottomInfo: z.record(z.string(), framePackTextConfigSchema).optional(),
+  brush: z.string().optional(), // Custom brush image path for \uFFEE symbol in loadBottomInfo
 });
 
 /**

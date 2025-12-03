@@ -117,6 +117,7 @@ export interface FramePackTemplate {
   loadBottomInfo?: {
     [key: string]: TextConfig;
   }; // Optional original collector info configuration for legacy packs (Unhinged, 8th Edition, etc.)
+  brush?: string; // Optional custom brush image path for \uFFEE symbol in loadBottomInfo (e.g., '/img/manaSymbols/brush.svg')
 }
 
 /**

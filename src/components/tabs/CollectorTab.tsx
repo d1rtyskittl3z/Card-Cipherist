@@ -86,8 +86,24 @@ const CollectorTabComponent = () => {
       Object.entries(loadedPack.loadBottomInfo).forEach(([key, textConfig]) => {
         const replacedText = textConfig.text
           .replace('{elemidinfo-artist}', originalArtist || '')
-          .replace(/\{ptshift[^}]*\}/g, ''); // Remove ptshift codes (not needed for collector info)
+          .replace(/\{ptshift[^}]*\}/g, '') // Remove ptshift codes (not needed for collector info)
+          .replace(/\{conditionalcolor:[^}]*\}/g, ''); // Remove inline conditionalcolor codes (use property instead)
         
+        // Resolve conditionalColor: if frames match, use the specified color
+        let resolvedColor = textConfig.color || 'white';
+        if (textConfig.conditionalColor) {
+          const [frameList, colorToApply] = textConfig.conditionalColor.split(':');
+          if (frameList && colorToApply) {
+            const frameNames = frameList.split(',').map(f => f.trim().toLowerCase());
+            const hasMatchingFrame = frames.some(frame => 
+              frameNames.some(fn => frame.name.toLowerCase().includes(fn))
+            );
+            if (hasMatchingFrame) {
+              resolvedColor = colorToApply;
+            }
+          }
+        }
+
         finalBottomInfo[key] = {
           name: key,
           text: replacedText,
@@ -97,7 +113,7 @@ const CollectorTabComponent = () => {
           height: textConfig.height || 0,
           size: textConfig.size,
           font: textConfig.font || 'gothammedium',
-          color: textConfig.color || 'white',
+          color: resolvedColor,
           oneLine: textConfig.oneLine || false,
           align: textConfig.align,
           outlineWidth: textConfig.outlineWidth,
@@ -147,8 +163,9 @@ const CollectorTabComponent = () => {
       });
     }
 
-    // Update card with the combined bottomInfo
-    updateCard({ bottomInfo: finalBottomInfo });
+    // Update card with the combined bottomInfo and brush (if using original collector info)
+    const brushToUse = useOriginalCollectorInfo && loadedPack?.brush ? loadedPack.brush : undefined;
+    updateCard({ bottomInfo: finalBottomInfo, brush: brushToUse });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useOriginalCollectorInfo, originalArtist, loadedPack, showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets, bottomInfoColor]);
 

@@ -434,6 +434,8 @@ export interface Card {
   hideBottomInfoBorder?: boolean;
   /** If true, shows flavor text divider bar */
   showsFlavorBar?: boolean;
+  /** Custom brush image path for \uFFEE symbol in collector info (from loadBottomInfo.brush) */
+  brush?: string;
 
   /** Callback executed after card loads (not persisted) */
   onload?: (() => void) | null;

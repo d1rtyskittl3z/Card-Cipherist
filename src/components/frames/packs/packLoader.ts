@@ -80,6 +80,27 @@ import Fuse from './Fuse';
 import FeuerAmeiseIxalan from './FeuerAmeiseIxalan';
 import M15BoxTopper from './M15BoxTopper';
 import M15ClearTextboxes from './M15ClearTextboxes';
+import M15Eighth from './M15Eighth';
+import M15EighthNyx from './M15EighthNyx';
+import M15EighthSnow from './M15EighthSnow';
+import M15EighthTransformBack from './M15EighthTransformBack';
+import M15EighthTransformFront from './M15EighthTransformFront';
+import M15EighthTransformNyxBack from './M15EighthTransformNyxBack';
+import M15EighthTransformNyxFront from './M15EighthTransformNyxFront';
+import M15EighthTransformSnowBack from './M15EighthTransformSnowBack';
+import M15EighthTransformSnowFront from './M15EighthTransformSnowFront';
+import M15EighthTransformUBBack from './M15EighthTransformUBBack';
+import M15EighthTransformUBFront from './M15EighthTransformUBFront';
+import M15EighthUB from './M15EighthUB';
+import M15EighthModal from './M15EighthModal';
+import M15EighthToken from './M15EighthToken';
+import M15EighthNyxToken from './M15EighthNyxToken';
+import M15EighthSnowToken from './M15EighthSnowToken';
+import M15EighthUBToken from './M15EighthUBToken';
+import M15EighthTokenTextless from './M15EighthTokenTextless';
+import M15EighthNyxTokenTextless from './M15EighthNyxTokenTextless';
+import M15EighthSnowTokenTextless from './M15EighthSnowTokenTextless';
+import M15EighthUBTokenTextless from './M15EighthUBTokenTextless';
 import M15ExtendedArtShort from './M15ExtendedArtShort';
 import PlaneswalkerBorderless from './PlaneswalkerBorderless';
 import PlaneswalkerBoxTopper from './PlaneswalkerBoxTopper';
@@ -329,6 +350,27 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15Mutate': M15Mutate,
   'M15HoloStamps': M15HoloStamps,
   'M15DarkPT': M15DarkPT,
+  'M15Eighth': M15Eighth,
+  'M15EighthNyx': M15EighthNyx,
+  'M15EighthSnow': M15EighthSnow,
+  'M15EighthTransformBack': M15EighthTransformBack,
+  'M15EighthTransformFront': M15EighthTransformFront,
+  'M15EighthTransformNyxBack': M15EighthTransformNyxBack,
+  'M15EighthTransformNyxFront': M15EighthTransformNyxFront,
+  'M15EighthTransformSnowBack': M15EighthTransformSnowBack,
+  'M15EighthTransformSnowFront': M15EighthTransformSnowFront,
+  'M15EighthTransformUBBack': M15EighthTransformUBBack,
+  'M15EighthTransformUBFront': M15EighthTransformUBFront,
+  'M15EighthUB': M15EighthUB,
+  'M15EighthModal': M15EighthModal,
+  'M15EighthToken': M15EighthToken,
+  'M15EighthNyxToken': M15EighthNyxToken,
+  'M15EighthSnowToken': M15EighthSnowToken,
+  'M15EighthUBToken': M15EighthUBToken,
+  'M15EighthTokenTextless': M15EighthTokenTextless,
+  'M15EighthNyxTokenTextless': M15EighthNyxTokenTextless,
+  'M15EighthSnowTokenTextless': M15EighthSnowTokenTextless,
+  'M15EighthUBTokenTextless': M15EighthUBTokenTextless,
   'M15Borders': M15Borders,
   'M15CIPips': M15CIPips,
   'TheList': TheList,

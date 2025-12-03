@@ -1304,10 +1304,22 @@ export const drawBottomInfo = async (
   }
 
   // Load artist brush symbols (both white and black variants, plus original SVG)
+  // If card.brush is set, use custom brush from pack instead of defaults
   let artistBrushImage: HTMLImageElement | null = null;
   let whiteBrushImage: HTMLImageElement | null = null;
   let blackBrushImage: HTMLImageElement | null = null;
+  let customBrushImage: HTMLImageElement | null = null;
   
+  // Load custom brush if specified by pack
+  if (card.brush) {
+    try {
+      customBrushImage = await loadImage(card.brush);
+    } catch (error) {
+      console.warn('Failed to load custom brush symbol, falling back to default:', error);
+    }
+  }
+
+  // Load default brushes as fallback
   try {
     artistBrushImage = await loadImage('/img/manaSymbols/artistbrush.svg');
   } catch (error) {
@@ -1479,16 +1491,18 @@ export const drawBottomInfo = async (
           bottomInfoContext.font = `${segmentSize}px ${segmentFont}`;
           totalWidth += bottomInfoContext.measureText(segment.content).width + kerning;
         } else if (segment.type === 'artistbrush') {
-          // Choose brush image based on text color
-          let brushImage = artistBrushImage;
-          if (chosenColor === 'white' && whiteBrushImage) {
-            brushImage = whiteBrushImage;
-          } else if (chosenColor === 'black' && blackBrushImage) {
-            brushImage = blackBrushImage;
+          // Choose brush image: custom > color-specific > default
+          let brushImage = customBrushImage || artistBrushImage;
+          if (!customBrushImage) {
+            if (chosenColor === 'white' && whiteBrushImage) {
+              brushImage = whiteBrushImage;
+            } else if (chosenColor === 'black' && blackBrushImage) {
+              brushImage = blackBrushImage;
+            }
           }
           
           if (brushImage) {
-            const targetHeight = baseFontSize * 0.5;
+            const targetHeight = baseFontSize * 0.65;
             const naturalW = brushImage.naturalWidth || brushImage.width || 1;
             const naturalH = brushImage.naturalHeight || brushImage.height || 1;
             const aspect = naturalW / naturalH;
@@ -1511,14 +1525,17 @@ export const drawBottomInfo = async (
           bottomInfoContext.font = `${segmentSize}px ${segmentFont}`;
           totalWidth += bottomInfoContext.measureText(segment.content).width + kerning;
         } else if (segment.type === 'artistbrush') {
-          let brushImage = artistBrushImage;
-          if (chosenColor === 'white' && whiteBrushImage) {
-            brushImage = whiteBrushImage;
-          } else if (chosenColor === 'black' && blackBrushImage) {
-            brushImage = blackBrushImage;
+          // Choose brush image: custom > color-specific > default
+          let brushImage = customBrushImage || artistBrushImage;
+          if (!customBrushImage) {
+            if (chosenColor === 'white' && whiteBrushImage) {
+              brushImage = whiteBrushImage;
+            } else if (chosenColor === 'black' && blackBrushImage) {
+              brushImage = blackBrushImage;
+            }
           }
           if (brushImage) {
-            const targetHeight = baseFontSize * 0.5;
+            const targetHeight = baseFontSize * 0.65;
             const naturalW = brushImage.naturalWidth || brushImage.width || 1;
             const naturalH = brushImage.naturalHeight || brushImage.height || 1;
             const aspect = naturalW / naturalH;
@@ -1562,18 +1579,20 @@ export const drawBottomInfo = async (
         const textWidth = bottomInfoContext.measureText(textContent).width;
         currentX += textWidth + kerning;
       } else if (segment.type === 'artistbrush') {
-        // Choose brush image based on text color
-        let brushImage = artistBrushImage;
-        if (chosenColor === 'white' && whiteBrushImage) {
-          brushImage = whiteBrushImage;
-        } else if (chosenColor === 'black' && blackBrushImage) {
-          brushImage = blackBrushImage;
+        // Choose brush image: custom > color-specific > default
+        let brushImage = customBrushImage || artistBrushImage;
+        if (!customBrushImage) {
+          if (chosenColor === 'white' && whiteBrushImage) {
+            brushImage = whiteBrushImage;
+          } else if (chosenColor === 'black' && blackBrushImage) {
+            brushImage = blackBrushImage;
+          }
         }
         
         // Draw artist brush symbol (only if it loaded successfully)
         if (brushImage) {
           // Preserve original aspect ratio of the brush symbol
-          const targetHeight = fontSize * 0.45;
+          const targetHeight = fontSize * 0.65;
           const naturalW = brushImage.naturalWidth || brushImage.width || 1;
           const naturalH = brushImage.naturalHeight || brushImage.height || 1;
           const aspect = naturalW / naturalH;
@@ -1611,9 +1630,12 @@ export const drawBottomInfo = async (
           }
 
           // Draw main symbol on top
-          // If using whiteBrush.png or blackBrush.png, draw directly without tinting
-          // Only tint to black if using the original SVG artistbrush
-          if (chosenColor === 'black' && brushImage === artistBrushImage) {
+          // Tint brush to match chosenColor:
+          // - Custom brush: always tint to chosenColor
+          // - Default artistbrush SVG: tint to black if chosenColor is black (SVG is white by default)
+          // - Color-specific brushes (whiteBrush/blackBrush): draw without tinting
+          const needsTinting = customBrushImage || (chosenColor === 'black' && brushImage === artistBrushImage);
+          if (needsTinting) {
             const mainCanvas = document.createElement('canvas');
             mainCanvas.width = Math.ceil(symbolWidth);
             mainCanvas.height = Math.ceil(symbolHeight);
@@ -1621,7 +1643,7 @@ export const drawBottomInfo = async (
             if (mainCtx) {
               mainCtx.drawImage(brushImage, 0, 0, mainCanvas.width, mainCanvas.height);
               mainCtx.globalCompositeOperation = 'source-in';
-              mainCtx.fillStyle = 'black';
+              mainCtx.fillStyle = chosenColor;
               mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
               bottomInfoContext.drawImage(mainCanvas, currentX, symbolY);
             }
