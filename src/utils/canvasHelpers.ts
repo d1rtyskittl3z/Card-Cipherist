@@ -1346,7 +1346,7 @@ export const drawBottomInfo = async (
   let fontSize = scaleHeight(card, textObj.size);
   const baseFontSize = fontSize;
   let fontFamily = textObj.font || 'gothammedium';
-  const chosenColor = card.bottomInfoColor || textObj.color || 'white';
+  const chosenColor = textObj.color || card.bottomInfoColor || 'white';
   const outlineWidth = textObj.outlineWidth ? scaleWidth(card, textObj.outlineWidth) : 0;
   // Shadow properties
   const shadowX = textObj.shadowX ? scaleWidth(card, textObj.shadowX) : 0;

@@ -1113,7 +1113,7 @@ const FrameTabComponent = () => {
         masks,
         bounds: selectedFrame.bounds,
         ogBounds: selectedFrame.ogBounds || selectedFrame.bounds,
-        opacity: 100, // 100 = fully opaque (0-100 scale)
+        opacity: selectedFrame.opacity ?? 100, // Use pack-defined opacity or default to 100 (0-100 scale)
         visible: true, // Default to visible
         x: 0,
         y: 0,
@@ -1129,7 +1129,7 @@ const FrameTabComponent = () => {
   stretch: stretchConfig,
   colorOverrides: initialColorOverrides,
         // Store original values for reset
-        ogOpacity: 100,
+        ogOpacity: selectedFrame.opacity ?? 100,
         ogVisible: true,
         ogX: 0,
         ogY: 0,

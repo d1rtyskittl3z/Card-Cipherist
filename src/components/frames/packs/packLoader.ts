@@ -219,6 +219,7 @@ import Invention from './Invention';
 import InvocationMUL from './InvocationMUL';
 import Ixalan from './Ixalan';
 import LegendCrownsEtched from './LegendCrownsEtched';
+import Legends from './Legends';
 import Praetors from './Praetors';
 import FullText from './FullText';
 import FullTextAlt from './FullTextAlt';
@@ -253,6 +254,11 @@ import M15Mutate from './M15Mutate';
 import Prototype from './Prototype';
 import PrototypeExtended from './PrototypeExtended';
 import FeuerAmeiseKaldheim from './FeuerAmeiseKaldheim';
+import Fourth from './Fourth';
+import Seventh from './Seventh';
+import SeventhButFifth from './SeventhButFifth';
+import SeventhSnowLands from './SeventhSnowLands';
+import SeventhTextless from './SeventhTextless';
 import TextlessInvention from './TextlessInvention';
 import Woodland from './Woodland';
 import Ghostfire from './Ghostfire';
@@ -266,6 +272,8 @@ import NeonInkTransformFront from './NeonInkTransformFront';
 import NeonInkTransformBack from './NeonInkTransformBack';
 import NeonInkTransformFrontTextless from './NeonInkTransformFrontTextless';
 import NeonInkTransformBackTextless from './NeonInkTransformBackTextless';
+import OldFloating from './OldFloating';
+import OldFloatingShort from './OldFloatingShort';
 import SNCGildedColored from './SNCGildedColored';
 import SNCGildedTextless from './SNCGildedTextless';
 import StoneCutterDeluxeCase from './StoneCutterDeluxeCase';
@@ -394,6 +402,11 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'FNM': FNM,
   'Fuse': Fuse,
   'Flip': Flip,
+  'Fourth': Fourth,
+  'Seventh': Seventh,
+  'SeventhButFifth': SeventhButFifth,
+  'SeventhSnowLands': SeventhSnowLands,
+  'SeventhTextless': SeventhTextless,
   'M15BoxTopper': M15BoxTopper,
   'M15ClearTextboxes': M15ClearTextboxes,
   'M15ExtendedArtShort': M15ExtendedArtShort,
@@ -506,6 +519,8 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'NeonInkTransformBack': NeonInkTransformBack,
   'NeonInkTransformFrontTextless': NeonInkTransformFrontTextless,
   'NeonInkTransformBackTextless': NeonInkTransformBackTextless,
+  'OldFloating': OldFloating,
+  'OldFloatingShort': OldFloatingShort,
   'SNCGildedColored': SNCGildedColored,
   'SNCGildedTextless': SNCGildedTextless,
   'StoneCutterDeluxeCase': StoneCutterDeluxeCase,
@@ -536,6 +551,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'InvocationMUL': InvocationMUL,
   'Ixalan': Ixalan,
   'LegendCrownsEtched': LegendCrownsEtched,
+  'Legends': Legends,
   'Praetors': Praetors,
   'FullText': FullText,
   'FullTextAlt': FullTextAlt,

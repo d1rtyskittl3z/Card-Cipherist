@@ -31,6 +31,7 @@ export interface FrameItem {
   bounds?: Bounds;
   ogBounds?: Bounds;
   noDefaultMask?: boolean;
+  opacity?: number; // Frame opacity (0-100, defaults to 100)
   complementary?: number | number[] | string | string[]; // Auto-add frame(s) at these indices or by name when no masks are selected
   erase?: boolean; // Use 'destination-out' compositing mode (removes pixels instead of drawing)
   preserveAlpha?: boolean; // Preserve alpha channel when applying color adjustments
