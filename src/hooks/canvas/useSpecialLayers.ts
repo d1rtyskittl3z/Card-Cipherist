@@ -317,11 +317,45 @@ export const useSpecialLayers = ({
     }
   }, [canvasRefs, contextRefs, showSerialNumbers]);
 
+  /**
+   * Render QR code layer for deck cover cards
+   * Takes a source canvas (from QRCodeCanvas component) and draws it to the offscreen qrCode layer
+   */
+  const renderQRCode = useCallback((
+    card: Card,
+    sourceCanvas: HTMLCanvasElement | null,
+    qrConfig: { x: number; y: number; size: number; fgColor: string; bgColor: string; bgAlpha: number } | undefined
+  ) => {
+    const qrCodeCanvas = canvasRefs.qrCode;
+    const qrCodeContext = contextRefs.qrCode;
+    if (!qrCodeCanvas || !qrCodeContext) return;
+
+    // Always clear the QR code canvas before drawing
+    qrCodeContext.clearRect(0, 0, qrCodeCanvas.width, qrCodeCanvas.height);
+
+    if (!sourceCanvas || !qrConfig) {
+      return;
+    }
+
+    try {
+      // Calculate pixel positions based on normalized config
+      const qrSize = Math.round(qrConfig.size * qrCodeCanvas.width);
+      const qrX = scaleX(card, qrConfig.x);
+      const qrY = scaleY(card, qrConfig.y);
+
+      // Draw the source canvas (QRCodeCanvas from qrcode.react) to the qrCode layer
+      qrCodeContext.drawImage(sourceCanvas, qrX, qrY, qrSize, qrSize);
+    } catch (error) {
+      console.error('Failed to render QR code layer:', error);
+    }
+  }, [canvasRefs, contextRefs]);
+
   return {
     renderSaga,
     renderClass,
     renderPlaneswalker,
     renderStation,
     renderSerial,
+    renderQRCode,
   };
 };

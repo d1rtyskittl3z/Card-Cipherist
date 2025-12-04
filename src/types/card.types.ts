@@ -519,6 +519,8 @@ export interface CanvasRefs {
   planeswalkerPost: HTMLCanvasElement;
   stationPre: HTMLCanvasElement;
   stationPost: HTMLCanvasElement;
+  qrCode: HTMLCanvasElement;
+  qrious: HTMLCanvasElement;
   text: HTMLCanvasElement;
   paragraph: HTMLCanvasElement;
   line: HTMLCanvasElement;
@@ -540,6 +542,8 @@ export interface CanvasContextRefs {
   planeswalkerPost: CanvasRenderingContext2D;
   stationPre: CanvasRenderingContext2D;
   stationPost: CanvasRenderingContext2D;
+  qrCode: CanvasRenderingContext2D;
+  qrious: CanvasRenderingContext2D;
   text: CanvasRenderingContext2D;
   paragraph: CanvasRenderingContext2D;
   line: CanvasRenderingContext2D;

@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { useCardStore } from '../store/cardStore';
+import { useMediaStore } from '../store/mediaStore';
 import { useImageLoader } from '../hooks/canvas/useImageLoader';
 import { useLayerRenderers } from '../hooks/canvas/useLayerRenderers';
 import { useSpecialLayers } from '../hooks/canvas/useSpecialLayers';
@@ -19,6 +20,7 @@ import {
   useLoadedPack,
   useShowGuidelines,
   useShowArtBoundsDebug,
+  useQRCodeUrl,
 } from '../store/selectors';
 
 interface CardCanvasRendererProps {
@@ -38,6 +40,8 @@ export const CardCanvasRenderer = ({ previewRef }: CardCanvasRendererProps) => {
   const customArtBounds = useCardStore((state) => state.customArtBounds);
   const showGuidelines = useShowGuidelines();
   const showArtBoundsDebug = useShowArtBoundsDebug();
+  const qrCodeUrl = useQRCodeUrl();
+  const qrCodeSourceCanvas = useMediaStore((state) => state.qrCodeSourceCanvas);
   const card = useCardStore((state) => state.card);
 
   // Load core images
@@ -50,7 +54,7 @@ export const CardCanvasRenderer = ({ previewRef }: CardCanvasRendererProps) => {
   });
 
   // Initialize special card type layers (use context internally - no prop drilling!)
-  const { renderSaga, renderClass, renderPlaneswalker, renderStation, renderSerial } = useSpecialLayers({
+  const { renderSaga, renderClass, renderPlaneswalker, renderStation, renderSerial, renderQRCode } = useSpecialLayers({
     showSerialNumbers,
   });
 
@@ -85,6 +89,7 @@ export const CardCanvasRenderer = ({ previewRef }: CardCanvasRendererProps) => {
     await perfMonitor.measureAsync('canvas:renderSerial', () => renderSerial(card));
     await perfMonitor.measureAsync('canvas:renderStation', () => renderStation(card));
     perfMonitor.measure('canvas:renderWatermark', () => renderWatermark());
+    perfMonitor.measure('canvas:renderQRCode', () => renderQRCode(card, qrCodeSourceCanvas, loadedPack?.qrCode));
     await perfMonitor.measureAsync('canvas:renderSaga', () => renderSaga(card));
     await perfMonitor.measureAsync('canvas:renderClass', () => renderClass(card));
     await perfMonitor.measureAsync('canvas:renderPlaneswalker', () => renderPlaneswalker(card));
@@ -112,6 +117,8 @@ export const CardCanvasRenderer = ({ previewRef }: CardCanvasRendererProps) => {
     renderSaga,
     renderClass,
     renderPlaneswalker,
+    renderQRCode,
+    qrCodeSourceCanvas,
     renderTextLayer,
     renderBottomInfo,
     renderGuidelines,
@@ -129,7 +136,7 @@ export const CardCanvasRenderer = ({ previewRef }: CardCanvasRendererProps) => {
         render();
       }
     },
-    [render, imagesLoaded, width, height, marginX, marginY, frames.length],
+    [render, imagesLoaded, width, height, marginX, marginY, frames.length, qrCodeUrl, qrCodeSourceCanvas],
     { fps: 60, immediate: false }
   );
 

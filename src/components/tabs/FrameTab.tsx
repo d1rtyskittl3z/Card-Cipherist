@@ -103,6 +103,7 @@ const FrameTabComponent = () => {
   const setHasShownStationsTab = useCardStore((state) => state.setHasShownStationsTab);
   const setHasShownMysticalArchiveTab = useCardStore((state) => state.setHasShownMysticalArchiveTab);
   const setHasShownMysticalArchiveHorizontalTab = useCardStore((state) => state.setHasShownMysticalArchiveHorizontalTab);
+  const setHasShownQRCodeTab = useCardStore((state) => state.setHasShownQRCodeTab);
   const initializeNeoBasicsControls = useCardStore((state) => state.initializeNeoBasicsControls);
   const initializeMysticalArchiveControls = useCardStore((state) => state.initializeMysticalArchiveControls);
   const initializeMysticalArchiveHorizontalControls = useCardStore((state) => state.initializeMysticalArchiveHorizontalControls);
@@ -535,6 +536,17 @@ const FrameTabComponent = () => {
         });
       }
 
+      // Show QR Code tab for Custom Deck Cover pack
+      if (pack?.id === 'CustomDeckCover') {
+        setHasShownQRCodeTab(true);
+        toaster.create({
+          title: 'Deck Cover Pack Selected',
+          description: 'A "QR Code" tab has appeared. Use it to generate a QR code that links to your decklist.',
+          type: 'info',
+          duration: 8000,
+        });
+      }
+
       // Handle replacementMasks - override position masks if pack specifies custom ones
       if (pack?.replacementMasks) {
         setPositionMasks({ ...defaultPositionMasks.current, ...pack.replacementMasks });
@@ -547,7 +559,7 @@ const FrameTabComponent = () => {
     // Clear custom masks when pack changes (they're tied to the loaded pack)
     setCustomMasks([]);
     setCustomMaskCounter(1);
-  }, [selectedPackId, setLoadedPackStore, setHasShownKamigawaTab, setHasShownSagaTab, setHasShownPlaneswalkerTab, setHasShownClassTab, setHasShownStationsTab, setHasShownMysticalArchiveTab, setHasShownMysticalArchiveHorizontalTab, initializeNeoBasicsControls, initializeMysticalArchiveControls, initializeMysticalArchiveHorizontalControls]);
+  }, [selectedPackId, setLoadedPackStore, setHasShownKamigawaTab, setHasShownSagaTab, setHasShownPlaneswalkerTab, setHasShownClassTab, setHasShownStationsTab, setHasShownMysticalArchiveTab, setHasShownMysticalArchiveHorizontalTab, setHasShownQRCodeTab, initializeNeoBasicsControls, initializeMysticalArchiveControls, initializeMysticalArchiveHorizontalControls]);
 
   // Get frames and masks from loaded pack
   const availableFrames = useMemo(() => {

@@ -17,6 +17,7 @@ import { ClassTab } from './tabs/ClassTab';
 import { StationsTab } from './tabs/StationsTab';
 import { MysticalArchiveTab } from './tabs/MysticalArchiveTab';
 import { MysticalArchiveHorizontalTab } from './tabs/MysticalArchiveHorizontalTab';
+import { QRCodeTab } from './tabs/QRCodeTab';
 import { ArtTab } from './tabs/ArtTab';
 import { SetSymbolTab } from './tabs/SetSymbolTab';
 import { WatermarkTab } from './tabs/WatermarkTab';
@@ -36,6 +37,7 @@ const CardCreatorLayoutComponent = () => {
   const hasShownStationsTab = useCardStore((state) => state.hasShownStationsTab);
   const hasShownMysticalArchiveTab = useCardStore((state) => state.hasShownMysticalArchiveTab);
   const hasShownMysticalArchiveHorizontalTab = useCardStore((state) => state.hasShownMysticalArchiveHorizontalTab);
+  const hasShownQRCodeTab = useCardStore((state) => state.hasShownQRCodeTab);
   const rotateCanvasPreview = useRotateCanvasPreview();
   const accordionWidth = rotateCanvasPreview ? '1000px' : '1200px';
 
@@ -287,6 +289,27 @@ const CardCreatorLayoutComponent = () => {
                   <Accordion.ItemContent>
                     <Accordion.ItemBody p={4}>
                       <MysticalArchiveHorizontalTab />
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+              )}
+
+              {/* Conditionally show QR Code accordion item */}
+              {hasShownQRCodeTab && (
+                <Accordion.Item value={TABS.QR_CODE}>
+                  <Accordion.ItemTrigger
+                    fontSize="md"
+                    fontWeight="semibold"
+                    py={4}
+                  >
+                    <Box flex="1" textAlign="start">
+                      QR Code
+                    </Box>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent>
+                    <Accordion.ItemBody p={4}>
+                      <QRCodeTab />
                     </Accordion.ItemBody>
                   </Accordion.ItemContent>
                 </Accordion.Item>

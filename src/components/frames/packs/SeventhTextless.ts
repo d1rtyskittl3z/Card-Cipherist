@@ -1,4 +1,4 @@
-import type { FramePackTemplate, Mask, FrameItem, Bounds } from './types';
+import type { FramePackTemplate, Mask, FrameItem } from './types';
 
 const masks: Mask[] = [
   { src: '/img/frames/seventh/textless/seventhTextlessMaskPinline.png', name: 'Pinline' },

@@ -485,6 +485,30 @@ export const useIsMysticalArchiveJPCard = () => {
 };
 
 // ============================================================================
+// QR Code Selectors
+// ============================================================================
+
+/**
+ * Get QR code URL
+ */
+export const useQRCodeUrl = () => useCardStore((state) => state.qrCodeUrl);
+
+/**
+ * Check if QR Code tab has been shown
+ */
+export const useHasShownQRCodeTab = () => useCardStore((state) => state.hasShownQRCodeTab);
+
+/**
+ * Check if current card is a QR Code deck cover
+ */
+export const useIsQRCodeCard = () => {
+  return useCardStore((state) => {
+    const version = state.card.version?.toLowerCase();
+    return version === 'customqrcodedeckcover';
+  });
+};
+
+// ============================================================================
 // Canvas Ref Selectors
 // ============================================================================
 

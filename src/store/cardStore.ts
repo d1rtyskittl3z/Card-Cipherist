@@ -87,6 +87,8 @@ interface CardState {
   hasShownStationsTab: boolean;
   hasShownMysticalArchiveTab: boolean;
   hasShownMysticalArchiveHorizontalTab: boolean;
+  hasShownQRCodeTab: boolean;
+  qrCodeUrl: string;
   neoBasicsTitleHeight: number;
   neoBasicsElements: string[];
   neoBasicsColorOverrides: Record<string, FrameColorOverride>;
@@ -198,6 +200,8 @@ interface CardState {
   setHasShownStationsTab: (shown: boolean) => void;
   setHasShownMysticalArchiveTab: (shown: boolean) => void;
   setHasShownMysticalArchiveHorizontalTab: (shown: boolean) => void;
+  setHasShownQRCodeTab: (shown: boolean) => void;
+  setQRCodeUrl: (url: string) => void;
   initializeNeoBasicsControls: (elements: string[]) => void;
   setNeoBasicsTitleHeight: (value: number) => void;
   setNeoBasicsColorOverride: (
@@ -456,6 +460,8 @@ export const useCardStore = create<CardState>()(
         hasShownStationsTab: false,
         hasShownMysticalArchiveTab: false,
         hasShownMysticalArchiveHorizontalTab: false,
+        hasShownQRCodeTab: false,
+        qrCodeUrl: '',
   neoBasicsTitleHeight: NEO_BASICS_MIN_TITLE_HEIGHT,
   neoBasicsElements: [],
   neoBasicsColorOverrides: {},
@@ -717,6 +723,14 @@ export const useCardStore = create<CardState>()(
 
         setHasShownMysticalArchiveHorizontalTab: (shown) => {
           set({ hasShownMysticalArchiveHorizontalTab: shown });
+        },
+
+        setHasShownQRCodeTab: (shown) => {
+          set({ hasShownQRCodeTab: shown });
+        },
+
+        setQRCodeUrl: (url) => {
+          set({ qrCodeUrl: url });
         },
 
         initializeNeoBasicsControls: (elements) => {

@@ -19,7 +19,7 @@ const frames: FrameItem[] = [
   { name: 'Artifact Frame', src: '/img/frames/planeswalker/regular/planeswalkerFrameA.png', masks },
 ];
 
-const DEFAULT_ABILITIES: [string, string, string, string] = ['', '+1', '0', '-7'];
+const DEFAULT_ABILITIES: [string, string, string, string] = ['+1', '0', '-1', ''];
 const DEFAULT_ADJUST: [number, number, number, number] = [0, 0, 0, 0];
 const DEFAULT_HEIGHTS: [number, number, number, number] = [0.0972, 0.0972, 0.0972, 0];
 

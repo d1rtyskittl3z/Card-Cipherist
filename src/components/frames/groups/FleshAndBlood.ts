@@ -9,7 +9,7 @@ const group: LegacyGroup = {
 	{ kind: 'pack', label: 'Class Frames', id:'FABClasses' },
 	{ kind: 'pack', label: 'Hero Frames', id:'FABHeroes' },
 	{ kind: 'pack', label: 'Fabled Frame', id:'FABFabled' },
-	{ kind: 'pack', label: 'Talents', id:'disabled' },
+	{ kind: 'label', label: 'Talents'},
 	{ kind: 'pack', label: 'Light Frames', id:'FABLight' },
 	{ kind: 'pack', label: 'Shadow Frames', id:'FABShadow' },
 	{ kind: 'pack', label: 'Elemental Frames', id:'FABElemental' }

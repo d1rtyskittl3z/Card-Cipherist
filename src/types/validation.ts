@@ -594,6 +594,7 @@ export const framePackTextConfigSchema = z.object({
   rotation: z.number().optional(),
   allCaps: z.boolean().optional(),
   kerning: z.number().optional(),
+  lineSpacing: z.number().optional(),
   italics: z.boolean().optional(),
   bold: z.boolean().optional(),
 });
@@ -631,6 +632,18 @@ export const setSymbolBoundsSchema = framePackBoundsSchema.extend({
 });
 
 /**
+ * QR code pack config schema
+ */
+export const qrCodePackConfigSchema = z.object({
+  x: normalizedCoordSchema,
+  y: normalizedCoordSchema,
+  size: normalizedCoordSchema,
+  fgColor: z.string(),
+  bgColor: z.string(),
+  bgAlpha: z.number().min(0).max(1),
+});
+
+/**
  * Frame pack template schema
  */
 export const framePackTemplateSchema = z.object({
@@ -644,6 +657,7 @@ export const framePackTemplateSchema = z.object({
   watermarkBounds: framePackBoundsSchema.optional(),
   saga: sagaPackConfigSchema.optional(),
   planeswalker: planeswalkerPackConfigSchema.optional(),
+  qrCode: qrCodePackConfigSchema.optional(), // Optional QR code configuration for deck cover packs
   replacementMasks: z.record(z.string(), z.string()).optional(),
   frames: z.array(framePackFrameItemSchema).min(1, 'Frame pack must have at least one frame'),
   text: z.record(z.string(), framePackTextConfigSchema).optional(),

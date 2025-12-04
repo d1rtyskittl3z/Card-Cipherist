@@ -17,6 +17,7 @@
  * - PLANESWALKER: Planeswalker-specific controls (conditional)
  * - KAMIGAWA: Kamigawa/Neo Basics controls (conditional)
  * - STATIONS: Station card controls (conditional)
+ * - QR_CODE: QR code generation controls for deck covers (conditional)
  * - TEXT: Text field editing
  * - ART: Art upload and positioning
  * - SET_SYMBOL: Set symbol selection
@@ -35,6 +36,7 @@ export const TABS = {
   STATIONS: 'stations',
   MYSTICAL_ARCHIVE: 'mysticalArchive',
   MYSTICAL_ARCHIVE_HORIZONTAL: 'mysticalArchiveHorizontal',
+  QR_CODE: 'qrCode',
   TEXT: 'text',
   ART: 'art',
   SET_SYMBOL: 'setSymbol',

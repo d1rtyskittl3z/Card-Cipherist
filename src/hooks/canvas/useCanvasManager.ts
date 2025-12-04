@@ -43,6 +43,7 @@ export const useCanvasManager = () => {
       'bottomInfo',
       'guidelines',
       'prePT',
+      'qrCode',
     ] as const;
 
     canvasNames.forEach((name) => {

@@ -58,6 +58,9 @@ import OilSlick from './OilSlick';
 import Omen from './Omen';
 import M21 from './M21';
 import MemoryCorridor from './MemoryCorridor';
+import CustomCelidAsap from './CustomCelidAsap';
+import CustomDeckCover from './CustomDeckCover';
+import CustomMarginCelidAsap from './CustomMarginCelidAsap';
 import CustomNeon from './CustomNeon';
 import CustomDualLands from './CustomDualLands';
 import CustomMagraoKaldheim from './CustomMagraoKaldheim';
@@ -74,6 +77,13 @@ import Equinox from './Equinox';
 import EquinoxBack from './EquinoxBack';
 import EquinoxFront from './EquinoxFront';
 import EternalNight from './EternalNight';
+import FABClasses from './FABClasses';
+import FABElemental from './FABElemental';
+import FABFabled from './FABFabled';
+import FABHeroes from './FABHeroes';
+import FABLight from './FABLight';
+import FABRegular from './FABRegular';
+import FABShadow from './FABShadow';
 import Fang from './Fang';
 import FNM from './FNM';
 import Fuse from './Fuse';
@@ -105,6 +115,7 @@ import M15ExtendedArtShort from './M15ExtendedArtShort';
 import PlaneswalkerBorderless from './PlaneswalkerBorderless';
 import PlaneswalkerBoxTopper from './PlaneswalkerBoxTopper';
 import PlaneswalkerRegular from './PlaneswalkerRegular';
+import PlaneswalkerSeventh from './PlaneswalkerSeventh';
 import PlaneswalkerTall from './PlaneswalkerTall';
 import PlaneswalkerTallBorderless from './PlaneswalkerTallBorderless';
 import PlaneswalkerNickname from './PlaneswalkerNickname';
@@ -172,7 +183,7 @@ import M15RegularNew from './M15RegularNew';
 import M15ExtendedArtNew from './M15ExtendedArtNew-1';
 import M15LegendCrownsNew from './M15LegendCrownsNew-1';
 import M15InnerCrownsNew from './M15InnerCrownsNew-1';
-import FullArtNew from './FullArtNew-1';
+import FullArtNew from './FullArtNew';
 import SnowNew from './SnowNew-1';
 import M15TransformSnowFront from './M15TransformSnowFront';
 import M15TransformUBFront from './M15TransformUBFront';
@@ -295,14 +306,18 @@ import NeonInkTransformFrontTextless from './NeonInkTransformFrontTextless';
 import NeonInkTransformBackTextless from './NeonInkTransformBackTextless';
 import OldFloating from './OldFloating';
 import OldFloatingShort from './OldFloatingShort';
+import OldSaga from './OldSaga';
 import SNCGildedColored from './SNCGildedColored';
 import SNCGildedTextless from './SNCGildedTextless';
 import StoneCutterDeluxeCase from './StoneCutterDeluxeCase';
-import StoneCutterDeluxeDFC from './StoneCutterDeluxeDFC';
-import StoneCutterDeluxeTransformAddons from './StoneCutterDeluxeTransformAddons';
-import StoneCutterDeluxeSaga from './StoneCutterDeluxeSaga';
 import StoneCutterDeluxeClass from './StoneCutterDeluxeClass';
+import StoneCutterDeluxeDFC from './StoneCutterDeluxeDFC';
 import StoneCutterDeluxeExtended from './StoneCutterDeluxeExtended';
+import StoneCutterDeluxePlaneswalker from './StoneCutterDeluxePlaneswalker';
+import StoneCutterDeluxePlaneswalkerExtended from './StoneCutterDeluxePlaneswalkerExtended';
+import StoneCutterDeluxePlaneswalkerTransformAddons from './StoneCutterDeluxePlaneswalkerTransformAddons';
+import StoneCutterDeluxeSaga from './StoneCutterDeluxeSaga';
+import StoneCutterDeluxeTransformAddons from './StoneCutterDeluxeTransformAddons';
 import MarginEOEBasics from './MarginEOEBasics';
 import MarginBorderlessStellarSights from './MarginBorderlessStellarSights';
 import MarginDraconic from './MarginDraconic';
@@ -426,6 +441,9 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M21': M21,
   'MH2': MH2,
   'MemoryCorridor': MemoryCorridor,
+  'CustomCelidAsap': CustomCelidAsap,
+  'CustomDeckCover': CustomDeckCover,
+  'CustomMarginCelidAsap': CustomMarginCelidAsap,
   'CustomNeon': CustomNeon,
   'CustomDualLands': CustomDualLands,
   'CustomMagraoKaldheim': CustomMagraoKaldheim,
@@ -440,6 +458,13 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'EquinoxBack': EquinoxBack,
   'EquinoxFront': EquinoxFront,
   'EternalNight': EternalNight,
+  'FABClasses': FABClasses,
+  'FABElemental': FABElemental,
+  'FABFabled': FABFabled,
+  'FABHeroes': FABHeroes,
+  'FABLight': FABLight,
+  'FABRegular': FABRegular,
+  'FABShadow': FABShadow,
   'Fang': Fang,
   'FNM': FNM,
   'Fuse': Fuse,
@@ -455,6 +480,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PlaneswalkerBorderless': PlaneswalkerBorderless,
   'PlaneswalkerBoxTopper': PlaneswalkerBoxTopper,
   'PlaneswalkerRegular': PlaneswalkerRegular,
+  'PlaneswalkerSeventh': PlaneswalkerSeventh,
   'PlaneswalkerTall': PlaneswalkerTall,
   'PlaneswalkerTallBorderless': PlaneswalkerTallBorderless,
   'PlaneswalkerNickname': PlaneswalkerNickname,
@@ -563,14 +589,18 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'NeonInkTransformBackTextless': NeonInkTransformBackTextless,
   'OldFloating': OldFloating,
   'OldFloatingShort': OldFloatingShort,
+  'OldSaga': OldSaga,
   'SNCGildedColored': SNCGildedColored,
   'SNCGildedTextless': SNCGildedTextless,
   'StoneCutterDeluxeCase': StoneCutterDeluxeCase,
-  'StoneCutterDeluxeDFC': StoneCutterDeluxeDFC,
-  'StoneCutterDeluxeTransformAddons': StoneCutterDeluxeTransformAddons,
-  'StoneCutterDeluxeSaga': StoneCutterDeluxeSaga,
   'StoneCutterDeluxeClass': StoneCutterDeluxeClass,
+  'StoneCutterDeluxeDFC': StoneCutterDeluxeDFC,
   'StoneCutterDeluxeExtended': StoneCutterDeluxeExtended,
+  'StoneCutterDeluxePlaneswalker': StoneCutterDeluxePlaneswalker,
+  'StoneCutterDeluxePlaneswalkerExtended': StoneCutterDeluxePlaneswalkerExtended,
+  'StoneCutterDeluxePlaneswalkerTransformAddons': StoneCutterDeluxePlaneswalkerTransformAddons,
+  'StoneCutterDeluxeSaga': StoneCutterDeluxeSaga,
+  'StoneCutterDeluxeTransformAddons': StoneCutterDeluxeTransformAddons,
   'StoneCutterDeluxe': StoneCutterDeluxe,
   'StoneCutterDeluxeNicknameAddons': StoneCutterDeluxeNicknameAddons,
   'TARDIS': TARDIS,

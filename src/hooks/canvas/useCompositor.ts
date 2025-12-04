@@ -39,6 +39,7 @@ export const useCompositor = ({
     const textCanvas = canvasRefs.text;
     const bottomInfoCanvas = canvasRefs.bottomInfo;
     const guidelinesCanvas = canvasRefs.guidelines;
+    const qrCodeCanvas = canvasRefs.qrCode;
     const previewCanvas = previewRef.current;
 
     if (!cardCanvas || !cardContext || !previewCanvas) return;
@@ -75,6 +76,11 @@ export const useCompositor = ({
     // Draw watermark
     if (watermarkCanvas) {
       cardContext.drawImage(watermarkCanvas, 0, 0);
+    }
+
+    // Draw QR code (for deck cover cards)
+    if (qrCodeCanvas && loadedPack?.qrCode) {
+      cardContext.drawImage(qrCodeCanvas, 0, 0);
     }
 
     // Draw saga layer (chapter markers)

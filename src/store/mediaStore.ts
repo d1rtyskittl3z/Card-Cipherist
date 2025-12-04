@@ -160,6 +160,9 @@ interface MediaState {
   /** Cached mana symbol images (key: symbol name, value: image element) */
   manaSymbolImages: { [key: string]: HTMLImageElement };
 
+  /** QR code source canvas (rendered by QRCodeTab component) */
+  qrCodeSourceCanvas: HTMLCanvasElement | null;
+
   /**
    * Update art transformation properties
    * @param updates - Partial art properties to update
@@ -303,6 +306,12 @@ interface MediaState {
   setManaSymbolImages: (images: { [key: string]: HTMLImageElement }) => void;
 
   /**
+   * Set QR code source canvas (from QRCodeTab component)
+   * @param canvas - Canvas element with rendered QR code (or null to clear)
+   */
+  setQRCodeSourceCanvas: (canvas: HTMLCanvasElement | null) => void;
+
+  /**
    * Reset art to default state (blank image, centered, no zoom/rotation)
    */
   resetArt: () => void;
@@ -390,6 +399,9 @@ export const useMediaStore = create<MediaState>()(
 
       // Initial state - Mana Symbols
       manaSymbolImages: {},
+
+      // Initial state - QR Code
+      qrCodeSourceCanvas: null,
 
       // Art Management
       updateArt: (updates) => {
@@ -527,6 +539,13 @@ export const useMediaStore = create<MediaState>()(
       setManaSymbolImages: (images) => {
         set((draft) => {
           draft.manaSymbolImages = castDraft(images);
+        });
+      },
+
+      // QR Code Management
+      setQRCodeSourceCanvas: (canvas) => {
+        set((draft) => {
+          draft.qrCodeSourceCanvas = castDraft(canvas);
         });
       },
 
