@@ -108,6 +108,9 @@ import M15EighthTransformUBBack from './M15EighthTransformUBBack';
 import M15EighthTransformUBFront from './M15EighthTransformUBFront';
 import M15EighthUB from './M15EighthUB';
 import M15EighthModal from './M15EighthModal';
+import M15EighthModalNyx from './M15EighthModalNyx';
+import M15EighthModalSnow from './M15EighthModalSnow';
+import M15EighthModalUB from './M15EighthModalUB';
 import M15EighthToken from './M15EighthToken';
 import M15EighthNyxToken from './M15EighthNyxToken';
 import M15EighthSnowToken from './M15EighthSnowToken';
@@ -389,6 +392,9 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15EighthTransformUBFront': M15EighthTransformUBFront,
   'M15EighthUB': M15EighthUB,
   'M15EighthModal': M15EighthModal,
+  'M15EighthModalNyx': M15EighthModalNyx,
+  'M15EighthModalSnow': M15EighthModalSnow,
+  'M15EighthModalUB': M15EighthModalUB,
   'M15EighthToken': M15EighthToken,
   'M15EighthNyxToken': M15EighthNyxToken,
   'M15EighthSnowToken': M15EighthSnowToken,
