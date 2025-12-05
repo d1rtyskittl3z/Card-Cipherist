@@ -90,6 +90,7 @@ import FABShadow from './FABShadow';
 import Fang from './Fang';
 import FNM from './FNM';
 import Fuse from './Fuse';
+import FutureRegular from './FutureRegular';
 import FeuerAmeiseIxalan from './FeuerAmeiseIxalan';
 import M15BoxTopper from './M15BoxTopper';
 import M15ClearTextboxes from './M15ClearTextboxes';
@@ -477,6 +478,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Fang': Fang,
   'FNM': FNM,
   'Fuse': Fuse,
+  'FutureRegular': FutureRegular,
   'Flip': Flip,
   'Fourth': Fourth,
   'Seventh': Seventh,

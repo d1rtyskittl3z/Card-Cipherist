@@ -56,11 +56,13 @@ const CollectorTabComponent = () => {
   const [note, setNote] = useState('');
 
   // Auto-enable original collector info when a pack with loadBottomInfo is loaded
+  // and disable standard collector info to prevent duplicate brush symbols
   useEffect(() => {
     if (loadedPack?.loadBottomInfo) {
       setUseOriginalCollectorInfo(true);
+      updateCard({ showCollectorInfo: false });
     }
-  }, [loadedPack]);
+  }, [loadedPack, updateCard]);
 
   // Combined effect to handle both original and standard collector info
   useEffect(() => {
@@ -83,10 +85,22 @@ const CollectorTabComponent = () => {
 
     // Add original collector info if enabled
     if (useOriginalCollectorInfo && loadedPack?.loadBottomInfo) {
+      // Check if any Power/Toughness frame is present
+      const hasPowerToughness = frames.some(frame =>
+        frame.name.includes('Power') || frame.name.includes('Toughness')
+      );
+
       Object.entries(loadedPack.loadBottomInfo).forEach(([key, textConfig]) => {
+        // Parse ptshift values before removing the code
+        let ptShiftX = 0;
+        const ptshiftMatch = textConfig.text.match(/\{ptshift([^,}]+),([^}]+)\}/);
+        if (ptshiftMatch && hasPowerToughness) {
+          ptShiftX = parseFloat(ptshiftMatch[1]) || 0;
+        }
+
         const replacedText = textConfig.text
           .replace('{elemidinfo-artist}', originalArtist || '')
-          .replace(/\{ptshift[^}]*\}/g, '') // Remove ptshift codes (not needed for collector info)
+          .replace(/\{ptshift[^}]*\}/g, '') // Remove ptshift codes after parsing
           .replace(/\{conditionalcolor:[^}]*\}/g, ''); // Remove inline conditionalcolor codes (use property instead)
         
         // Resolve conditionalColor: if frames match, use the specified color
@@ -104,12 +118,15 @@ const CollectorTabComponent = () => {
           }
         }
 
+        // Apply ptshift to width (negative ptShiftX reduces width from right side)
+        const adjustedWidth = (textConfig.width || 0) + ptShiftX;
+
         finalBottomInfo[key] = {
           name: key,
           text: replacedText,
           x: textConfig.x || 0,
           y: textConfig.y || 0,
-          width: textConfig.width || 0,
+          width: adjustedWidth,
           height: textConfig.height || 0,
           size: textConfig.size,
           font: textConfig.font || 'gothammedium',
