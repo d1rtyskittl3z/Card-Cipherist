@@ -597,6 +597,7 @@ export const framePackTextConfigSchema = z.object({
   lineSpacing: z.number().optional(),
   italics: z.boolean().optional(),
   bold: z.boolean().optional(),
+  fontStyle: z.string().optional(),
 });
 
 /**

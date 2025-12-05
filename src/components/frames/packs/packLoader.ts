@@ -3,6 +3,9 @@ import { validateFramePack } from '../../../types/validation';
 import { createError, ErrorType, logError, type Result, Ok, Err } from '../../../utils/errors';
 
 // Import all pack modules statically
+import ABU from './ABU';
+import Eighth from './8th';
+import EighthColorshifted from './8thColorshifted';
 import M15Regular1 from './M15Regular-1';
 import M15TransformFront from './M15TransformFront';
 import M15TransformNyxFront from './M15TransformNyxFront';
@@ -271,11 +274,13 @@ import PlaneswalkerTransformFrontDBL from './PlaneswalkerTransformFrontDBL';
 import PlaneswalkerTransformBackDBL from './PlaneswalkerTransformBackDBL';
 import PlaneswalkerTransformIcons from './PlaneswalkerTransformIcons';
 import Pipboy from './Pipboy';
+import Playtest from './Playtest';
 import Ravnica from './Ravnica';
 import Room from './Room';
 import RoomUB from './RoomUB';
 import Ring from './Ring';
 import Flip from './Flip';
+import Cardback from './Cardback';
 import Case from './Case';
 import Scroll from './Scroll';
 import ShatteredGlass from './ShatteredGlass';
@@ -341,6 +346,9 @@ import MarginElemental from './MarginElemental';
  * Pack registry - maps pack IDs to their modules
  */
 const PACK_REGISTRY: Record<string, FramePackTemplate> = {
+  'ABU': ABU,
+  '8th': Eighth,
+  '8thColorshifted': EighthColorshifted,
   'M15Regular-1': M15Regular1,
   'M15TransformFront': M15TransformFront,
   'M15TransformNyxFront': M15TransformNyxFront,
@@ -401,6 +409,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15Snow': M15Snow,
   'Leveler': Leveler,
   'Conspiracy': Conspiracy,
+  'Cardback': Cardback,
   'Case': Case,
   'Colorshifted': Colorshifted,
   'Battle': Battle,
@@ -648,6 +657,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PlaneswalkerTransformBackDBL': PlaneswalkerTransformBackDBL,
   'PlaneswalkerTransformIcons': PlaneswalkerTransformIcons,
   'Pipboy': Pipboy,
+  'Playtest': Playtest,
   'Ravnica': Ravnica,
   'M15TransformSnowFront': M15TransformSnowFront,
   'M15TransformUBFront': M15TransformUBFront,

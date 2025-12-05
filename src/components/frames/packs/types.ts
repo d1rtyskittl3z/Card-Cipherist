@@ -69,6 +69,7 @@ export interface TextConfig {
   lineSpacing?: number; // Line spacing adjustment (fractional multiplier of text size)
   italics?: boolean; // Render text in italic style
   bold?: boolean; // Render text in bold style
+  fontStyle?: string; // CSS font-style prefix (e.g., 'bold', 'italic', 'italic bold')
 }
 
 export interface SagaPackConfig {
