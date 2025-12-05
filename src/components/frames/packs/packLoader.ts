@@ -34,6 +34,7 @@ import Split from './Split';
 import SpreeUB from './SpreeUB';
 import SimpleInventions from './SimpleInventions';
 import Adventure from './Adventure';
+import AKHInvocationExtended from './AKHInvocationExtended';
 import Aftermath from './Aftermath';
 import Attraction from './Attraction';
 import M15Devoid from './M15Devoid';
@@ -252,6 +253,7 @@ import ExpeditionBFZ1 from './ExpeditionBFZ-1';
 import ExpeditionZNR1 from './ExpeditionZNR-1';
 import InnerCrownsEtched from './InnerCrownsEtched';
 import Invention from './Invention';
+import Invocation from './Invocation';
 import InvocationMUL from './InvocationMUL';
 import Ixalan from './Ixalan';
 import LegendCrownsEtched from './LegendCrownsEtched';
@@ -404,6 +406,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'SpreeUB': SpreeUB,
   'SimpleInventions': SimpleInventions,
   'Adventure': Adventure,
+  'AKHInvocationExtended': AKHInvocationExtended,
   'Aftermath': Aftermath,
   'Attraction': Attraction,
   'M15Devoid': M15Devoid,
@@ -631,6 +634,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'ExpeditionZNR-1': ExpeditionZNR1,
   'InnerCrownsEtched': InnerCrownsEtched,
   'Invention': Invention,
+  'Invocation': Invocation,
   'InvocationMUL': InvocationMUL,
   'Ixalan': Ixalan,
   'LegendCrownsEtched': LegendCrownsEtched,

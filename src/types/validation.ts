@@ -120,6 +120,7 @@ export const textObjectSchema = z.object({
   outlineColor: z.string().optional(),
   fontSizeAdjustment: z.number().optional(),
   manaPrefix: z.string().optional(),
+  manaSymbolColor: z.string().optional(),
   manaPlacement: z
     .object({
       x: z.array(z.number()),
@@ -582,6 +583,7 @@ export const framePackTextConfigSchema = z.object({
   manaCost: z.boolean().optional(),
   manaSpacing: z.number().optional(),
   manaPrefix: z.string().optional(),
+  manaSymbolColor: z.string().optional(),
   manaPlacement: z.object({
     x: z.array(z.number()),
     y: z.array(z.number()),

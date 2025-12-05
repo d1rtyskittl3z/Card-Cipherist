@@ -31,6 +31,10 @@ const CollectorTabComponent = () => {
   const [showPositionControls, setShowPositionControls] = useState(false);
   const [useOriginalCollectorInfo, setUseOriginalCollectorInfo] = useState(false);
   const [originalArtist, setOriginalArtist] = useState('');
+  const [originalNumber, setOriginalNumber] = useState('');
+  const [originalSet, setOriginalSet] = useState('');
+  const [originalLanguage, setOriginalLanguage] = useState('');
+  const [originalRarity, setOriginalRarity] = useState('');
   
   // Position offsets (normalized coordinates) - reset on page reload
   const [positionOffsets, setPositionOffsets] = useState<Record<string, { x: number; y: number }>>({
@@ -100,6 +104,10 @@ const CollectorTabComponent = () => {
 
         const replacedText = textConfig.text
           .replace('{elemidinfo-artist}', originalArtist || '')
+          .replace('{elemidinfo-number}', originalNumber || '')
+          .replace('{elemidinfo-set}', originalSet || '')
+          .replace('{elemidinfo-language}', originalLanguage || '')
+          .replace('{elemidinfo-rarity}', originalRarity || '')
           .replace(/\{ptshift[^}]*\}/g, '') // Remove ptshift codes after parsing
           .replace(/\{conditionalcolor:[^}]*\}/g, ''); // Remove inline conditionalcolor codes (use property instead)
         
@@ -184,7 +192,7 @@ const CollectorTabComponent = () => {
     const brushToUse = useOriginalCollectorInfo && loadedPack?.brush ? loadedPack.brush : undefined;
     updateCard({ bottomInfo: finalBottomInfo, brush: brushToUse });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useOriginalCollectorInfo, originalArtist, loadedPack, showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets, bottomInfoColor]);
+  }, [useOriginalCollectorInfo, originalArtist, originalNumber, originalSet, originalLanguage, originalRarity, loadedPack, showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets, bottomInfoColor]);
 
   // Ensure the switch is off by default on first mount
   useEffect(() => {
@@ -276,13 +284,41 @@ const CollectorTabComponent = () => {
             />
 
             {useOriginalCollectorInfo && (
-              <ControlGrid columns={1} gap={3} mt={3}>
+              <ControlGrid columns={2} gap={3} mt={3}>
                 <LabeledInput
                   label="Artist"
                   type="text"
                   placeholder="Artist name"
                   value={originalArtist}
                   onChange={setOriginalArtist}
+                />
+                <LabeledInput
+                  label="Number"
+                  type="text"
+                  placeholder="e.g., 001/054"
+                  value={originalNumber}
+                  onChange={setOriginalNumber}
+                />
+                <LabeledInput
+                  label="Set"
+                  type="text"
+                  placeholder="e.g., AKH"
+                  value={originalSet}
+                  onChange={setOriginalSet}
+                />
+                <LabeledInput
+                  label="Language"
+                  type="text"
+                  placeholder="e.g., EN"
+                  value={originalLanguage}
+                  onChange={setOriginalLanguage}
+                />
+                <LabeledInput
+                  label="Rarity"
+                  type="text"
+                  placeholder="e.g., M"
+                  value={originalRarity}
+                  onChange={setOriginalRarity}
                 />
               </ControlGrid>
             )}

@@ -57,6 +57,7 @@ export interface TextConfig {
   manaCost?: boolean;
   manaSpacing?: number;
   manaPrefix?: string; // Alternative mana symbol directory (e.g., 'oilslick' → /img/manaSymbols/oilslick/oilslickw.svg)
+  manaSymbolColor?: string; // Color override for mana symbols (e.g., '#24150E', 'white')
   manaPlacement?: { x: number[]; y: number[] }; // Manual positioning for each mana symbol (manaCost only, max 6 symbols)
   noVerticalCenter?: boolean; // When used with manaPlacement, don't center align (used for custom layouts)
   vertical?: 'top' | 'center' | 'bottom' | boolean;

@@ -181,6 +181,8 @@ export interface TextObject {
   fontSizeAdjustment?: number;
   /** Prefix for mana symbol references (e.g., '/img/manaSymbols/') */
   manaPrefix?: string;
+  /** Color override for mana symbols (e.g., '#24150E', 'white') */
+  manaSymbolColor?: string;
   /** Custom mana symbol placement coordinates */
   manaPlacement?: { x: number[]; y: number[] };
   /** If true, disables vertical centering of text */
