@@ -1379,10 +1379,22 @@ export const drawBottomInfo = async (
       currentX = x + textWidth / 2;
     }
 
-    const currentY = y;
+    let currentY = y;
     let kerning = 0;
     let verticalOffset = 0;
     const textAlign = textObj.align || 'left';
+
+    // Apply rotation if specified
+    const rotation = textObj.rotation || 0;
+    const hasRotation = rotation !== 0;
+    if (hasRotation) {
+      bottomInfoContext.save();
+      // Rotate around the text starting position (currentX, currentY)
+      // This ensures text rotates around where it will be drawn
+      bottomInfoContext.translate(currentX, currentY);
+      bottomInfoContext.rotate((rotation * Math.PI) / 180);
+      bottomInfoContext.translate(-currentX, -currentY);
+    }
 
     // Parse and render text with formatting codes
     const segments: Array<{ type: 'text' | 'artistbrush'; content: string; font?: string; size?: number }> = [];
@@ -1659,6 +1671,11 @@ export const drawBottomInfo = async (
           currentX += symbolWidth + 2;
         }
       }
+    }
+
+    // Restore context if rotation was applied
+    if (hasRotation) {
+      bottomInfoContext.restore();
     }
     } catch (error) {
       console.error('drawBottomInfo: Error rendering', textObj.name, error);

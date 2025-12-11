@@ -31,6 +31,7 @@ const CollectorTabComponent = () => {
   const [showPositionControls, setShowPositionControls] = useState(false);
   const [useOriginalCollectorInfo, setUseOriginalCollectorInfo] = useState(false);
   const [originalArtist, setOriginalArtist] = useState('');
+  const [originalNote, setOriginalNote] = useState('');
   const [originalNumber, setOriginalNumber] = useState('');
   const [originalSet, setOriginalSet] = useState('');
   const [originalLanguage, setOriginalLanguage] = useState('');
@@ -72,7 +73,7 @@ const CollectorTabComponent = () => {
 
       // Scan all loadBottomInfo entries for {elemidinfo-*} placeholders
       const fieldMap = new Map<string, string>();
-      const fieldOrder = ['artist', 'number', 'set', 'language', 'rarity'];
+      const fieldOrder = ['artist', 'note', 'number', 'set', 'language', 'rarity'];
 
       Object.entries(loadedPack.loadBottomInfo).forEach(([key, textConfig]) => {
         const matches = textConfig.text.matchAll(/\{elemidinfo-(\w+)\}/g);
@@ -137,6 +138,7 @@ const CollectorTabComponent = () => {
 
         const replacedText = textConfig.text
           .replace('{elemidinfo-artist}', originalArtist || '')
+          .replace('{elemidinfo-note}', originalNote || '')
           .replace('{elemidinfo-number}', originalNumber || '')
           .replace('{elemidinfo-set}', originalSet || '')
           .replace('{elemidinfo-language}', originalLanguage || '')
@@ -190,6 +192,7 @@ const CollectorTabComponent = () => {
           outlineWidth: textConfig.outlineWidth,
           shadowX: textConfig.shadowX,
           shadowY: textConfig.shadowY,
+          rotation: textConfig.rotation,
         };
       });
     }
@@ -238,7 +241,7 @@ const CollectorTabComponent = () => {
     const brushToUse = useOriginalCollectorInfo && loadedPack?.brush ? loadedPack.brush : undefined;
     updateCard({ bottomInfo: finalBottomInfo, brush: brushToUse });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useOriginalCollectorInfo, originalArtist, originalNumber, originalSet, originalLanguage, originalRarity, loadedPack, showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets, bottomInfoColor]);
+  }, [useOriginalCollectorInfo, originalArtist, originalNote, originalNumber, originalSet, originalLanguage, originalRarity, loadedPack, showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets, bottomInfoColor]);
 
   // Ensure the switch is off by default on first mount
   useEffect(() => {
@@ -337,6 +340,11 @@ const CollectorTabComponent = () => {
                       value: originalArtist,
                       onChange: setOriginalArtist,
                       placeholder: 'Artist name',
+                    },
+                    note: {
+                      value: originalNote,
+                      onChange: setOriginalNote,
+                      placeholder: 'e.g., Promo',
                     },
                     number: {
                       value: originalNumber,

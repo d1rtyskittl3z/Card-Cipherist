@@ -6,6 +6,7 @@ import { createError, ErrorType, logError, type Result, Ok, Err } from '../../..
 import ABU from './ABU';
 import Eighth from './8th';
 import EighthColorshifted from './8thColorshifted';
+import EighthPlaytest from './8thPlaytest';
 import EighthTransformBack from './8thTransformBack';
 import EighthTransformFront from './8thTransformFront';
 import M15Regular1 from './M15Regular-1';
@@ -357,6 +358,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'ABU': ABU,
   '8th': Eighth,
   '8thColorshifted': EighthColorshifted,
+  '8thPlaytest': EighthPlaytest,
   '8thTransformBack': EighthTransformBack,
   '8thTransformFront': EighthTransformFront,
   'M15Regular-1': M15Regular1,
