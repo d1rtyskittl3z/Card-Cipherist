@@ -271,6 +271,7 @@ import StoneCutterDeluxe from './StoneCutterDeluxe';
 import StoneCutterDeluxeNicknameAddons from './StoneCutterDeluxeNicknameAddons';
 import TARDIS from './TARDIS';
 import Tarkir from './Tarkir';
+import Tapped from './Tapped';
 import PlaneswalkerCompleated from './PlaneswalkerCompleated';
 import PlaneswalkerDBL from './PlaneswalkerDBL';
 import PlaneswalkerTallDBL from './PlaneswalkerTallDBL';
@@ -631,6 +632,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'StoneCutterDeluxeNicknameAddons': StoneCutterDeluxeNicknameAddons,
   'TARDIS': TARDIS,
   'Tarkir': Tarkir,
+  'Tapped': Tapped,
   'StationRegular': StationRegular,
   'StationBorderless': StationBorderless,
   'Class': Class,

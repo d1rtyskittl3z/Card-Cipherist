@@ -74,7 +74,7 @@ const FRAME_GROUPS: Record<string, LegacyGroup> = {
   'FleshAndBlood': FleshAndBlood,
 };
 
-const ROTATION_PACK_IDS = new Set<string>(['Battle', 'Flip', 'Fuse', 'Split', 'Room', 'RoomUB']);
+const ROTATION_PACK_IDS = new Set<string>(['Battle', 'Flip', 'Fuse', 'Split', 'Room', 'RoomUB', 'Tapped', 'Planechase']);
 
 const PLANESWALKER_FALLBACK_ABILITIES: [string, string, string, string] = ['', '+1', '0', '-7'];
 const PLANESWALKER_FALLBACK_ADJUST: [number, number, number, number] = [0, 0, 0, 0];
@@ -328,6 +328,17 @@ const FrameTabComponent = () => {
         }
         if (pack.watermarkBounds) {
           cardUpdates.watermarkBounds = pack.watermarkBounds;
+        }
+        // Apply canvas dimensions and landscape orientation for special packs
+        if (pack.canvasDimensions) {
+          const [width, height, marginX, marginY] = pack.canvasDimensions;
+          cardUpdates.width = width;
+          cardUpdates.height = height;
+          cardUpdates.marginX = marginX;
+          cardUpdates.marginY = marginY;
+        }
+        if (pack.landscape !== undefined) {
+          cardUpdates.landscape = pack.landscape;
         }
 
         if (Object.keys(cardUpdates).length > 0) {

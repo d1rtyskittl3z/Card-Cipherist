@@ -109,6 +109,8 @@ export interface FramePackTemplate {
   label: string;
   version?: string; // Optional for addon-only packs
   notice?: string;
+  canvasDimensions?: [number, number, number, number]; // Optional canvas dimensions [width, height, marginX, marginY] for special layouts (e.g., landscape packs)
+  landscape?: boolean; // Optional flag for landscape orientation (rotated 90 degrees)
   artBounds?: Bounds; // Optional for addon-only packs
   artBounds2?: Bounds; // Specifically for the three packs that need a second slot for art
   setSymbolBounds?: Bounds & {
@@ -123,6 +125,8 @@ export interface FramePackTemplate {
   class?: ClassPackConfig; // Optional Class configuration (level layout defaults)
   qrCode?: QRCodePackConfig; // Optional QR code configuration for deck cover packs
   replacementMasks?: Record<string, string>; // Optional position mask overrides (e.g., 'Right Half': '/img/custom/mask.png')
+  collectorInfoScale?: number; // Optional scale multiplier for standard collector info text (default: 1.0)
+  collectorInfoOffsets?: Record<string, { x: number; y: number }>; // Optional position offsets for standard collector info fields (normalized coordinates)
   frames: FrameItem[];
   text?: {
     [key: string]: TextConfig;

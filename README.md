@@ -25,44 +25,9 @@ Soon this project shall rise in full glory… once the build pipeline stops leak
 Whenever the next full moon aligns with `npm run build` and succeeds three times in a row.
 
 #### Here is a list of currently supported Frame Packs: 
-##### Standard Frames
-<div style="columns:3;"> <ul> <li>Regular Frames</li> <li>Enchantment Frames (Nyx)</li> <li>Legend Crowns</li> <li>Floating Legend Crowns</li> <li>Inner Crowns</li> <li>Nicknames</li> <li>Smooth Nickname Legend Crowns</li> <li>Miracle</li> <li>Holo Stamps</li> <li>Dark Power/Toughness</li> <li>Colored Borders</li> <li>Color Identity Pips</li> <li>"The List" Stamp</li> <li>Lands</li> <li>Spree</li> <li>Attractions</li> <li>Snow</li> <li>Conspiracies</li> <li>Colorshifted</li> <li>Brawl Legend Crowns</li> <li>Stations Regualr and Borderless</li></ul> </div>
 
-##### Tokens
-<div style="columns:3;"> <ul> <li>Regular</li> <li>Textless</li> <li>Textless (Borderless)</li> <li>Tall</li> <li>Short</li> <li>Monarch Token</li> <li>Marker Card</li> <li>Initiative Token</li> <li>Planeswalker Emblems</li> <li>Regular (Bordered M15)</li> <li>Textless (Bordered M15)</li> </ul> </div>
-
-##### Sagas
-<div style="columns:3;"> <ul> <li>Regular</li> </ul> </div>
-
-##### Planeswalker
-<div style="columns:3;"> <ul> <li>Regular</li> </ul> </div>
-
-##### Modal DFC's
-<div style="columns:3;"> <ul> <li>Regular</li> </ul> </div>
-
-##### Transform
-<div style="columns:3;"> <ul> <li>Regular (Front)</li> </ul> </div>
-
-##### Showcase Frames
-<div style="columns:3;"> <ul> <li>Avatar Elemental (TLA)</li> <li>Universes Beyond</li> <li>Universes Beyond (Full art)</li> <li>Universes Beyond (Extended art)</li> <li>Legend Crowns (Universes Beyond)</li> <li>Floating Legend Crowns (Universes Beyond)</li> <li>Nickname ("Godzilla")</li> <li>Extended Art (Regular)</li> <li>Etched</li> <li>M21 Signature Spellbooks</li> <li>Oil Slick</li> <li>Wanted Poster</li> </ul> </div>
-
-##### Universes Beyond
-<div style="columns:3;"> <ul> <li>Universes Beyond</li> <li>Full art</li> <li>Extended art</li> <li>Legend Crowns</li> <li>Floating Legend Crowns</li> </ul> </div>
-
-##### Promos (Tall Art)
-<div style="columns:3;"> <ul> <li>Regular Frames</li> <li>Borderless Frames</li> <li>Nyx Frames</li> <li>Extended Art Frames</li> <li>Nickname Frames</li> <li>Generic Showcase</li> </ul> </div>
-
-##### Textless/Fullart
-<div style="columns:3;"> <ul> <li>Edge of Eternities Basics</li> <li>Kamigawa Basics</li><li>Fullart Basics (2022)</li> <li>Fullart Basics (Universes Beyond)</li> <li>Fullart Basics (SNC)</li> <li>Fullart Basics (THB)</li> <li>Fullart Basics (ZEN)</li> <li>Fullart Snow Basics</li> <li>Unfinity Basics</li> <li>Unstable Basics</li> <li>Generic Showcase</li> <li>Magic Fest Promos</li> </ul> </div>
-
-##### Custom</li>
-<div style="columns:3;"> <ul> <li>Neon</li> </ul> </div>
-
-##### Accurate Frames
-<div style="columns:3;"> <ul> <li>Regular Frames</li> <li>Extended Art Frames</li> <li>Legend Crowns</li> <li>Inner Crowns</li> <li>Full Art</li> <li>Snow</li> <li>Nyx</li> <li>Universes Beyond</li> <li>Legend Crowns (Universes Beyond)</li> </ul> </div>
-
-##### 1/8th Inch Margin</li>
-<li>Generic Margins</li> </ul> </div>
+* As of December 11, 2025 all cards with the exception of Planchase, Dungeon (AFR), Cartoony and Pokemon are currently ported.
+* ***NOTE:*** Further testing is needed to verify complete functionality. There are known issues that will be addressed in the future...
 
 ---
 

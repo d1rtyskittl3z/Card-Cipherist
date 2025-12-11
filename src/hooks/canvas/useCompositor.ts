@@ -121,14 +121,38 @@ export const useCompositor = ({
     // Copy to preview canvas (visible to user)
     const previewContext = previewCanvas.getContext('2d');
     if (previewContext) {
-      // Resize if dimensions changed
-      if (previewCanvas.width !== cardCanvas.width || previewCanvas.height !== cardCanvas.height) {
-        previewCanvas.width = cardCanvas.width;
-        previewCanvas.height = cardCanvas.height;
+      // Handle landscape orientation (rotate 90 degrees for display)
+      if (card.landscape) {
+        // For landscape, swap width and height for preview canvas
+        if (previewCanvas.width !== cardCanvas.height || previewCanvas.height !== cardCanvas.width) {
+          previewCanvas.width = cardCanvas.height;
+          previewCanvas.height = cardCanvas.width;
+        }
+        previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        
+        // Save context state
+        previewContext.save();
+        
+        // Rotate 90 degrees counter-clockwise
+        // Move origin to center, rotate, then translate back
+        previewContext.translate(0, previewCanvas.height);
+        previewContext.rotate(-Math.PI / 2);
+        
+        // Draw the card canvas
+        previewContext.drawImage(cardCanvas, 0, 0);
+        
+        // Restore context state
+        previewContext.restore();
+      } else {
+        // Standard portrait orientation
+        if (previewCanvas.width !== cardCanvas.width || previewCanvas.height !== cardCanvas.height) {
+          previewCanvas.width = cardCanvas.width;
+          previewCanvas.height = cardCanvas.height;
+        }
+        // Always clear before drawing to prevent stale content from showing through
+        previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        previewContext.drawImage(cardCanvas, 0, 0);
       }
-      // Always clear before drawing to prevent stale content from showing through
-      previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-      previewContext.drawImage(cardCanvas, 0, 0);
     }
   }, [canvasRefs, previewRef, renderArtLayer, renderSetSymbol]);
 

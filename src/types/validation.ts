@@ -654,6 +654,8 @@ export const framePackTemplateSchema = z.object({
   label: z.string().min(1, 'Frame pack label cannot be empty'),
   version: z.string().optional(),
   notice: z.string().optional(),
+  canvasDimensions: z.tuple([z.number(), z.number(), z.number(), z.number()]).optional(), // Canvas dimensions [width, height, marginX, marginY]
+  landscape: z.boolean().optional(), // Landscape orientation flag
   artBounds: framePackBoundsSchema.optional(),
   artBounds2: framePackBoundsSchema.optional(),
   setSymbolBounds: setSymbolBoundsSchema.optional(),
@@ -662,6 +664,8 @@ export const framePackTemplateSchema = z.object({
   planeswalker: planeswalkerPackConfigSchema.optional(),
   qrCode: qrCodePackConfigSchema.optional(), // Optional QR code configuration for deck cover packs
   replacementMasks: z.record(z.string(), z.string()).optional(),
+  collectorInfoScale: z.number().optional(), // Scale multiplier for standard collector info
+  collectorInfoOffsets: z.record(z.string(), z.object({ x: z.number(), y: z.number() })).optional(), // Position offsets for standard collector info fields
   frames: z.array(framePackFrameItemSchema).min(1, 'Frame pack must have at least one frame'),
   text: z.record(z.string(), framePackTextConfigSchema).optional(),
   loadBottomInfo: z.record(z.string(), framePackTextConfigSchema).optional(),

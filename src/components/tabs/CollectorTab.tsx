@@ -40,7 +40,7 @@ const CollectorTabComponent = () => {
   // Dynamic fields tracking for loadBottomInfo
   const [requiredFields, setRequiredFields] = useState<Array<{ key: string; label: string }>>([]);
 
-  // Position offsets (normalized coordinates) - reset on page reload
+  // Position offsets (normalized coordinates) - initialized from pack's collectorInfoOffsets
   const [positionOffsets, setPositionOffsets] = useState<Record<string, { x: number; y: number }>>({
     topLeft: { x: 0, y: 0 },
     rarity: { x: 0, y: 0 },
@@ -50,6 +50,16 @@ const CollectorTabComponent = () => {
     bottomLeft: { x: 0, y: 0 },
     bottomRight: { x: 0, y: 0 },
   });
+
+  // Apply pack-specific collector info offsets when pack loads
+  useEffect(() => {
+    if (loadedPack?.collectorInfoOffsets) {
+      setPositionOffsets((prev) => ({
+        ...prev,
+        ...loadedPack.collectorInfoOffsets,
+      }));
+    }
+  }, [loadedPack]);
   // removed local state; now using store-backed showSerialNumbers
 
   // Get collector info from store
@@ -75,7 +85,7 @@ const CollectorTabComponent = () => {
       const fieldMap = new Map<string, string>();
       const fieldOrder = ['artist', 'note', 'number', 'set', 'language', 'rarity'];
 
-      Object.entries(loadedPack.loadBottomInfo).forEach(([key, textConfig]) => {
+      Object.entries(loadedPack.loadBottomInfo).forEach(([_key, textConfig]) => {
         const matches = textConfig.text.matchAll(/\{elemidinfo-(\w+)\}/g);
         for (const match of matches) {
           const fieldKey = match[1];
@@ -128,7 +138,7 @@ const CollectorTabComponent = () => {
         frame.name.includes('Power') || frame.name.includes('Toughness')
       );
 
-      Object.entries(loadedPack.loadBottomInfo).forEach(([key, textConfig]) => {
+      Object.entries(loadedPack.loadBottomInfo).forEach(([_key, textConfig]) => {
         // Parse ptshift values before removing the code
         let ptShiftX = 0;
         const ptshiftMatch = textConfig.text.match(/\{ptshift([^,}]+),([^}]+)\}/);
@@ -177,8 +187,8 @@ const CollectorTabComponent = () => {
         // Apply ptshift to width (negative ptShiftX reduces width from right side)
         const adjustedWidth = (textConfig.width || 0) + ptShiftX;
 
-        finalBottomInfo[key] = {
-          name: key,
+        finalBottomInfo[_key] = {
+          name: _key,
           text: replacedText,
           x: textConfig.x || 0,
           y: textConfig.y || 0,
@@ -192,7 +202,6 @@ const CollectorTabComponent = () => {
           outlineWidth: textConfig.outlineWidth,
           shadowX: textConfig.shadowX,
           shadowY: textConfig.shadowY,
-          rotation: textConfig.rotation,
         };
       });
     }
@@ -201,6 +210,9 @@ const CollectorTabComponent = () => {
     if (showCollectorInfo) {
       const cardForConfig = { bottomInfoColor, frames };
       const config = getCollectorInfoConfig(cardForConfig as Card, collectorInfoStyle, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight);
+      
+      // Apply pack-specific collector info scale if present
+      const collectorScale = loadedPack?.collectorInfoScale ?? 1.0;
 
       Object.entries(config).forEach(([key, textConfig]) => {
         let replacedText = replaceCollectorTokens(textConfig.text, {
@@ -226,8 +238,8 @@ const CollectorTabComponent = () => {
           x: textConfig.x + offset.x,
           y: textConfig.y + offset.y,
           width: textConfig.width,
-          height: textConfig.height,
-          size: textConfig.size,
+          height: textConfig.height * collectorScale,
+          size: textConfig.size * collectorScale,
           font: textConfig.font,
           color: textConfig.color,
           oneLine: textConfig.oneLine,
@@ -237,8 +249,9 @@ const CollectorTabComponent = () => {
       });
     }
 
-    // Update card with the combined bottomInfo and brush (if using original collector info)
-    const brushToUse = useOriginalCollectorInfo && loadedPack?.brush ? loadedPack.brush : undefined;
+    // Update card with the combined bottomInfo and brush
+    // Use pack's brush if defined, whether using original or standard collector info
+    const brushToUse = loadedPack?.brush;
     updateCard({ bottomInfo: finalBottomInfo, brush: brushToUse });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useOriginalCollectorInfo, originalArtist, originalNote, originalNumber, originalSet, originalLanguage, originalRarity, loadedPack, showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets, bottomInfoColor]);
