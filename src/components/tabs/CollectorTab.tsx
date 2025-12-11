@@ -36,6 +36,9 @@ const CollectorTabComponent = () => {
   const [originalLanguage, setOriginalLanguage] = useState('');
   const [originalRarity, setOriginalRarity] = useState('');
   
+  // Dynamic fields tracking for loadBottomInfo
+  const [requiredFields, setRequiredFields] = useState<Array<{ key: string; label: string }>>([]);
+
   // Position offsets (normalized coordinates) - reset on page reload
   const [positionOffsets, setPositionOffsets] = useState<Record<string, { x: number; y: number }>>({
     topLeft: { x: 0, y: 0 },
@@ -61,10 +64,40 @@ const CollectorTabComponent = () => {
 
   // Auto-enable original collector info when a pack with loadBottomInfo is loaded
   // and disable standard collector info to prevent duplicate brush symbols
+  // Also detect required fields from placeholders
   useEffect(() => {
     if (loadedPack?.loadBottomInfo) {
       setUseOriginalCollectorInfo(true);
       updateCard({ showCollectorInfo: false });
+
+      // Scan all loadBottomInfo entries for {elemidinfo-*} placeholders
+      const fieldMap = new Map<string, string>();
+      const fieldOrder = ['artist', 'number', 'set', 'language', 'rarity'];
+
+      Object.entries(loadedPack.loadBottomInfo).forEach(([key, textConfig]) => {
+        const matches = textConfig.text.matchAll(/\{elemidinfo-(\w+)\}/g);
+        for (const match of matches) {
+          const fieldKey = match[1];
+          // Use the entry's name as label, add suffix if duplicate
+          const baseLabel = textConfig.name || fieldKey;
+          let label = baseLabel;
+          let counter = 2;
+          while (Array.from(fieldMap.values()).includes(label)) {
+            label = `${baseLabel} ${counter}`;
+            counter++;
+          }
+          fieldMap.set(fieldKey, label);
+        }
+      });
+
+      // Convert to array and sort by standard field order
+      const detectedFields = fieldOrder
+        .filter(key => fieldMap.has(key))
+        .map(key => ({ key, label: fieldMap.get(key)! }));
+
+      setRequiredFields(detectedFields);
+    } else {
+      setRequiredFields([]);
     }
   }, [loadedPack, updateCard]);
 
@@ -116,10 +149,23 @@ const CollectorTabComponent = () => {
         if (textConfig.conditionalColor) {
           const [frameList, colorToApply] = textConfig.conditionalColor.split(':');
           if (frameList && colorToApply) {
-            const frameNames = frameList.split(',').map(f => f.trim().toLowerCase());
-            const hasMatchingFrame = frames.some(frame => 
-              frameNames.some(fn => frame.name.toLowerCase().includes(fn))
-            );
+            const patterns = frameList.split(',').map(f => f.trim());
+            const hasMatchingFrame = frames.some(frame => {
+              return patterns.some(pattern => {
+                // Split pattern by * to get required parts
+                const parts = pattern.split('*').filter(p => p.length > 0);
+                // Check if all parts match (handling negation with !)
+                return parts.every(part => {
+                  if (part.startsWith('!')) {
+                    // Negation: frame must NOT contain this part
+                    return !frame.name.includes(part.substring(1));
+                  } else {
+                    // Regular match: frame must contain this part
+                    return frame.name.includes(part);
+                  }
+                });
+              });
+            });
             if (hasMatchingFrame) {
               resolvedColor = colorToApply;
             }
@@ -283,43 +329,48 @@ const CollectorTabComponent = () => {
               size="lg"
             />
 
-            {useOriginalCollectorInfo && (
+            {useOriginalCollectorInfo && requiredFields.length > 0 && (
               <ControlGrid columns={2} gap={3} mt={3}>
-                <LabeledInput
-                  label="Artist"
-                  type="text"
-                  placeholder="Artist name"
-                  value={originalArtist}
-                  onChange={setOriginalArtist}
-                />
-                <LabeledInput
-                  label="Number"
-                  type="text"
-                  placeholder="e.g., 001/054"
-                  value={originalNumber}
-                  onChange={setOriginalNumber}
-                />
-                <LabeledInput
-                  label="Set"
-                  type="text"
-                  placeholder="e.g., AKH"
-                  value={originalSet}
-                  onChange={setOriginalSet}
-                />
-                <LabeledInput
-                  label="Language"
-                  type="text"
-                  placeholder="e.g., EN"
-                  value={originalLanguage}
-                  onChange={setOriginalLanguage}
-                />
-                <LabeledInput
-                  label="Rarity"
-                  type="text"
-                  placeholder="e.g., M"
-                  value={originalRarity}
-                  onChange={setOriginalRarity}
-                />
+                {requiredFields.map(({ key, label }) => {
+                  const fieldProps = {
+                    artist: {
+                      value: originalArtist,
+                      onChange: setOriginalArtist,
+                      placeholder: 'Artist name',
+                    },
+                    number: {
+                      value: originalNumber,
+                      onChange: setOriginalNumber,
+                      placeholder: 'e.g., 001/054',
+                    },
+                    set: {
+                      value: originalSet,
+                      onChange: setOriginalSet,
+                      placeholder: 'e.g., AKH',
+                    },
+                    language: {
+                      value: originalLanguage,
+                      onChange: setOriginalLanguage,
+                      placeholder: 'e.g., EN',
+                    },
+                    rarity: {
+                      value: originalRarity,
+                      onChange: setOriginalRarity,
+                      placeholder: 'e.g., M',
+                    },
+                  }[key];
+
+                  return fieldProps ? (
+                    <LabeledInput
+                      key={`${key}-${label}`}
+                      label={label}
+                      type="text"
+                      placeholder={fieldProps.placeholder}
+                      value={fieldProps.value}
+                      onChange={fieldProps.onChange}
+                    />
+                  ) : null;
+                })}
               </ControlGrid>
             )}
           </Box>

@@ -15,6 +15,8 @@ const group: LegacyGroup = {
     { kind: 'pack', label: 'Alpha/Beta/Unlimited', id:'ABU' },
 
     { kind: 'label', label: 'Misc' },
+    { kind: 'pack', label: 'Eighth Edition (Tranform Front)', id:'8thTransformFront' },
+    { kind: 'pack', label: 'Eighth Edition (Tranform Back)', id:'8thTransformBack' },
     { kind: 'pack', label: 'Eighth Edition Universes Beyond', id:'8thUB' },
     { kind: 'pack', label: 'Eighth Edition Playtest Cards', id:'8thPlaytest' },
     { kind: 'pack', label: 'Playtest Cards', id:'Playtest' },
