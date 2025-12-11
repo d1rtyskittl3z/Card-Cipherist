@@ -195,11 +195,14 @@ const SetSymbolTabComponent = () => {
       if (customFolders.length === 0) {
         customFolders = [
           'ABYSSALALTERS',
+          'Astral',
           'CNF',
+          'Dcape',
           'JEST',
           'JOE',
           'LOGAN',
           'LOL',
+          'Ocarina',
           'POK',
           'SPIRALTENTACLE',
           'TEMPLE',
