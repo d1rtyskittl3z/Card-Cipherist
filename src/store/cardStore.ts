@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
 import type {
   Card,
   Frame,
@@ -438,53 +438,52 @@ const getInitialCard = (): Card => ({
 
 export const useCardStore = create<CardState>()(
   devtools(
-    persist(
-      (set) => ({
-        // Initial state
-        card: getInitialCard(),
-        selectedFrameIndex: 0,
-        selectedMaskIndex: 0,
-        selectedTextIndex: 0,
-        availableFrames: [],
-        currentTab: 'frame',
-  planeswalker: null,
-        showGuidelines: false,
-        showTransparencies: false,
-        loadedPack: null,
-        isFrameEditorOpen: false,
-        editingFrameIndex: null,
-        hasShownSagaTab: false,
-        hasShownPlaneswalkerTab: false,
-        hasShownKamigawaTab: false,
-        hasShownClassTab: false,
-        hasShownStationsTab: false,
-        hasShownMysticalArchiveTab: false,
-        hasShownMysticalArchiveHorizontalTab: false,
-        hasShownQRCodeTab: false,
-        qrCodeUrl: '',
-  neoBasicsTitleHeight: NEO_BASICS_MIN_TITLE_HEIGHT,
-  neoBasicsElements: [],
-  neoBasicsColorOverrides: {},
-        mysticalArchiveTitleHeight: MYSTICAL_ARCHIVE_JP_DEFAULT_TITLE_HEIGHT,
-        mysticalArchiveTypeWidth: MYSTICAL_ARCHIVE_JP_DEFAULT_TYPE_WIDTH,
-        mysticalArchiveHorizontalTitleWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TITLE_WIDTH,
-        mysticalArchiveHorizontalTypeWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TYPE_WIDTH,
-        setCode: '',
-        rarity: '',
-        collectorSetCode: 'MTG',
-        collectorLanguage: 'EN',
-        collectorArtist: '',
-        collectorRarity: 'P',
-        collectorDigits: '2025',
-        artImage: null,
-        setSymbolImage: null,
-        watermarkImage: null,
-        manaSymbolImages: {},
-        previewCanvasRef: null,
-        showSerialNumbers: false,
-        showArtBoundsDebug: false,
-        customArtBounds: null,
-        autoFitArt: true,
+    (set) => ({
+      // Initial state
+      card: getInitialCard(),
+      selectedFrameIndex: 0,
+      selectedMaskIndex: 0,
+      selectedTextIndex: 0,
+      availableFrames: [],
+      currentTab: 'frame',
+planeswalker: null,
+      showGuidelines: false,
+      showTransparencies: false,
+      loadedPack: null,
+      isFrameEditorOpen: false,
+      editingFrameIndex: null,
+      hasShownSagaTab: false,
+      hasShownPlaneswalkerTab: false,
+      hasShownKamigawaTab: false,
+      hasShownClassTab: false,
+      hasShownStationsTab: false,
+      hasShownMysticalArchiveTab: false,
+      hasShownMysticalArchiveHorizontalTab: false,
+      hasShownQRCodeTab: false,
+      qrCodeUrl: '',
+neoBasicsTitleHeight: NEO_BASICS_MIN_TITLE_HEIGHT,
+neoBasicsElements: [],
+neoBasicsColorOverrides: {},
+      mysticalArchiveTitleHeight: MYSTICAL_ARCHIVE_JP_DEFAULT_TITLE_HEIGHT,
+      mysticalArchiveTypeWidth: MYSTICAL_ARCHIVE_JP_DEFAULT_TYPE_WIDTH,
+      mysticalArchiveHorizontalTitleWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TITLE_WIDTH,
+      mysticalArchiveHorizontalTypeWidth: MYSTICAL_ARCHIVE_JP_HORIZONTAL_DEFAULT_TYPE_WIDTH,
+      setCode: '',
+      rarity: '',
+      collectorSetCode: 'MTG',
+      collectorLanguage: 'EN',
+      collectorArtist: '',
+      collectorRarity: 'P',
+      collectorDigits: '2025',
+      artImage: null,
+      setSymbolImage: null,
+      watermarkImage: null,
+      manaSymbolImages: {},
+      previewCanvasRef: null,
+      showSerialNumbers: false,
+      showArtBoundsDebug: false,
+      customArtBounds: null,
+      autoFitArt: true,
 
         // Card Management
         updateCard: (updates) => {
@@ -1147,47 +1146,6 @@ export const useCardStore = create<CardState>()(
           set({ autoFitArt: enabled });
         },
       }),
-      {
-        name: 'card-conjurer-storage',
-        partialize: (state) => ({
-          // Only persist card data, not UI state or images
-          card: {
-            ...state.card,
-            onload: null, // Don't persist functions
-            frames: [], // Don't persist frames - start with clean slate on refresh
-            marginX: 0, // Don't persist margins - they're derived from frames
-            marginY: 0, // Don't persist margins - they're derived from frames
-            saga: null,
-            planeswalker: null,
-            class: null,
-            station: null,
-            text: {}, // Don't persist text - reset on refresh
-            bottomInfo: {}, // Don't persist bottom info - reset on refresh
-            showCollectorInfo: false, // Always start OFF on load
-            collectorInfoStyle: 'default', // Always reset to default on reload
-            serialNumber: undefined, // Don't persist serial number - reset on refresh
-            serialTotal: undefined, // Don't persist serial total - reset on refresh
-            artSource: '/img/blank.png', // Don't persist art - reset on refresh
-            artX: 0, // Don't persist art position - reset on refresh
-            artY: 0, // Don't persist art position - reset on refresh
-            artZoom: 1, // Don't persist art zoom - reset on refresh
-            artRotate: 0, // Don't persist art rotation - reset on refresh
-            setSymbolSource: '/img/blank.png', // Don't persist set symbol - reset on refresh
-            setSymbolX: 0, // Don't persist set symbol position - reset on refresh
-            setSymbolY: 0, // Don't persist set symbol position - reset on refresh
-            setSymbolZoom: 1, // Don't persist set symbol zoom - reset on refresh
-            setSymbolRotate: 0, // Don't persist set symbol rotation - reset on refresh
-            watermarkSource: '/img/blank.png', // Don't persist watermark - reset on refresh
-            watermarkX: 0, // Don't persist watermark position - reset on refresh
-            watermarkY: 0, // Don't persist watermark position - reset on refresh
-            watermarkZoom: 1, // Don't persist watermark zoom - reset on refresh
-            watermarkOpacity: 0.4, // Don't persist watermark opacity - reset on refresh
-            watermarkLeft: '#b79d58', // Default to White color
-            watermarkRight: 'none', // Don't persist watermark colors - reset on refresh
-          },
-        }),
-      }
-    ),
     {
       name: 'CardStore',
     }
