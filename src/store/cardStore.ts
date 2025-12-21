@@ -130,6 +130,7 @@ interface CardState {
   removeFrame: (index: number) => void;
   updateFrame: (index: number, updates: Partial<Frame>) => void;
   reorderFrames: (oldIndex: number, newIndex: number) => void;
+  setFrames: (frames: Frame[]) => void;
   setSelectedFrameIndex: (index: number) => void;
   toggleFrameVisibility: (index: number) => void;
 
@@ -553,6 +554,20 @@ neoBasicsColorOverrides: {},
             frames.splice(newIndex, 0, movedFrame);
             return {
               card: { ...state.card, frames },
+            };
+          });
+        },
+
+        setFrames: (frames) => {
+          set((state) => {
+            const { marginX, marginY } = calculateRequiredMargins(frames);
+            return {
+              card: {
+                ...state.card,
+                frames,
+                marginX,
+                marginY,
+              },
             };
           });
         },

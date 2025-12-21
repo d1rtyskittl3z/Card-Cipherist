@@ -38,6 +38,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { CardBounds } from '../types/card.types';
+import type { AutoFrameType } from '../types/autoFrame.types';
 
 /**
  * UI Store State Interface
@@ -89,6 +90,17 @@ interface UIState {
 
   /** Text rendering errors - maps field names to error messages */
   textRenderErrors: Record<string, string>;
+
+  // ===== AutoFrame State =====
+
+  /** Whether auto-frame feature is enabled */
+  autoFrameEnabled: boolean;
+
+  /** Currently selected auto-frame type (null if none selected) */
+  autoFrameType: AutoFrameType | null;
+
+  /** Whether to always use Nyx style for enchantments (not just creatures/artifacts) */
+  autoFrameAlwaysNyx: boolean;
 
   /**
    * Set the currently active tab
@@ -191,6 +203,26 @@ interface UIState {
    * Clear all text render errors
    */
   clearAllTextRenderErrors: () => void;
+
+  // ===== AutoFrame Actions =====
+
+  /**
+   * Enable or disable auto-frame feature
+   * @param enabled - True to enable, false to disable
+   */
+  setAutoFrameEnabled: (enabled: boolean) => void;
+
+  /**
+   * Set the auto-frame type to use for generation
+   * @param type - Frame type (or null to clear)
+   */
+  setAutoFrameType: (type: AutoFrameType | null) => void;
+
+  /**
+   * Set whether to always use Nyx style for enchantments
+   * @param value - True to always use Nyx, false for standard behavior
+   */
+  setAutoFrameAlwaysNyx: (value: boolean) => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -212,6 +244,11 @@ export const useUIStore = create<UIState>()(
       hasShownKamigawaTab: false,
       hasShownStationsTab: false,
       textRenderErrors: {},
+
+      // AutoFrame State
+      autoFrameEnabled: false,
+      autoFrameType: null,
+      autoFrameAlwaysNyx: false,
 
       // Tab Management
       setCurrentTab: (tab) =>
@@ -297,6 +334,20 @@ export const useUIStore = create<UIState>()(
       clearAllTextRenderErrors: () =>
         set((draft) => {
           draft.textRenderErrors = {};
+        }),
+
+      // AutoFrame Actions
+      setAutoFrameEnabled: (enabled) =>
+        set((draft) => {
+          draft.autoFrameEnabled = enabled;
+        }),
+      setAutoFrameType: (type) =>
+        set((draft) => {
+          draft.autoFrameType = type;
+        }),
+      setAutoFrameAlwaysNyx: (value) =>
+        set((draft) => {
+          draft.autoFrameAlwaysNyx = value;
         }),
     })),
     { name: 'UIStore' }

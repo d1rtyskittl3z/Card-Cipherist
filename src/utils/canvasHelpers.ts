@@ -1379,7 +1379,7 @@ export const drawBottomInfo = async (
       currentX = x + textWidth / 2;
     }
 
-    let currentY = y;
+    const currentY = y;
     let kerning = 0;
     let verticalOffset = 0;
     const textAlign = textObj.align || 'left';

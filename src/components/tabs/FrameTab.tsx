@@ -37,6 +37,9 @@ import {
 import { applyClassLayout } from '../../utils/classHelpers';
 import { PLANESWALKER_ABILITY_KEYS } from '../../constants';
 import { DEFAULT_COLOR_OVERRIDE } from '../../utils/neoBasics';
+import { useAutoFrame } from '../../hooks/useAutoFrame';
+import { AUTO_FRAME_TYPES, STANDARD_FRAME_NAMES } from '../../types/autoFrame.types';
+import type { AutoFrameType, ManaColor } from '../../types/autoFrame.types';
 
 // Import all frame groups
 import Standard3 from '../frames/groups/Standard-3';
@@ -76,6 +79,29 @@ const FRAME_GROUPS: Record<string, LegacyGroup> = {
 
 const ROTATION_PACK_IDS = new Set<string>(['Battle', 'Flip', 'Fuse', 'Split', 'Room', 'RoomUB', 'Tapped', 'Planechase']);
 
+/**
+ * Maps auto-frame types to their corresponding pack IDs.
+ * Some auto-frame types share a frame pack with different settings.
+ */
+const AUTO_FRAME_TYPE_TO_PACK_ID: Record<string, string> = {
+  // BorderlessUB uses the Borderless pack
+  'BorderlessUB': 'Borderless',
+  // UBNew uses the UB pack
+  'UBNew': 'UB',
+  // M15RegularNew uses M15Regular-1 pack
+  'M15RegularNew': 'M15Regular-1',
+  // FullArtNew uses M15FullArt pack
+  'FullArtNew': 'M15FullArt',
+};
+
+/**
+ * Gets the frame pack ID for an auto-frame type.
+ * Returns the mapped pack ID if one exists, otherwise returns the auto-frame type ID.
+ */
+function getPackIdForAutoFrameType(autoFrameType: string): string {
+  return AUTO_FRAME_TYPE_TO_PACK_ID[autoFrameType] || autoFrameType;
+}
+
 const PLANESWALKER_FALLBACK_ABILITIES: [string, string, string, string] = ['', '+1', '0', '-7'];
 const PLANESWALKER_FALLBACK_ADJUST: [number, number, number, number] = [0, 0, 0, 0];
 const PLANESWALKER_FALLBACK_X = 0.1167;
@@ -110,6 +136,18 @@ const FrameTabComponent = () => {
   const applyNeoBasicsAdjustments = useCardStore((state) => state.applyNeoBasicsAdjustments);
   const rotateCanvasPreview = useRotateCanvasPreview();
   const setRotateCanvasPreview = useUIStore((state) => state.setRotateCanvasPreview);
+
+  // Auto Frame hook
+  const {
+    isEnabled: autoFrameEnabled,
+    frameType: autoFrameType,
+    alwaysNyx: autoFrameAlwaysNyx,
+    detectedColors,
+    setEnabled: setAutoFrameEnabled,
+    setFrameType: setAutoFrameType,
+    setAlwaysNyx: setAutoFrameAlwaysNyx,
+  } = useAutoFrame();
+
   const [selectedGroupId, setSelectedGroupId] = useState<string>('Standard-3');
   const [selectedPackId, setSelectedPackId] = useState<string>('M15Regular-1');
   const [searchQuery, setSearchQuery] = useState('');
@@ -206,6 +244,35 @@ const FrameTabComponent = () => {
     return selectedGroup?.packs || [];
   }, [selectedGroup]);
 
+  // Group auto frame types by their frame group for the dropdown
+  const autoFrameTypeGroups = useMemo(() => {
+    const groups: Record<string, { label: string; types: typeof AUTO_FRAME_TYPES }> = {
+      'Standard-3': { label: 'Standard', types: [] },
+      'Showcase-5': { label: 'Showcase', types: [] },
+      'Custom': { label: 'Custom', types: [] },
+      'Misc-2': { label: 'Old/Misc', types: [] },
+      'Accurate': { label: 'Accurate', types: [] },
+    };
+
+    for (const frameType of AUTO_FRAME_TYPES) {
+      const groupKey = frameType.group;
+      if (groups[groupKey]) {
+        groups[groupKey].types.push(frameType);
+      } else {
+        // Fallback to Custom if group not found
+        groups['Custom'].types.push(frameType);
+      }
+    }
+
+    // Filter out empty groups
+    return Object.entries(groups).filter(([, group]) => group.types.length > 0);
+  }, []);
+
+  // Helper to get color display name
+  const getColorDisplayName = useCallback((color: ManaColor): string => {
+    return STANDARD_FRAME_NAMES[color] || color;
+  }, []);
+
   const rotationSupported = loadedPack ? ROTATION_PACK_IDS.has(loadedPack.id) : false;
 
   useEffect(() => {
@@ -213,6 +280,22 @@ const FrameTabComponent = () => {
       setRotateCanvasPreview(false);
     }
   }, [rotationSupported, rotateCanvasPreview, setRotateCanvasPreview]);
+
+  // Sync Frame Group and Pack when Auto Frame type changes
+  useEffect(() => {
+    if (!autoFrameType) return;
+
+    // Find the frame type info for the selected auto frame type
+    const frameTypeInfo = AUTO_FRAME_TYPES.find((t) => t.id === autoFrameType);
+    if (!frameTypeInfo) return;
+
+    // Update group and pack to match the selected auto frame type
+    // Some auto-frame types share a pack with different settings (e.g., BorderlessUB uses Borderless pack)
+    // Mark as search selection to prevent the group change effect from resetting the pack
+    isSearchSelection.current = true;
+    setSelectedGroupId(frameTypeInfo.group);
+    setSelectedPackId(getPackIdForAutoFrameType(autoFrameType));
+  }, [autoFrameType]);
 
   // Reset pack when group ACTUALLY changes (unless it's from search)
   useEffect(() => {
@@ -1251,6 +1334,94 @@ const FrameTabComponent = () => {
 
   return (
     <VStack align="stretch" gap={4}>
+      {/* Auto Frame Section */}
+      <Box
+        bg="rgba(0, 0, 0, 0.3)"
+        borderRadius="md"
+        p={4}
+        borderWidth="1px"
+        borderColor={autoFrameEnabled ? 'blue.500' : 'transparent'}
+      >
+        <HStack justify="space-between" align="flex-start" gap={4}>
+          {/* Left side: Toggle and Frame Type */}
+          <VStack align="stretch" gap={3} flex={1}>
+            <HStack justify="flex-start" align="center" gap={2}>
+              <LabeledSwitch
+                label=""
+                checked={autoFrameEnabled}
+                onCheckedChange={setAutoFrameEnabled}
+                colorPalette="blue"
+              />
+              <Heading size="sm" display="flex" alignItems="center">Auto Frame</Heading>
+            </HStack>
+
+            {autoFrameEnabled && (
+              <>
+                {/* Frame Type Selector */}
+                <Field label="Frame Type">
+                  <NativeSelectRoot>
+                    <NativeSelectField
+                      value={autoFrameType || ''}
+                      onChange={(e) => setAutoFrameType(e.target.value as AutoFrameType || null)}
+                    >
+                      <option value="">Select a frame type...</option>
+                      {autoFrameTypeGroups.map(([groupId, group]) => (
+                        <optgroup key={groupId} label={group.label}>
+                          {group.types.map((frameType) => (
+                            <option key={frameType.id} value={frameType.id}>
+                              {frameType.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </NativeSelectField>
+                  </NativeSelectRoot>
+                </Field>
+
+                {/* Always Nyx Checkbox */}
+                <Checkbox.Root
+                  checked={autoFrameAlwaysNyx}
+                  onCheckedChange={(e) => setAutoFrameAlwaysNyx(e.checked === true)}
+                  colorPalette="purple"
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                  <Checkbox.Label>Always use Nyx style for enchantments</Checkbox.Label>
+                </Checkbox.Root>
+              </>
+            )}
+          </VStack>
+
+          {/* Right side: Detected Colors */}
+          {autoFrameEnabled && (
+            <Box minW="150px">
+              <Text fontSize="sm" color="gray.400" mb={2}>
+                Detected Colors
+              </Text>
+              {detectedColors.length > 0 ? (
+                <VStack align="flex-start" gap={1}>
+                  {detectedColors.map((color) => (
+                    <Text key={color} fontSize="sm" color="gray.200">
+                      {getColorDisplayName(color)}
+                    </Text>
+                  ))}
+                </VStack>
+              ) : (
+                <Text fontSize="sm" color="gray.500" fontStyle="italic">
+                  No colors detected
+                </Text>
+              )}
+            </Box>
+          )}
+        </HStack>
+
+        {autoFrameEnabled && !autoFrameType && (
+          <Text fontSize="xs" color="orange.300" mt={2}>
+            Select a frame type to enable auto-generation
+          </Text>
+        )}
+      </Box>
+
       {/* Frame Selectors Row */}
       <HStack align="flex-start" gap={3}>
         {/* Frame Group Selector */}
