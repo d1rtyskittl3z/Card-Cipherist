@@ -5,12 +5,14 @@ const masks: Mask[] = [
   { src: '/img/frames/omen/regular/pinline.png', name: 'Pinline' },
   { src: '/img/frames/m15/regular/m15MaskTitle.png', name: 'Title' },
   { src: '/img/frames/m15/regular/m15MaskType.png', name: 'Type' },
+  { src: '/img/frames/omen/regular/maskFrame.png', name:'Frame' }, 
   { src: '/img/frames/omen/regular/rules.png', name: 'Rules' },
   { src: '/img/frames/omen/regular/rulesRight.png', name: 'Rules (Right Half)' },
   { src: '/img/frames/omen/regular/omen.png', name: 'Omen' },
   { src: '/img/frames/omen/regular/omenRight.png', name: 'Omen (Right Half)' },
   { src: '/img/frames/omen/regular/omenPinline.png', name: 'Omen Pinline' },
   { src: '/img/frames/omen/regular/omenTypeTitle.png', name: 'Omen Type/Title' },
+  { src: '/img/frames/m15/regular/m15MaskBorder.png', name:'Border' },
 ];
 
 // Shared bounds
