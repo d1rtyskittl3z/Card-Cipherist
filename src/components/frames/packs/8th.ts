@@ -72,6 +72,9 @@ const template: FramePackTemplate = {
   loadBottomInfo: {
     top: { name: 'Artist', text: '\uFFEE {elemidinfo-artist}', x: 150 / 2010, y: 1938 / 2100, width: 0.8107, height: 0.0248, oneLine: true, font: 'matrixb', size: 0.0248, color: 'black', conditionalColor: 'Black Frame*Frame*!Right Half,Land Frame*Frame*!Right Half,Black Nyx Frame*Frame*!Right Half,Colorless Frame:white' },
   },
+  brush: '/img/manaSymbols/brush.svg',
+  brushWhite: '/img/manaSymbols/brushWhite.svg',
+  brushScale: 1.3, // Make brush 50% larger
 };
 
 export default template;

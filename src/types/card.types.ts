@@ -438,6 +438,10 @@ export interface Card {
   showsFlavorBar?: boolean;
   /** Custom brush image path for \uFFEE symbol in collector info (from loadBottomInfo.brush) */
   brush?: string;
+  /** White/inverted brush for use when text color is white (from loadBottomInfo.brushWhite) */
+  brushWhite?: string;
+  /** Scale multiplier for brush size (default 1.0) */
+  brushScale?: number;
 
   /** Callback executed after card loads (not persisted) */
   onload?: (() => void) | null;

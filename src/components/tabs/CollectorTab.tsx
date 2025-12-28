@@ -249,10 +249,12 @@ const CollectorTabComponent = () => {
       });
     }
 
-    // Update card with the combined bottomInfo and brush
-    // Use pack's brush if defined, whether using original or standard collector info
+    // Update card with the combined bottomInfo and brush settings
+    // Use pack's brush/brushWhite/brushScale if defined, whether using original or standard collector info
     const brushToUse = loadedPack?.brush;
-    updateCard({ bottomInfo: finalBottomInfo, brush: brushToUse });
+    const brushWhiteToUse = loadedPack?.brushWhite;
+    const brushScaleToUse = loadedPack?.brushScale;
+    updateCard({ bottomInfo: finalBottomInfo, brush: brushToUse, brushWhite: brushWhiteToUse, brushScale: brushScaleToUse });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useOriginalCollectorInfo, originalArtist, originalNote, originalNumber, originalSet, originalLanguage, originalRarity, loadedPack, showCollectorInfo, collectorInfoStyle, setCode, language, artist, rarity, note, digits, useStar, enableAdditionalFields, middleRight, bottomLeft, bottomRight, frames, positionOffsets, bottomInfoColor]);
 

@@ -1303,39 +1303,37 @@ export const drawBottomInfo = async (
     // Non-fatal: if fonts API is unavailable, continue; canvas will use fallbacks
   }
 
-  // Load artist brush symbols (both white and black variants, plus original SVG)
-  // If card.brush is set, use custom brush from pack instead of defaults
-  let artistBrushImage: HTMLImageElement | null = null;
-  let whiteBrushImage: HTMLImageElement | null = null;
-  let blackBrushImage: HTMLImageElement | null = null;
-  let customBrushImage: HTMLImageElement | null = null;
-  
-  // Load custom brush if specified by pack
-  if (card.brush) {
-    try {
-      customBrushImage = await loadImage(card.brush);
-    } catch (error) {
-      console.warn('Failed to load custom brush symbol, falling back to default:', error);
+  // Load artist brush symbols
+  // - Default: artistbrush.svg (white, tinted to match text color)
+  // - Custom: card.brush for dark text, card.brushWhite for white text
+  // If only card.brush is set, it will be tinted to match text color
+  // If both brush and brushWhite are set, the appropriate one is selected based on text color (no tinting)
+  let brushImageDark: HTMLImageElement | null = null;
+  let brushImageWhite: HTMLImageElement | null = null;
+  const defaultBrush = '/img/manaSymbols/artistbrush.svg';
+
+  // Load dark/default brush
+  const darkBrushPath = card.brush || defaultBrush;
+  try {
+    brushImageDark = await loadImage(darkBrushPath);
+  } catch (error) {
+    console.warn('Failed to load brush symbol:', error);
+    if (card.brush) {
+      try {
+        brushImageDark = await loadImage(defaultBrush);
+      } catch {
+        console.warn('Failed to load fallback brush symbol');
+      }
     }
   }
 
-  // Load default brushes as fallback
-  try {
-    artistBrushImage = await loadImage('/img/manaSymbols/artistbrush.svg');
-  } catch (error) {
-    console.warn('Failed to load artist brush symbol, continuing without it:', error);
-  }
-
-  try {
-    whiteBrushImage = await loadImage('/img/manaSymbols/whiteBrush.png');
-  } catch (error) {
-    console.warn('Failed to load white brush symbol, continuing without it:', error);
-  }
-
-  try {
-    blackBrushImage = await loadImage('/img/manaSymbols/blackBrush.png');
-  } catch (error) {
-    console.warn('Failed to load black brush symbol, continuing without it:', error);
+  // Load white brush if specified
+  if (card.brushWhite) {
+    try {
+      brushImageWhite = await loadImage(card.brushWhite);
+    } catch (error) {
+      console.warn('Failed to load white brush symbol:', error);
+    }
   }
 
   // Position save/load system
@@ -1359,6 +1357,16 @@ export const drawBottomInfo = async (
   const baseFontSize = fontSize;
   let fontFamily = textObj.font || 'gothammedium';
   const chosenColor = textObj.color || card.bottomInfoColor || 'white';
+
+  // Select appropriate brush based on text color
+  // If brushWhite exists, use pre-colored brushes (no tinting needed)
+  // Otherwise use the default/dark brush with tinting
+  const hasDualBrushes = brushImageWhite !== null;
+  const isWhiteText = chosenColor.toLowerCase() === 'white' || chosenColor === '#fff' || chosenColor === '#ffffff';
+  const brushImage = hasDualBrushes && isWhiteText ? brushImageWhite : brushImageDark;
+  const skipTinting = hasDualBrushes; // Pre-colored brushes don't need tinting
+  const brushScale = card.brushScale ?? 1.0; // Scale multiplier for brush size
+
   const outlineWidth = textObj.outlineWidth ? scaleWidth(card, textObj.outlineWidth) : 0;
   // Shadow properties
   const shadowX = textObj.shadowX ? scaleWidth(card, textObj.shadowX) : 0;
@@ -1502,25 +1510,13 @@ export const drawBottomInfo = async (
           const segmentSize = segment.size || fontSize;
           bottomInfoContext.font = `${segmentSize}px ${segmentFont}`;
           totalWidth += bottomInfoContext.measureText(segment.content).width + kerning;
-        } else if (segment.type === 'artistbrush') {
-          // Choose brush image: custom > color-specific > default
-          let brushImage = customBrushImage || artistBrushImage;
-          if (!customBrushImage) {
-            if (chosenColor === 'white' && whiteBrushImage) {
-              brushImage = whiteBrushImage;
-            } else if (chosenColor === 'black' && blackBrushImage) {
-              brushImage = blackBrushImage;
-            }
-          }
-          
-          if (brushImage) {
-            const targetHeight = baseFontSize * 0.65;
-            const naturalW = brushImage.naturalWidth || brushImage.width || 1;
-            const naturalH = brushImage.naturalHeight || brushImage.height || 1;
-            const aspect = naturalW / naturalH;
-            const symbolWidth = targetHeight * aspect;
-            totalWidth += symbolWidth + 2;
-          }
+        } else if (segment.type === 'artistbrush' && brushImage) {
+          const targetHeight = baseFontSize * 0.65 * brushScale;
+          const naturalW = brushImage.naturalWidth || brushImage.width || 1;
+          const naturalH = brushImage.naturalHeight || brushImage.height || 1;
+          const aspect = naturalW / naturalH;
+          const symbolWidth = targetHeight * aspect;
+          totalWidth += symbolWidth + 2;
         }
       }
       // Start from the right edge minus total width
@@ -1536,24 +1532,13 @@ export const drawBottomInfo = async (
           const segmentSize = segment.size || fontSize;
           bottomInfoContext.font = `${segmentSize}px ${segmentFont}`;
           totalWidth += bottomInfoContext.measureText(segment.content).width + kerning;
-        } else if (segment.type === 'artistbrush') {
-          // Choose brush image: custom > color-specific > default
-          let brushImage = customBrushImage || artistBrushImage;
-          if (!customBrushImage) {
-            if (chosenColor === 'white' && whiteBrushImage) {
-              brushImage = whiteBrushImage;
-            } else if (chosenColor === 'black' && blackBrushImage) {
-              brushImage = blackBrushImage;
-            }
-          }
-          if (brushImage) {
-            const targetHeight = baseFontSize * 0.65;
-            const naturalW = brushImage.naturalWidth || brushImage.width || 1;
-            const naturalH = brushImage.naturalHeight || brushImage.height || 1;
-            const aspect = naturalW / naturalH;
-            const symbolWidth = targetHeight * aspect;
-            totalWidth += symbolWidth + 2;
-          }
+        } else if (segment.type === 'artistbrush' && brushImage) {
+          const targetHeight = baseFontSize * 0.65 * brushScale;
+          const naturalW = brushImage.naturalWidth || brushImage.width || 1;
+          const naturalH = brushImage.naturalHeight || brushImage.height || 1;
+          const aspect = naturalW / naturalH;
+          const symbolWidth = targetHeight * aspect;
+          totalWidth += symbolWidth + 2;
         }
       }
       // Center: start at center point minus half the total width
@@ -1590,86 +1575,70 @@ export const drawBottomInfo = async (
         // Update X position with kerning
         const textWidth = bottomInfoContext.measureText(textContent).width;
         currentX += textWidth + kerning;
-      } else if (segment.type === 'artistbrush') {
-        // Choose brush image: custom > color-specific > default
-        let brushImage = customBrushImage || artistBrushImage;
-        if (!customBrushImage) {
-          if (chosenColor === 'white' && whiteBrushImage) {
-            brushImage = whiteBrushImage;
-          } else if (chosenColor === 'black' && blackBrushImage) {
-            brushImage = blackBrushImage;
-          }
-        }
-        
-        // Draw artist brush symbol (only if it loaded successfully)
-        if (brushImage) {
-          // Preserve original aspect ratio of the brush symbol
-          const targetHeight = fontSize * 0.65;
-          const naturalW = brushImage.naturalWidth || brushImage.width || 1;
-          const naturalH = brushImage.naturalHeight || brushImage.height || 1;
-          const aspect = naturalW / naturalH;
-          const symbolWidth = targetHeight * aspect;
-          const symbolHeight = targetHeight;
-          const symbolY = currentY + verticalOffset + (fontSize - symbolHeight) / 2;
-          // If an outline is specified, draw a black outline behind the symbol
-          if (outlineWidth > 0) {
-            // Create a black-tinted version of the brush symbol
-            const outlineCanvas = document.createElement('canvas');
-            outlineCanvas.width = Math.ceil(symbolWidth);
-            outlineCanvas.height = Math.ceil(symbolHeight);
-            const outlineCtx = outlineCanvas.getContext('2d');
-            if (outlineCtx) {
-              outlineCtx.clearRect(0, 0, outlineCanvas.width, outlineCanvas.height);
-              outlineCtx.drawImage(brushImage, 0, 0, outlineCanvas.width, outlineCanvas.height);
-              outlineCtx.globalCompositeOperation = 'source-in';
-              outlineCtx.fillStyle = (chosenColor === 'black') ? 'white' : 'black';
-              outlineCtx.fillRect(0, 0, outlineCanvas.width, outlineCanvas.height);
+      } else if (segment.type === 'artistbrush' && brushImage) {
+        // Draw artist brush symbol
+        const targetHeight = fontSize * 0.65 * brushScale;
+        const naturalW = brushImage.naturalWidth || brushImage.width || 1;
+        const naturalH = brushImage.naturalHeight || brushImage.height || 1;
+        const aspect = naturalW / naturalH;
+        const symbolWidth = targetHeight * aspect;
+        const symbolHeight = targetHeight;
+        const symbolY = currentY + verticalOffset + (fontSize - symbolHeight) / 2;
 
-              // Draw around in multiple directions to simulate stroke
-              const r = Math.max(1, Math.round(outlineWidth / 2));
-              const offsets = [
-                [-r, 0], [r, 0], [0, -r], [0, r],
-                [-r, -r], [r, -r], [-r, r], [r, r],
-              ];
-              for (const [dx, dy] of offsets) {
-                bottomInfoContext.drawImage(
-                  outlineCanvas,
-                  currentX + dx,
-                  symbolY + dy
-                );
-              }
+        // If an outline is specified, draw outline behind the symbol
+        if (outlineWidth > 0) {
+          const outlineCanvas = document.createElement('canvas');
+          outlineCanvas.width = Math.ceil(symbolWidth);
+          outlineCanvas.height = Math.ceil(symbolHeight);
+          const outlineCtx = outlineCanvas.getContext('2d');
+          if (outlineCtx) {
+            outlineCtx.clearRect(0, 0, outlineCanvas.width, outlineCanvas.height);
+            outlineCtx.drawImage(brushImage, 0, 0, outlineCanvas.width, outlineCanvas.height);
+            outlineCtx.globalCompositeOperation = 'source-in';
+            outlineCtx.fillStyle = (chosenColor === 'black') ? 'white' : 'black';
+            outlineCtx.fillRect(0, 0, outlineCanvas.width, outlineCanvas.height);
+
+            // Draw around in multiple directions to simulate stroke
+            const r = Math.max(1, Math.round(outlineWidth / 2));
+            const offsets = [
+              [-r, 0], [r, 0], [0, -r], [0, r],
+              [-r, -r], [r, -r], [-r, r], [r, r],
+            ];
+            for (const [dx, dy] of offsets) {
+              bottomInfoContext.drawImage(
+                outlineCanvas,
+                currentX + dx,
+                symbolY + dy
+              );
             }
           }
-
-          // Draw main symbol on top
-          // Tint brush to match chosenColor:
-          // - Custom brush: always tint to chosenColor
-          // - Default artistbrush SVG: tint to black if chosenColor is black (SVG is white by default)
-          // - Color-specific brushes (whiteBrush/blackBrush): draw without tinting
-          const needsTinting = customBrushImage || (chosenColor === 'black' && brushImage === artistBrushImage);
-          if (needsTinting) {
-            const mainCanvas = document.createElement('canvas');
-            mainCanvas.width = Math.ceil(symbolWidth);
-            mainCanvas.height = Math.ceil(symbolHeight);
-            const mainCtx = mainCanvas.getContext('2d');
-            if (mainCtx) {
-              mainCtx.drawImage(brushImage, 0, 0, mainCanvas.width, mainCanvas.height);
-              mainCtx.globalCompositeOperation = 'source-in';
-              mainCtx.fillStyle = chosenColor;
-              mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
-              bottomInfoContext.drawImage(mainCanvas, currentX, symbolY);
-            }
-          } else {
-            bottomInfoContext.drawImage(
-              brushImage,
-              currentX,
-              symbolY,
-              symbolWidth,
-              symbolHeight
-            );
-          }
-          currentX += symbolWidth + 2;
         }
+
+        // Draw main symbol on top
+        if (skipTinting) {
+          // Pre-colored brush - draw directly without tinting
+          bottomInfoContext.drawImage(
+            brushImage,
+            currentX,
+            symbolY,
+            symbolWidth,
+            symbolHeight
+          );
+        } else {
+          // Default brush - tint to match text color
+          const mainCanvas = document.createElement('canvas');
+          mainCanvas.width = Math.ceil(symbolWidth);
+          mainCanvas.height = Math.ceil(symbolHeight);
+          const mainCtx = mainCanvas.getContext('2d');
+          if (mainCtx) {
+            mainCtx.drawImage(brushImage, 0, 0, mainCanvas.width, mainCanvas.height);
+            mainCtx.globalCompositeOperation = 'source-in';
+            mainCtx.fillStyle = chosenColor;
+            mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
+            bottomInfoContext.drawImage(mainCanvas, currentX, symbolY);
+          }
+        }
+        currentX += symbolWidth + 2;
       }
     }
 

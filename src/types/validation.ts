@@ -670,6 +670,8 @@ export const framePackTemplateSchema = z.object({
   text: z.record(z.string(), framePackTextConfigSchema).optional(),
   loadBottomInfo: z.record(z.string(), framePackTextConfigSchema).optional(),
   brush: z.string().optional(), // Custom brush image path for \uFFEE symbol in loadBottomInfo
+  brushWhite: z.string().optional(), // White/inverted brush for use when text color is white
+  brushScale: z.number().optional(), // Scale multiplier for brush size (default 1.0)
 });
 
 /**
