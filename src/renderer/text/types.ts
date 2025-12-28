@@ -146,6 +146,7 @@ export interface SymbolInfo {
   image: HTMLImageElement;
   width: number;             // Size multiplier
   height: number;            // Size multiplier
+  yOffset?: number;          // Vertical offset multiplier (fractional)
   matchColor: boolean;       // Should match text color
   back?: string;             // Randomized back image pattern
   backs?: number;            // Number of back variants

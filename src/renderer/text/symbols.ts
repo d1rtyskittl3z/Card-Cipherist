@@ -71,6 +71,7 @@ export function loadManaSymbol(
     matchColor?: boolean;
     width?: number;
     height?: number;
+    yOffset?: number;
     back?: string;
     backs?: number;
   } = {}
@@ -86,6 +87,7 @@ export function loadManaSymbol(
         image,
         width: options.width ?? 1,
         height: options.height ?? 1,
+        yOffset: options.yOffset,
         matchColor: options.matchColor ?? false,
         back: options.back,
         backs: options.backs,
@@ -121,6 +123,7 @@ export async function loadManaSymbols(
     matchColor?: boolean;
     width?: number;
     height?: number;
+    yOffset?: number;
   } = {}
 ): Promise<SymbolInfo[]> {
   const promises = paths.map(async (item) => {
@@ -304,7 +307,7 @@ export async function createStandardManaAtlas(): Promise<SymbolAtlas> {
       '2purple', 'purplep',
       'cw', 'cu', 'cb', 'cr', 'cg',
     ],
-    { width: 1.2, height: 1.2 }
+    { width: 1.2, height: 1.2, yOffset: 0.03 }
   );
   hybridSymbols.forEach(s => atlas.registerSymbol(s));
 
@@ -315,7 +318,7 @@ export async function createStandardManaAtlas(): Promise<SymbolAtlas> {
   // Double-X symbols
   const doubleXSymbols = await loadManaSymbols(
     ['xxbgw', 'xxbrg', 'xxgub', 'xxgwu', 'xxrgw', 'xxrwu', 'xxubr', 'xxurg', 'xxwbr', 'xxwub'],
-    { width: 1.2, height: 1.2 }
+    { width: 1.2, height: 1.2, yOffset: 0.03 }
   );
   doubleXSymbols.forEach(s => atlas.registerSymbol(s));
 

@@ -213,6 +213,10 @@ export function layoutText(
             totalHeight: 0,
             verticalAdjust: 0,
             horizontalAdjust: 0,
+            ptShift: state.ptShift,
+            permaShift: state.permaShift,
+            rotation: state.rotation,
+            drawToPrePTCanvas: state.drawToPrePTCanvas,
           };
         } else {
           // Multi-line - wrap to next line ONLY if there's content on current line
@@ -746,6 +750,11 @@ function processSymbol(
     manaSymbolY -= ((fieldSpec.manaImageScale - 1) / 2) * manaSymbolHeight;
     manaSymbolWidth *= fieldSpec.manaImageScale;
     manaSymbolHeight *= fieldSpec.manaImageScale;
+  }
+
+  // Apply symbol yOffset if defined
+  if (symbol.yOffset) {
+    manaSymbolY += state.textSize * symbol.yOffset;
   }
 
   // Get back image if available
