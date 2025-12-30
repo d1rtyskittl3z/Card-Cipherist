@@ -21,6 +21,7 @@ import type {
   DungeonWallColor,
 } from '../types/card.types';
 import { DEFAULT_DUNGEON_ROOMS, DUNGEON_MAX_ROOMS } from '../types/card.types';
+import { generateDungeonTextFields } from '../utils/dungeonHelpers';
 import type { FramePackTemplate } from '../components/frames/packs/types';
 import {
   NEO_BASICS_FRAME_PREFIX,
@@ -1170,12 +1171,19 @@ neoBasicsColorOverrides: {},
             if (state.card.dungeon) {
               return {};
             }
+            // Generate text fields for default rooms
+            const dungeonTextFields = generateDungeonTextFields(DEFAULT_DUNGEON_ROOMS);
             return {
               card: {
                 ...state.card,
                 dungeon: {
                   rooms: [...DEFAULT_DUNGEON_ROOMS],
                   wallColor: 'B' as DungeonWallColor,
+                },
+                // Merge dungeon text fields with existing text
+                text: {
+                  ...state.card.text,
+                  ...dungeonTextFields,
                 },
               },
             };
@@ -1198,15 +1206,30 @@ neoBasicsColorOverrides: {},
         },
 
         resetDungeonInfo: () => {
-          set((state) => ({
-            card: {
-              ...state.card,
-              dungeon: {
-                rooms: [...DEFAULT_DUNGEON_ROOMS],
-                wallColor: 'B' as DungeonWallColor,
+          set((state) => {
+            // Generate text fields for default rooms
+            const dungeonTextFields = generateDungeonTextFields(DEFAULT_DUNGEON_ROOMS);
+            // Remove old dungeon room text fields
+            const newText = { ...state.card.text };
+            Object.keys(newText).forEach(key => {
+              if (key.startsWith('dungeonRoom')) {
+                delete newText[key];
+              }
+            });
+            return {
+              card: {
+                ...state.card,
+                dungeon: {
+                  rooms: [...DEFAULT_DUNGEON_ROOMS],
+                  wallColor: 'B' as DungeonWallColor,
+                },
+                text: {
+                  ...newText,
+                  ...dungeonTextFields,
+                },
               },
-            },
-          }));
+            };
+          });
         },
 
         addDungeonRoom: (room) => {
@@ -1218,12 +1241,20 @@ neoBasicsColorOverrides: {},
           if (currentDungeon.rooms.length >= DUNGEON_MAX_ROOMS) {
             return false;
           }
+          const newRooms = [...currentDungeon.rooms, room];
+          // Generate text field for the new room
+          const newDungeonTextFields = generateDungeonTextFields(newRooms);
           set({
             card: {
               ...state.card,
               dungeon: {
                 ...currentDungeon,
-                rooms: [...currentDungeon.rooms, room],
+                rooms: newRooms,
+              },
+              // Merge new text fields (preserves existing room text)
+              text: {
+                ...state.card.text,
+                ...newDungeonTextFields,
               },
             },
           });
@@ -1236,12 +1267,26 @@ neoBasicsColorOverrides: {},
             if (!currentDungeon) {
               return {};
             }
+            const newRooms = currentDungeon.rooms.filter((_, i) => i !== index);
+            // Regenerate text fields for remaining rooms (to renumber them)
+            const newDungeonTextFields = generateDungeonTextFields(newRooms);
+            // Remove old dungeon room text fields and add new ones
+            const newText = { ...state.card.text };
+            Object.keys(newText).forEach(key => {
+              if (key.startsWith('dungeonRoom')) {
+                delete newText[key];
+              }
+            });
             return {
               card: {
                 ...state.card,
                 dungeon: {
                   ...currentDungeon,
-                  rooms: currentDungeon.rooms.filter((_, i) => i !== index),
+                  rooms: newRooms,
+                },
+                text: {
+                  ...newText,
+                  ...newDungeonTextFields,
                 },
               },
             };
@@ -1254,15 +1299,28 @@ neoBasicsColorOverrides: {},
             if (!currentDungeon) {
               return {};
             }
+            const newRooms = currentDungeon.rooms.map((room, i) =>
+              i === index ? { ...room, ...updates } : room
+            );
+            // Regenerate text field positions for updated rooms
+            const newDungeonTextFields = generateDungeonTextFields(newRooms);
+            // Preserve existing user text, just update positions
+            const mergedText = { ...state.card.text };
+            Object.entries(newDungeonTextFields).forEach(([key, fieldDef]) => {
+              const existingText = mergedText[key]?.text;
+              mergedText[key] = {
+                ...fieldDef,
+                text: existingText ?? fieldDef.text,
+              };
+            });
             return {
               card: {
                 ...state.card,
                 dungeon: {
                   ...currentDungeon,
-                  rooms: currentDungeon.rooms.map((room, i) =>
-                    i === index ? { ...room, ...updates } : room
-                  ),
+                  rooms: newRooms,
                 },
+                text: mergedText,
               },
             };
           });

@@ -425,27 +425,39 @@ export async function drawDungeonLayer(
 /**
  * Generate text fields for dungeon rooms
  * Returns an object with text configurations for each room
+ *
+ * @param rooms - Array of dungeon room configurations
  */
 export function generateDungeonTextFields(
-  rooms: DungeonRoom[],
-  card: Card
+  rooms: DungeonRoom[]
 ): Record<string, import('../types/card.types').TextObject> {
   const textObjects: Record<string, import('../types/card.types').TextObject> = {};
 
-  const cellSize = scaleHeight(card, DUNGEON_CELL_SIZE);
-  const origX = scaleX(card, DUNGEON_ORIGIN_X);
-  const origY = scaleY(card, DUNGEON_ORIGIN_Y);
+  // Calculate cell size and origin in normalized coordinates (0-1 range)
+  // Do NOT use scaleX/scaleY here as those add margins which would be applied twice
+  // when the text renderer uses its own scaleX/scaleY
+  const cellSizeNorm = DUNGEON_CELL_SIZE;
+  const origXNorm = DUNGEON_ORIGIN_X;
+  const origYNorm = DUNGEON_ORIGIN_Y;
 
   rooms.forEach((room, index) => {
     const roomNumber = index + 1;
     const adjustedWidth = room.width - 1;
     const adjustedHeight = room.height - 1;
 
-    // Calculate normalized text bounds for this room
-    const textX = (origX + cellSize * (room.x + 0.5)) / card.width;
-    const textY = (origY + cellSize * (room.y + 0.5)) / card.height;
-    const textWidth = (cellSize * adjustedWidth) / card.width;
-    const textHeight = (cellSize * adjustedHeight) / card.height;
+    // Calculate normalized text bounds for this room (all values in 0-1 range)
+    // IMPORTANT: The dungeon wall drawing uses scaleHeight for cellSize (based on card height),
+    // but the text renderer's scaleX/scaleWidth multiply by card width.
+    // Standard MTG cards have aspect ratio height/width = 2100/1500 = 1.4
+    // So we need to adjust X coordinates: cellSizeX = cellSizeNorm * (height/width)
+    const aspectRatio = 1.4; // Standard MTG aspect ratio (2100/1500)
+    const cellSizeX = cellSizeNorm * aspectRatio; // For X positions and widths
+    const cellSizeY = cellSizeNorm; // For Y positions and heights
+
+    const textX = origXNorm + cellSizeX * (room.x + 0.5);
+    const textY = origYNorm + cellSizeY * (room.y + 0.5);
+    const textWidth = cellSizeX * adjustedWidth;
+    const textHeight = cellSizeY * adjustedHeight;
 
     let defaultText = `Room ${roomNumber}{lns}{fontmplantin}{fontsize-8}Effect.`;
     if (adjustedHeight < 3) {

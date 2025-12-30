@@ -442,9 +442,11 @@ export const useIsDungeonCard = () => {
 
 /**
  * Get dungeon rooms
+ * Uses a stable empty array to prevent infinite re-renders
  */
+const EMPTY_ROOMS: import('../types/card.types').DungeonRoom[] = [];
 export const useDungeonRooms = () => {
-  return useCardStore((state) => state.card.dungeon?.rooms ?? []);
+  return useCardStore((state) => state.card.dungeon?.rooms ?? EMPTY_ROOMS);
 };
 
 /**

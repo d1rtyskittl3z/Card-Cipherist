@@ -10,11 +10,12 @@ import { LabeledInput } from '../ui';
 import { useCardStore } from '../../store/cardStore';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { convertTypedQuote } from '../../utils/smartQuotes';
-import { useCardText, useLoadedPack } from '../../store/selectors';
+import { useCardText, useLoadedPack, useDungeonRooms, useIsDungeonCard } from '../../store/selectors';
 import { useUIStore } from '../../store/uiStore';
 import { formatTextRenderError } from '../../utils/textRenderErrors';
 import { useDebouncedCallback } from '../../hooks/useDebounce';
 import { TEXT_INPUT_DEBOUNCE_MS, SLIDER_DEBOUNCE_MS } from '../../constants/canvas';
+import { generateDungeonTextFields } from '../../utils/dungeonHelpers';
 
 /**
  * Standard field display order and labels
@@ -90,6 +91,8 @@ const TextTabComponent = () => {
   const text = useCardText();
   const updateText = useCardStore((state) => state.updateText);
   const loadedPack = useLoadedPack();
+  const isDungeonCard = useIsDungeonCard();
+  const dungeonRooms = useDungeonRooms();
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [editBoundsOpen, setEditBoundsOpen] = useState(false);
   const [codeReferenceOpen, setCodeReferenceOpen] = useState(false);
@@ -139,12 +142,51 @@ const TextTabComponent = () => {
   );
 
   /**
+   * Generate dungeon room text field definitions dynamically
+   * These are computed from the current dungeon room configuration
+   */
+  const dungeonTextFields = useMemo(() => {
+    if (!isDungeonCard || dungeonRooms.length === 0) {
+      return {};
+    }
+    return generateDungeonTextFields(dungeonRooms);
+  }, [isDungeonCard, dungeonRooms]);
+
+  /**
    * Dynamically build TEXT_FIELDS based on the loaded frame pack (if any)
    * Pack-defined fields take priority and preserve their declared order
    * Fallback to default card text ordering when no pack text is available
+   *
+   * SPECIAL CASE: For dungeon cards, dynamically generate room text fields
+   * based on the number of rooms defined in the Dungeon tab
    */
   const TEXT_FIELDS = useMemo(() => {
     const packText = loadedPack?.text;
+
+    // For dungeon cards, merge pack text (title) with dynamic room fields
+    if (isDungeonCard && dungeonRooms.length > 0) {
+      const mergedText = { ...packText, ...dungeonTextFields };
+      const fields = Object.keys(mergedText);
+
+      // Sort so title comes first, then rooms in order
+      fields.sort((a, b) => {
+        if (a === 'title') return -1;
+        if (b === 'title') return 1;
+        // Extract room numbers and sort numerically
+        const aMatch = a.match(/dungeonRoom(\d+)/);
+        const bMatch = b.match(/dungeonRoom(\d+)/);
+        if (aMatch && bMatch) {
+          return parseInt(aMatch[1], 10) - parseInt(bMatch[1], 10);
+        }
+        return a.localeCompare(b);
+      });
+
+      return fields.map((key) => ({
+        key,
+        label: mergedText[key]?.name || FIELD_LABELS[key] || key,
+      }));
+    }
+
     const packFields = packText ? Object.keys(packText) : [];
     const cardFields = text ? Object.keys(text) : [];
 
@@ -168,7 +210,7 @@ const TextTabComponent = () => {
       key,
       label: resolveLabel(key),
     }));
-  }, [loadedPack, text]);
+  }, [loadedPack, text, isDungeonCard, dungeonRooms, dungeonTextFields]);
 
   // Initialize selected field to first available field if not set
   const currentField = useMemo(() => {
@@ -179,7 +221,7 @@ const TextTabComponent = () => {
     return TEXT_FIELDS.length > 0 ? TEXT_FIELDS[0].key : '';
   }, [selectedField, TEXT_FIELDS]);
 
-  // Sync local text state from store when text changes or field switches
+  // Sync local text state from store when text changes
   useEffect(() => {
     if (!text) return;
 
@@ -193,17 +235,28 @@ const TextTabComponent = () => {
 
   // Load bounds when currentField changes
   useEffect(() => {
-    if (!text) return;
+    if (!currentField) return;
 
-    const fieldConfig = text[currentField];
+    const fieldConfig = text?.[currentField];
     if (fieldConfig) {
       setBoundsX(fieldConfig.x ?? '');
       setBoundsY(fieldConfig.y ?? '');
       setBoundsWidth(fieldConfig.width ?? '');
       setBoundsHeight(fieldConfig.height ?? '');
       setFontSizeAdjustment(fieldConfig.fontSizeAdjustment ?? 0);
+    } else if (isDungeonCard && currentField.startsWith('dungeonRoom')) {
+      // For dungeon rooms not yet in store, compute bounds on-the-fly
+      const computed = generateDungeonTextFields(dungeonRooms);
+      const computedField = computed[currentField];
+      if (computedField) {
+        setBoundsX(computedField.x ?? '');
+        setBoundsY(computedField.y ?? '');
+        setBoundsWidth(computedField.width ?? '');
+        setBoundsHeight(computedField.height ?? '');
+        setFontSizeAdjustment(0);
+      }
     }
-  }, [currentField, text]);
+  }, [currentField, text, isDungeonCard, dungeonRooms]);
 
   const wrapSelectedText = (prefix: string, suffix: string) => {
     const start = selectionStart;
@@ -302,6 +355,9 @@ const TextTabComponent = () => {
   /**
    * Handle text change with smart quote conversion for rules field
    * Uses local state for immediate feedback, debounced store update
+   *
+   * For dungeon room fields, ensures the full field configuration is saved
+   * to the store on first edit (not just the text)
    */
   const handleTextChange = (fieldKey: string, newText: string, cursorPos: number) => {
     // Update local state immediately for instant feedback
@@ -332,8 +388,23 @@ const TextTabComponent = () => {
       }
     }
 
-    // Default: debounced update to store
-    debouncedUpdateText(fieldKey, newText);
+    // For dungeon room fields, if the field doesn't exist in the store yet,
+    // initialize it with the full computed field configuration
+    const isDungeonRoomField = fieldKey.startsWith('dungeonRoom');
+    const fieldExistsInStore = text?.[fieldKey] !== undefined;
+
+    if (isDungeonRoomField && !fieldExistsInStore) {
+      // First time editing this dungeon room - compute and save full config
+      const computed = generateDungeonTextFields(dungeonRooms);
+      if (computed[fieldKey]) {
+        updateText(fieldKey, { ...computed[fieldKey], text: newText });
+      } else {
+        debouncedUpdateText(fieldKey, newText);
+      }
+    } else {
+      // Default: debounced update to store (text only)
+      debouncedUpdateText(fieldKey, newText);
+    }
   };
 
   return (
