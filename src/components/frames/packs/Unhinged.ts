@@ -30,6 +30,9 @@ const template: FramePackTemplate = {
   loadBottomInfo: {
     top: { name: 'Artist', text: '{ptshift-0.1667,0}\uFFEE {elemidinfo-artist}', x: 0.08, y: 1898 / 2100, width: 0.8107, height: 0.0248, oneLine: true, font: 'matrixb', size: 0.0248, color: 'white', shadowX: 0.0007, shadowY: 0.0005 },
   },
+  brush: '/img/manaSymbols/brush.svg',
+  brushWhite: '/img/manaSymbols/brushWhite.svg',
+  brushScale: 1.3, // Make brush 50% larger  
 };
 
 export default template;
