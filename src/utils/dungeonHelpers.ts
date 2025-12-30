@@ -353,8 +353,12 @@ export async function drawDungeonLayer(
     dungeonFXContext.drawImage(cache.fxOuter, 0, 0, dungeonFXCanvas.width, dungeonFXCanvas.height);
   }
 
-  // Draw doorways - including entrance doorway from above the grid
-  const allRooms = [...rooms, { x: 0, y: -2, width: 16, height: 1, doors: [7] }];
+  // Draw doorways for each room plus the entrance doorway
+  // The entrance room is a virtual room above the grid that creates the entrance opening
+  // Original CC: rooms.push([0,-2,16,1,7]) where indices are [x, y, width-1, height-1, door]
+  // So the entrance doorway is at y = -2 + 1 = -1 (one cell above grid origin)
+  const entranceRoom = { x: 0, y: -2, width: 17, height: 2, doors: [7] };
+  const allRooms = [...rooms, entranceRoom];
 
   for (const room of allRooms) {
     const adjustedHeight = room.height - 1;
@@ -377,11 +381,12 @@ export async function drawDungeonLayer(
         );
       }
 
-      // Draw doorway shape and FX
+      // Draw doorway shape and FX (skip for entrance doorway to avoid artifacts in title area)
       dungeonContext.globalCompositeOperation = 'source-over';
       dungeonFXContext.globalCompositeOperation = 'source-over';
 
-      if (cache.shapeDoorway && cache.fxDoorway) {
+      const isEntranceDoorway = room.y === -2;
+      if (cache.shapeDoorway && cache.fxDoorway && !isEntranceDoorway) {
         dungeonContext.drawImage(
           cache.shapeDoorway,
           origX + cellSize * (room.x + doorway - 0.5),
@@ -394,9 +399,8 @@ export async function drawDungeonLayer(
         );
       }
 
-      // Draw arrow (skip for entrance and exit)
-      // Match original: origX + cellSize * (room.x + doorway + 0.5), origY + cellSize * (room.y + adjustedHeight + 0.5)
-      if (room.y !== -2 && room.y + adjustedHeight !== 18 && cache.doorwayArrow) {
+      // Draw arrow (skip for entrance and exit doorways)
+      if (!isEntranceDoorway && room.y + adjustedHeight !== 18 && cache.doorwayArrow) {
         dungeonFXContext.drawImage(
           cache.doorwayArrow,
           origX + cellSize * (room.x + doorway + 0.5),

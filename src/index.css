@@ -22,9 +22,10 @@
 
 @font-face {
   font-family: 'belerenbsc';
-  src: url('/fonts/beleren-bsc.ttf') format('truetype');
+  src: url('/fonts/Beleren2016SmallCaps-Bold.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: block;
 }
 
 @font-face {

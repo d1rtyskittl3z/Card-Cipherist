@@ -59,8 +59,12 @@ export function applyFontStyle(ctx: CanvasRenderingContext2D, style: TextStyle):
     (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = '0px';
   }
 
-  // Shadow
-  ctx.shadowColor = style.shadowColor;
+  // Shadow - only set color if there's actually a shadow (offset or blur)
+  // Some browsers render artifacts when shadowColor is set even with 0 offset/blur
+  const hasShadow = style.shadowOffsetX !== 0 ||
+                    style.shadowOffsetY !== 0 ||
+                    style.shadowBlur > 0;
+  ctx.shadowColor = hasShadow ? style.shadowColor : 'transparent';
   ctx.shadowOffsetX = style.shadowOffsetX;
   ctx.shadowOffsetY = style.shadowOffsetY;
   ctx.shadowBlur = style.shadowBlur;

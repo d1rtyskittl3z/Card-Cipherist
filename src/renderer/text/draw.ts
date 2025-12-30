@@ -39,12 +39,32 @@ export function drawLayout(
   const paragraphCtx = tempCanvases.paragraph.getContext('2d')!;
   const lineCtx = tempCanvases.line.getContext('2d')!;
 
-  // Clear temp canvases
+  // Clear temp canvases and reset context state
   paragraphCtx.clearRect(0, 0, tempCanvases.paragraph.width, tempCanvases.paragraph.height);
+  paragraphCtx.shadowColor = 'transparent';
+  paragraphCtx.shadowBlur = 0;
+  paragraphCtx.shadowOffsetX = 0;
+  paragraphCtx.shadowOffsetY = 0;
 
   // Render each line
   for (const line of layout.lines) {
+    // Save and restore ensures complete state reset between lines
+    lineCtx.save();
+    lineCtx.setTransform(1, 0, 0, 1, 0, 0); // Reset any transforms
     lineCtx.clearRect(0, 0, tempCanvases.line.width, tempCanvases.line.height);
+    lineCtx.restore();
+
+    // Reset line context state to prevent artifacts from previous renders
+    lineCtx.shadowColor = 'transparent';
+    lineCtx.shadowBlur = 0;
+    lineCtx.shadowOffsetX = 0;
+    lineCtx.shadowOffsetY = 0;
+    lineCtx.globalCompositeOperation = 'source-over';
+    lineCtx.globalAlpha = 1;
+    lineCtx.filter = 'none';
+    lineCtx.textBaseline = 'alphabetic';
+    lineCtx.textAlign = 'left';
+    lineCtx.direction = 'ltr';
 
     // Calculate horizontal alignment offset
     let horizontalAdjust = 0;
@@ -123,6 +143,15 @@ function drawTextGlyph(ctx: CanvasRenderingContext2D, glyph: TextGlyph): void {
 
   const x = glyph.x + CANVAS_MARGIN;
   const y = CANVAS_MARGIN + glyph.style.size * TEXT_FONT_HEIGHT_RATIO + glyph.y;
+
+  // Ensure shadow is disabled if offsets and blur are zero
+  // Some browsers render artifacts with shadow color set even when offset/blur is 0
+  const hasShadow = glyph.style.shadowOffsetX !== 0 ||
+                    glyph.style.shadowOffsetY !== 0 ||
+                    glyph.style.shadowBlur > 0;
+  if (!hasShadow) {
+    ctx.shadowColor = 'transparent';
+  }
 
   // Draw outline first (if enabled)
   if (glyph.style.outlineWidth >= 1) {
