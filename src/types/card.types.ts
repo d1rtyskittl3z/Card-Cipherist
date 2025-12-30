@@ -352,6 +352,59 @@ export interface StationState {
 }
 
 /**
+ * Dungeon room definition
+ * Represents a single room in the dungeon grid
+ */
+export interface DungeonRoom {
+  /** Grid X position (in cells) */
+  x: number;
+  /** Grid Y position (in cells) */
+  y: number;
+  /** Grid width (in cells) */
+  width: number;
+  /** Grid height (in cells) */
+  height: number;
+  /** Door positions (relative to room, measured in cell units) */
+  doors: number[];
+}
+
+/**
+ * Wall color options for dungeon
+ */
+export type DungeonWallColor = 'W' | 'U' | 'B' | 'R' | 'G' | 'C';
+
+/**
+ * Dungeon-specific state
+ * Contains configuration for AFR-style dungeon cards
+ */
+export interface DungeonInfo {
+  /** Array of room definitions */
+  rooms: DungeonRoom[];
+  /** Wall texture color */
+  wallColor: DungeonWallColor;
+}
+
+/**
+ * Maximum number of rooms allowed in a dungeon
+ */
+export const DUNGEON_MAX_ROOMS = 12;
+
+/**
+ * Default dungeon configuration (Lost Mine of Phandelver layout)
+ */
+export const DEFAULT_DUNGEON_ROOMS: DungeonRoom[] = [
+  { x: 0, y: 0, width: 16, height: 2, doors: [3, 11] },
+  { x: 0, y: 2, width: 8, height: 4, doors: [1.5, 5.5] },
+  { x: 8, y: 2, width: 8, height: 4, doors: [0.5, 4.5] },
+  { x: 0, y: 6, width: 5, height: 5, doors: [1.5] },
+  { x: 5, y: 6, width: 6, height: 5, doors: [0.5, 3.5] },
+  { x: 11, y: 6, width: 5, height: 5, doors: [1.5] },
+  { x: 0, y: 11, width: 8, height: 4, doors: [3] },
+  { x: 8, y: 11, width: 8, height: 4, doors: [3] },
+  { x: 0, y: 15, width: 16, height: 4, doors: [7] },
+];
+
+/**
  * Main Card data structure
  * Contains all state for a single MTG card design
  *
@@ -479,6 +532,8 @@ export interface Card {
   class?: ClassInfo | null;
   /** Station-specific state (null for non-station cards) */
   station?: StationState | null;
+  /** Dungeon-specific state (null for non-dungeon cards) */
+  dungeon?: DungeonInfo | null;
 }
 
 export interface FrameOption {
@@ -525,6 +580,8 @@ export interface CanvasRefs {
   planeswalkerPost: HTMLCanvasElement;
   stationPre: HTMLCanvasElement;
   stationPost: HTMLCanvasElement;
+  dungeon: HTMLCanvasElement;
+  dungeonFX: HTMLCanvasElement;
   qrCode: HTMLCanvasElement;
   qrious: HTMLCanvasElement;
   text: HTMLCanvasElement;
@@ -548,6 +605,8 @@ export interface CanvasContextRefs {
   planeswalkerPost: CanvasRenderingContext2D;
   stationPre: CanvasRenderingContext2D;
   stationPost: CanvasRenderingContext2D;
+  dungeon: CanvasRenderingContext2D;
+  dungeonFX: CanvasRenderingContext2D;
   qrCode: CanvasRenderingContext2D;
   qrious: CanvasRenderingContext2D;
   text: CanvasRenderingContext2D;

@@ -33,6 +33,7 @@ export const useCompositor = ({
     const planeswalkerPostCanvas = canvasRefs.planeswalkerPost;
     const stationPreCanvas = canvasRefs.stationPre;
     const stationPostCanvas = canvasRefs.stationPost;
+    const dungeonCanvas = canvasRefs.dungeon;
     const watermarkCanvas = canvasRefs.watermark;
     const sagaCanvas = canvasRefs.saga;
     const classCanvas = canvasRefs.class;
@@ -58,6 +59,11 @@ export const useCompositor = ({
     // Draw frame layer
     if (frameCanvas) {
       cardContext.drawImage(frameCanvas, 0, 0);
+    }
+
+    // Draw dungeon layer (walls and rooms)
+    if (dungeonCanvas && card.version?.toLowerCase().includes('dungeon')) {
+      cardContext.drawImage(dungeonCanvas, 0, 0);
     }
 
     // Draw station pre-layer (ability squares before text)

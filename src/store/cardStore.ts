@@ -16,7 +16,11 @@ import type {
   ClassInfo,
   FrameColorOverride,
   StationState,
+  DungeonInfo,
+  DungeonRoom,
+  DungeonWallColor,
 } from '../types/card.types';
+import { DEFAULT_DUNGEON_ROOMS, DUNGEON_MAX_ROOMS } from '../types/card.types';
 import type { FramePackTemplate } from '../components/frames/packs/types';
 import {
   NEO_BASICS_FRAME_PREFIX,
@@ -88,6 +92,7 @@ interface CardState {
   hasShownMysticalArchiveTab: boolean;
   hasShownMysticalArchiveHorizontalTab: boolean;
   hasShownQRCodeTab: boolean;
+  hasShownDungeonTab: boolean;
   qrCodeUrl: string;
   neoBasicsTitleHeight: number;
   neoBasicsElements: string[];
@@ -202,6 +207,7 @@ interface CardState {
   setHasShownMysticalArchiveTab: (shown: boolean) => void;
   setHasShownMysticalArchiveHorizontalTab: (shown: boolean) => void;
   setHasShownQRCodeTab: (shown: boolean) => void;
+  setHasShownDungeonTab: (shown: boolean) => void;
   setQRCodeUrl: (url: string) => void;
   initializeNeoBasicsControls: (elements: string[]) => void;
   setNeoBasicsTitleHeight: (value: number) => void;
@@ -240,6 +246,15 @@ interface CardState {
   initializeStation: (version?: string) => void;
   updateStationState: (updater: (station: StationState) => StationState) => void;
   resetStationSettings: () => void;
+
+  // Dungeon management
+  initializeDungeon: () => void;
+  setDungeonInfo: (updates: Partial<DungeonInfo>) => void;
+  resetDungeonInfo: () => void;
+  addDungeonRoom: (room: DungeonRoom) => boolean;
+  removeDungeonRoom: (index: number) => void;
+  updateDungeonRoom: (index: number, updates: Partial<DungeonRoom>) => void;
+  setDungeonWallColor: (color: DungeonWallColor) => void;
 
   // Art debugging
   showArtBoundsDebug: boolean;
@@ -461,6 +476,7 @@ planeswalker: null,
       hasShownMysticalArchiveTab: false,
       hasShownMysticalArchiveHorizontalTab: false,
       hasShownQRCodeTab: false,
+      hasShownDungeonTab: false,
       qrCodeUrl: '',
 neoBasicsTitleHeight: NEO_BASICS_MIN_TITLE_HEIGHT,
 neoBasicsElements: [],
@@ -741,6 +757,10 @@ neoBasicsColorOverrides: {},
 
         setHasShownQRCodeTab: (shown) => {
           set({ hasShownQRCodeTab: shown });
+        },
+
+        setHasShownDungeonTab: (shown) => {
+          set({ hasShownDungeonTab: shown });
         },
 
         setQRCodeUrl: (url) => {
@@ -1143,6 +1163,129 @@ neoBasicsColorOverrides: {},
             };
           });
         },
+
+        // Dungeon Management
+        initializeDungeon: () => {
+          set((state) => {
+            if (state.card.dungeon) {
+              return {};
+            }
+            return {
+              card: {
+                ...state.card,
+                dungeon: {
+                  rooms: [...DEFAULT_DUNGEON_ROOMS],
+                  wallColor: 'B' as DungeonWallColor,
+                },
+              },
+            };
+          });
+        },
+
+        setDungeonInfo: (updates) => {
+          set((state) => {
+            const currentDungeon = state.card.dungeon;
+            if (!currentDungeon) {
+              return {};
+            }
+            return {
+              card: {
+                ...state.card,
+                dungeon: { ...currentDungeon, ...updates },
+              },
+            };
+          });
+        },
+
+        resetDungeonInfo: () => {
+          set((state) => ({
+            card: {
+              ...state.card,
+              dungeon: {
+                rooms: [...DEFAULT_DUNGEON_ROOMS],
+                wallColor: 'B' as DungeonWallColor,
+              },
+            },
+          }));
+        },
+
+        addDungeonRoom: (room) => {
+          const state = useCardStore.getState();
+          const currentDungeon = state.card.dungeon;
+          if (!currentDungeon) {
+            return false;
+          }
+          if (currentDungeon.rooms.length >= DUNGEON_MAX_ROOMS) {
+            return false;
+          }
+          set({
+            card: {
+              ...state.card,
+              dungeon: {
+                ...currentDungeon,
+                rooms: [...currentDungeon.rooms, room],
+              },
+            },
+          });
+          return true;
+        },
+
+        removeDungeonRoom: (index) => {
+          set((state) => {
+            const currentDungeon = state.card.dungeon;
+            if (!currentDungeon) {
+              return {};
+            }
+            return {
+              card: {
+                ...state.card,
+                dungeon: {
+                  ...currentDungeon,
+                  rooms: currentDungeon.rooms.filter((_, i) => i !== index),
+                },
+              },
+            };
+          });
+        },
+
+        updateDungeonRoom: (index, updates) => {
+          set((state) => {
+            const currentDungeon = state.card.dungeon;
+            if (!currentDungeon) {
+              return {};
+            }
+            return {
+              card: {
+                ...state.card,
+                dungeon: {
+                  ...currentDungeon,
+                  rooms: currentDungeon.rooms.map((room, i) =>
+                    i === index ? { ...room, ...updates } : room
+                  ),
+                },
+              },
+            };
+          });
+        },
+
+        setDungeonWallColor: (color) => {
+          set((state) => {
+            const currentDungeon = state.card.dungeon;
+            if (!currentDungeon) {
+              return {};
+            }
+            return {
+              card: {
+                ...state.card,
+                dungeon: {
+                  ...currentDungeon,
+                  wallColor: color,
+                },
+              },
+            };
+          });
+        },
+
         setShowSerialNumbers: (show) => {
           set({ showSerialNumbers: show })
         },

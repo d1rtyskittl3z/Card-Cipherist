@@ -52,6 +52,9 @@ export const CARD_VERSIONS = {
   STATION_REGULAR: 'stationRegular',
   STATION_BORDERLESS: 'stationBorderless',
 
+  // Dungeon versions
+  DUNGEON: 'dungeon',
+
   // Mystical Archive JP
   MYSTICAL_ARCHIVE_JP: 'mysticalArchiveJP',
 
@@ -158,6 +161,17 @@ export const isStationVersion = (version: string | undefined): boolean => {
   if (!version) return false;
   const lowerVersion = version.toLowerCase();
   return lowerVersion.includes('station');
+};
+
+/**
+ * Check if a version string indicates a Dungeon card
+ * @param version - The version string to check
+ * @returns True if the version is a Dungeon variant
+ */
+export const isDungeonVersion = (version: string | undefined): boolean => {
+  if (!version) return false;
+  const lowerVersion = version.toLowerCase();
+  return lowerVersion.includes('dungeon');
 };
 
 /**

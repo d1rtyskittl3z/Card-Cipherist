@@ -15,6 +15,7 @@ import { PlaneswalkerTab } from './tabs/PlaneswalkerTab';
 import { KamigawaTab } from './tabs/KamigawaTab';
 import { ClassTab } from './tabs/ClassTab';
 import { StationsTab } from './tabs/StationsTab';
+import { DungeonTab } from './tabs/DungeonTab';
 import { MysticalArchiveTab } from './tabs/MysticalArchiveTab';
 import { MysticalArchiveHorizontalTab } from './tabs/MysticalArchiveHorizontalTab';
 import { QRCodeTab } from './tabs/QRCodeTab';
@@ -35,6 +36,7 @@ const CardCreatorLayoutComponent = () => {
   const hasShownKamigawaTab = useCardStore((state) => state.hasShownKamigawaTab);
   const hasShownClassTab = useCardStore((state) => state.hasShownClassTab);
   const hasShownStationsTab = useCardStore((state) => state.hasShownStationsTab);
+  const hasShownDungeonTab = useCardStore((state) => state.hasShownDungeonTab);
   const hasShownMysticalArchiveTab = useCardStore((state) => state.hasShownMysticalArchiveTab);
   const hasShownMysticalArchiveHorizontalTab = useCardStore((state) => state.hasShownMysticalArchiveHorizontalTab);
   const hasShownQRCodeTab = useCardStore((state) => state.hasShownQRCodeTab);
@@ -247,6 +249,27 @@ const CardCreatorLayoutComponent = () => {
                   <Accordion.ItemContent>
                     <Accordion.ItemBody p={4}>
                       <StationsTab />
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+              )}
+
+              {/* Conditionally show Dungeon accordion item */}
+              {hasShownDungeonTab && (
+                <Accordion.Item value={TABS.DUNGEON}>
+                  <Accordion.ItemTrigger
+                    fontSize="md"
+                    fontWeight="semibold"
+                    py={4}
+                  >
+                    <Box flex="1" textAlign="start">
+                      Dungeon
+                    </Box>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent>
+                    <Accordion.ItemBody p={4}>
+                      <DungeonTab />
                     </Accordion.ItemBody>
                   </Accordion.ItemContent>
                 </Accordion.Item>

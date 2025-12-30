@@ -127,6 +127,8 @@ const FrameTabComponent = () => {
   const setHasShownClassTab = useCardStore((state) => state.setHasShownClassTab);
   const setHasShownKamigawaTab = useCardStore((state) => state.setHasShownKamigawaTab);
   const setHasShownStationsTab = useCardStore((state) => state.setHasShownStationsTab);
+  const setHasShownDungeonTab = useCardStore((state) => state.setHasShownDungeonTab);
+  const initializeDungeon = useCardStore((state) => state.initializeDungeon);
   const setHasShownMysticalArchiveTab = useCardStore((state) => state.setHasShownMysticalArchiveTab);
   const setHasShownMysticalArchiveHorizontalTab = useCardStore((state) => state.setHasShownMysticalArchiveHorizontalTab);
   const setHasShownQRCodeTab = useCardStore((state) => state.setHasShownQRCodeTab);
@@ -606,6 +608,18 @@ const FrameTabComponent = () => {
         });
       }
 
+      // Show Dungeon tab for Dungeon pack
+      if (pack?.version?.toLowerCase().includes('dungeon')) {
+        setHasShownDungeonTab(true);
+        initializeDungeon();
+        toaster.create({
+          title: 'Dungeon Pack Selected',
+          description: 'A "Dungeon" tab has appeared with controls for room layout and wall colors.',
+          type: 'info',
+          duration: 8000,
+        });
+      }
+
       // Show Mystical Archive tab for Japanese Mystical Archive pack
       if (pack?.id === 'MysticalArchiveJP') {
         setHasShownMysticalArchiveTab(true);
@@ -653,7 +667,7 @@ const FrameTabComponent = () => {
     // Clear custom masks when pack changes (they're tied to the loaded pack)
     setCustomMasks([]);
     setCustomMaskCounter(1);
-  }, [selectedPackId, setLoadedPackStore, setHasShownKamigawaTab, setHasShownSagaTab, setHasShownPlaneswalkerTab, setHasShownClassTab, setHasShownStationsTab, setHasShownMysticalArchiveTab, setHasShownMysticalArchiveHorizontalTab, setHasShownQRCodeTab, initializeNeoBasicsControls, initializeMysticalArchiveControls, initializeMysticalArchiveHorizontalControls]);
+  }, [selectedPackId, setLoadedPackStore, setHasShownKamigawaTab, setHasShownSagaTab, setHasShownPlaneswalkerTab, setHasShownClassTab, setHasShownStationsTab, setHasShownDungeonTab, initializeDungeon, setHasShownMysticalArchiveTab, setHasShownMysticalArchiveHorizontalTab, setHasShownQRCodeTab, initializeNeoBasicsControls, initializeMysticalArchiveControls, initializeMysticalArchiveHorizontalControls]);
 
   // Get frames and masks from loaded pack
   const availableFrames = useMemo(() => {

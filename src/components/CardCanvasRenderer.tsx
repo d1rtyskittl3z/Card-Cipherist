@@ -54,7 +54,7 @@ export const CardCanvasRenderer = ({ previewRef }: CardCanvasRendererProps) => {
   });
 
   // Initialize special card type layers (use context internally - no prop drilling!)
-  const { renderSaga, renderClass, renderPlaneswalker, renderStation, renderSerial, renderQRCode } = useSpecialLayers({
+  const { renderSaga, renderClass, renderPlaneswalker, renderStation, renderDungeon, renderSerial, renderQRCode } = useSpecialLayers({
     showSerialNumbers,
   });
 
@@ -88,6 +88,7 @@ export const CardCanvasRenderer = ({ previewRef }: CardCanvasRendererProps) => {
     perfMonitor.measure('canvas:renderFrameLayer', () => renderFrameLayer());
     await perfMonitor.measureAsync('canvas:renderSerial', () => renderSerial(card));
     await perfMonitor.measureAsync('canvas:renderStation', () => renderStation(card));
+    await perfMonitor.measureAsync('canvas:renderDungeon', () => renderDungeon(card));
     perfMonitor.measure('canvas:renderWatermark', () => renderWatermark());
     perfMonitor.measure('canvas:renderQRCode', () => renderQRCode(card, qrCodeSourceCanvas, loadedPack?.qrCode));
     await perfMonitor.measureAsync('canvas:renderSaga', () => renderSaga(card));
@@ -113,6 +114,7 @@ export const CardCanvasRenderer = ({ previewRef }: CardCanvasRendererProps) => {
     renderFrameLayer,
     renderSerial,
     renderStation,
+    renderDungeon,
     renderWatermark,
     renderSaga,
     renderClass,

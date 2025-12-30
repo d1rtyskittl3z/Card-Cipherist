@@ -36,6 +36,8 @@ export const useCanvasManager = () => {
       'planeswalkerPost',
       'stationPre',
       'stationPost',
+      'dungeon',
+      'dungeonFX',
       'text',
       'paragraph',
       'line',

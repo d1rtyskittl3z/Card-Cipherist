@@ -13,6 +13,7 @@ import {
   ensurePlaneswalkerAssets,
 } from '../../utils/planeswalkerHelpers';
 import { getStationImage, shouldUseStationLayers } from '../../utils/stationHelpers';
+import { drawDungeonLayer } from '../../utils/dungeonHelpers';
 import { drawSerialPlate } from '../../utils/drawSerialPlate';
 import { scaleX, scaleY, scaleHeight } from '../../utils/canvasHelpers';
 import type { Card } from '../../types/card.types';
@@ -250,6 +251,34 @@ export const useSpecialLayers = ({
   }, [canvasRefs, contextRefs]);
 
   /**
+   * Render dungeon layer (walls, doorways, textures)
+   */
+  const renderDungeon = useCallback(async (card: Card) => {
+    const dungeonCanvas = canvasRefs.dungeon;
+    const dungeonFXCanvas = canvasRefs.dungeonFX;
+    const dungeonContext = contextRefs.dungeon;
+    const dungeonFXContext = contextRefs.dungeonFX;
+
+    if (!dungeonCanvas || !dungeonFXCanvas || !dungeonContext || !dungeonFXContext) {
+      return;
+    }
+
+    // Always clear the dungeon canvases before drawing
+    dungeonContext.clearRect(0, 0, dungeonCanvas.width, dungeonCanvas.height);
+    dungeonFXContext.clearRect(0, 0, dungeonFXCanvas.width, dungeonFXCanvas.height);
+
+    if (!card.version?.toLowerCase().includes('dungeon') || !card.dungeon) {
+      return;
+    }
+
+    try {
+      await drawDungeonLayer(dungeonContext, dungeonFXContext, card);
+    } catch (error) {
+      console.error('Failed to render dungeon layer:', error);
+    }
+  }, [canvasRefs, contextRefs]);
+
+  /**
    * Render serial number plate on the frame canvas
    */
   const renderSerial = useCallback(async (card: Card) => {
@@ -355,6 +384,7 @@ export const useSpecialLayers = ({
     renderClass,
     renderPlaneswalker,
     renderStation,
+    renderDungeon,
     renderSerial,
     renderQRCode,
   };

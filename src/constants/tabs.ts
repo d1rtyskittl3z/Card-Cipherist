@@ -34,6 +34,7 @@ export const TABS = {
   KAMIGAWA: 'kamigawa',
   CLASS: 'class',
   STATIONS: 'stations',
+  DUNGEON: 'dungeon',
   MYSTICAL_ARCHIVE: 'mysticalArchive',
   MYSTICAL_ARCHIVE_HORIZONTAL: 'mysticalArchiveHorizontal',
   QR_CODE: 'qrCode',

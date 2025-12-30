@@ -76,6 +76,7 @@ import DMUStainedGlass from './DMUStainedGlass';
 import DNDModule from './DNDModule';
 import DNDSourcebook from './DNDSourcebook';
 import Dossier from './Dossier';
+import Dungeon from './Dungeon';
 import DoubleFeature from './DoubleFeature';
 import DoubleFeatureTransform from './DoubleFeatureTransform';
 import Kaldheim2 from './Kaldheim-2';
@@ -480,6 +481,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'DNDSourcebook': DNDSourcebook,
   'Dossier': Dossier,
   'Draconic': Draconic,
+  'Dungeon': Dungeon,
   'DoubleFeature': DoubleFeature,
   'DoubleFeatureTransform': DoubleFeatureTransform,
   'Equinox': Equinox,

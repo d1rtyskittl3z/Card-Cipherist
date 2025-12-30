@@ -422,6 +422,39 @@ export const useIsClassCard = () => {
 };
 
 // ============================================================================
+// Dungeon Selectors
+// ============================================================================
+
+/**
+ * Get dungeon info
+ */
+export const useDungeonInfo = () => useCardStore((state) => state.card.dungeon);
+
+/**
+ * Check if current card is a dungeon card
+ */
+export const useIsDungeonCard = () => {
+  return useCardStore((state) => {
+    const version = state.card.version?.toLowerCase();
+    return Boolean(version?.includes('dungeon') && state.card.dungeon);
+  });
+};
+
+/**
+ * Get dungeon rooms
+ */
+export const useDungeonRooms = () => {
+  return useCardStore((state) => state.card.dungeon?.rooms ?? []);
+};
+
+/**
+ * Get dungeon wall color
+ */
+export const useDungeonWallColor = () => {
+  return useCardStore((state) => state.card.dungeon?.wallColor ?? 'B');
+};
+
+// ============================================================================
 // Neo Basics (Kamigawa) Selectors
 // ============================================================================
 
