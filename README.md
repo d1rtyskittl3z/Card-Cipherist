@@ -26,7 +26,7 @@ Whenever the next full moon aligns with `npm run build` and succeeds three times
 
 #### Here is a list of currently supported Frame Packs: 
 
-* As of December 11, 2025 all cards with the exception of Planchase, Dungeon (AFR), Cartoony and Pokemon are currently ported.
+* As of December 30, 2025 all frames with the exception of Planchase, Borderless Source Material, Cartoony and Pokemon are currently ported.
 * ***NOTE:*** Further testing is needed to verify complete functionality. There are known issues that will be addressed in the future...
 
 ---
