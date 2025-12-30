@@ -357,7 +357,7 @@ export async function drawDungeonLayer(
   // The entrance room is a virtual room above the grid that creates the entrance opening
   // Original CC: rooms.push([0,-2,16,1,7]) where indices are [x, y, width-1, height-1, door]
   // So the entrance doorway is at y = -2 + 1 = -1 (one cell above grid origin)
-  const entranceRoom = { x: 0, y: -2, width: 17, height: 2, doors: [7] };
+  const entranceRoom = { x: 0.4, y: -2, width: 17, height: 2, doors: [7] };
   const allRooms = [...rooms, entranceRoom];
 
   for (const room of allRooms) {
@@ -403,8 +403,8 @@ export async function drawDungeonLayer(
       if (!isEntranceDoorway && room.y + adjustedHeight !== 18 && cache.doorwayArrow) {
         dungeonFXContext.drawImage(
           cache.doorwayArrow,
-          origX + cellSize * (room.x + doorway + 0.5),
-          origY + cellSize * (room.y + adjustedHeight + 0.5)
+          origX + cellSize * (room.x + doorway + 0.25), //This palces the arrow horizontally --dskz
+          origY + cellSize * (room.y + adjustedHeight + 0.7) //This palces the arrow vertically --dskz
         );
       }
     }

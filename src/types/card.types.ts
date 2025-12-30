@@ -401,7 +401,7 @@ export const DEFAULT_DUNGEON_ROOMS: DungeonRoom[] = [
   { x: 11, y: 6, width: 5, height: 5, doors: [1.5] },
   { x: 0, y: 11, width: 8, height: 4, doors: [3] },
   { x: 8, y: 11, width: 8, height: 4, doors: [3] },
-  { x: 0, y: 15, width: 16, height: 4, doors: [7] },
+  { x: 0, y: 15, width: 16, height: 4, doors: [7.4] },
 ];
 
 /**
