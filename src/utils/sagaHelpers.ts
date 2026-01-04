@@ -5,7 +5,7 @@ import { SAGA_ABILITY_KEYS, isSagaVersion } from '../constants';
 const SAGA_DIVIDER_SRC = '/img/frames/saga/sagaDivider.png';
 const SAGA_CHAPTER_SRC = '/img/frames/saga/sagaChapter.png';
 
-interface SagaAssets {
+export interface SagaAssets {
   divider: HTMLImageElement;
   chapter: HTMLImageElement;
 }
@@ -23,7 +23,7 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
 
 let sagaAssetsPromise: Promise<SagaAssets> | null = null;
 
-const ensureSagaAssets = async (): Promise<SagaAssets> => {
+export const ensureSagaAssets = async (): Promise<SagaAssets> => {
   if (!sagaAssetsPromise) {
     sagaAssetsPromise = Promise.all([loadImage(SAGA_DIVIDER_SRC), loadImage(SAGA_CHAPTER_SRC)]).then(
       ([divider, chapter]) => ({ divider, chapter })

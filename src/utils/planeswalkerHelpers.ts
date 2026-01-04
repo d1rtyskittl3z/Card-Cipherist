@@ -212,7 +212,7 @@ const shouldSkipBackgroundFill = (version?: string | null): boolean => {
   return lower.includes('sdcc15') || lower.includes('seventh');
 };
 
-const PLANESWALKER_ICON_LAYOUT: number[][][] = [
+export const PLANESWALKER_ICON_LAYOUT: number[][][] = [
   [[0.7467], [0.6953, 0.822], [0.6639, 0.7467, 0.8362], [0.6505, 0.72, 0.7905, 0.861]],
   [[0.72], [0.6391, 0.801], [0.5986, 0.72, 0.8415], [0.5986, 0.6796, 0.7605, 0.8415]],
 ];

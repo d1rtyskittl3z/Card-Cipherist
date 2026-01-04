@@ -34,6 +34,10 @@ import {
   deleteCard,
   isIndexedDBAvailable,
 } from '../../utils/cardDatabase';
+import { exportCardAsPSD, createPSDTextRenderer } from '../../utils/psdExport';
+import { ensurePlaneswalkerAssets, PLANESWALKER_ICON_LAYOUT } from '../../utils/planeswalkerHelpers';
+import { ensureSagaAssets } from '../../utils/sagaHelpers';
+import { getStationImage } from '../../utils/stationHelpers';
 
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 const METADATA_KEY = 'CardCipheristJSON';
@@ -388,16 +392,48 @@ const SaveImportTabComponent = () => {
   const setSetSymbolImage = useCardStore((state) => state.setSetSymbolImage);
   const setWatermarkImage = useCardStore((state) => state.setWatermarkImage);
   const previewCanvasRef = useCardStore((state) => state.previewCanvasRef);
+  const bottomInfoCanvasRef = useCardStore((state) => state.bottomInfoCanvasRef);
 
-  // Get art image and setter from mediaStore
+  // Special card type canvas refs (for PSD export)
+  const planeswalkerPreCanvasRef = useCardStore((state) => state.planeswalkerPreCanvasRef);
+  const planeswalkerPostCanvasRef = useCardStore((state) => state.planeswalkerPostCanvasRef);
+  const sagaCanvasRef = useCardStore((state) => state.sagaCanvasRef);
+  const classCanvasRef = useCardStore((state) => state.classCanvasRef);
+  const dungeonCanvasRef = useCardStore((state) => state.dungeonCanvasRef);
+  const dungeonFXCanvasRef = useCardStore((state) => state.dungeonFXCanvasRef);
+  const stationPreCanvasRef = useCardStore((state) => state.stationPreCanvasRef);
+  const stationPostCanvasRef = useCardStore((state) => state.stationPostCanvasRef);
+
+  // Get art, set symbol, and watermark images from mediaStore
   const artImage = useMediaStore((state) => state.artImage);
+  const setSymbolImage = useMediaStore((state) => state.setSymbolImage);
+  const watermarkImage = useMediaStore((state) => state.watermarkImage);
   const setArtImage = useMediaStore((state) => state.setArtImage);
   const updateArt = useMediaStore((state) => state.updateArt);
   const updateSetSymbolMedia = useMediaStore((state) => state.updateSetSymbol);
   const updateWatermarkMedia = useMediaStore((state) => state.updateWatermark);
+  const artGrayscale = useMediaStore((state) => state.artGrayscale);
+  const artX = useMediaStore((state) => state.artX);
+  const artY = useMediaStore((state) => state.artY);
+  const artZoom = useMediaStore((state) => state.artZoom);
+  const artRotate = useMediaStore((state) => state.artRotate);
+  const setSymbolX = useMediaStore((state) => state.setSymbolX);
+  const setSymbolY = useMediaStore((state) => state.setSymbolY);
+  const setSymbolZoom = useMediaStore((state) => state.setSymbolZoom);
+  const setSymbolRotate = useMediaStore((state) => state.setSymbolRotate);
+  const setCode = useMediaStore((state) => state.setCode);
+  const rarity = useMediaStore((state) => state.rarity);
+  const watermarkX = useMediaStore((state) => state.watermarkX);
+  const watermarkY = useMediaStore((state) => state.watermarkY);
+  const watermarkZoom = useMediaStore((state) => state.watermarkZoom);
+  const watermarkOpacity = useMediaStore((state) => state.watermarkOpacity);
+  const watermarkLeft = useMediaStore((state) => state.watermarkLeft);
+  const watermarkRight = useMediaStore((state) => state.watermarkRight);
 
-  // Get loaded pack from frameStore
-  const loadedPack = useFrameStore((state) => state.loadedPack);
+  // Get loaded pack from frameStore with cardStore fallback (some flows store it in cardStore)
+  const loadedPackFromFrameStore = useFrameStore((state) => state.loadedPack);
+  const loadedPackFromCardStore = useCardStore((state) => state.loadedPack);
+  const loadedPack = loadedPackFromFrameStore || loadedPackFromCardStore;
 
   // Get auto-fit setting from uiStore
   const autoFitArt = useUIStore((state) => state.autoFitArt);
@@ -860,6 +896,203 @@ const SaveImportTabComponent = () => {
     }
   }, [resetCard]);
 
+  const [exportingPSD, setExportingPSD] = useState(false);
+
+  const handleExportPSD = useCallback(async () => {
+    const canvas = previewCanvasRef ?? (document.querySelector('canvas') as HTMLCanvasElement | null);
+    if (!canvas) {
+      toaster.create({
+        title: 'Export failed',
+        description: 'No canvas available for export.',
+        type: 'error',
+      });
+      return;
+    }
+
+    // If loadedPack from hooks is null, try to get fresh from stores
+    const currentLoadedPack = loadedPack ?? useFrameStore.getState().loadedPack ?? useCardStore.getState().loadedPack;
+
+    setExportingPSD(true);
+    try {
+      // Create text renderer for raster text layers with mana symbols
+      const renderTextToCanvas = await createPSDTextRenderer();
+
+      // Load right gradient mask for watermark two-tone coloring
+      let rightGradientMask: HTMLImageElement | null = null;
+      if (watermarkImage && watermarkRight !== 'none') {
+        try {
+          rightGradientMask = await loadImage('/img/frames/maskRightHalf.png');
+        } catch (e) {
+          console.warn('Failed to load right gradient mask for PSD export:', e);
+        }
+      }
+
+      // Load special card type images in parallel based on card version
+      const isPlaneswalker = card.version?.toLowerCase().includes('planeswalker') && card.planeswalker;
+      const isSaga = card.version?.toLowerCase().includes('saga') && card.saga;
+      const isStation = card.version?.toLowerCase().includes('station') && card.station;
+
+      // Load planeswalker badge images if needed
+      let planeswalkerImages: { plusIcon?: HTMLImageElement; minusIcon?: HTMLImageElement; neutralIcon?: HTMLImageElement } | undefined;
+      if (isPlaneswalker) {
+        try {
+          const assets = await ensurePlaneswalkerAssets(card.version || '', false);
+          planeswalkerImages = {
+            plusIcon: assets.plusIcon,
+            minusIcon: assets.minusIcon,
+            neutralIcon: assets.neutralIcon,
+          };
+        } catch (e) {
+          console.warn('Failed to load planeswalker assets for PSD export:', e);
+        }
+      }
+
+      // Load saga chapter icons if needed
+      let sagaImages: { chapterIcon?: HTMLImageElement; divider?: HTMLImageElement } | undefined;
+      if (isSaga) {
+        try {
+          const assets = await ensureSagaAssets();
+          sagaImages = {
+            chapterIcon: assets.chapter,
+            divider: assets.divider,
+          };
+        } catch (e) {
+          console.warn('Failed to load saga assets for PSD export:', e);
+        }
+      }
+
+      // Load station badge/PT images if needed
+      let stationImages: { badgeImage?: HTMLImageElement; ptImage?: HTMLImageElement } | undefined;
+      if (isStation && card.station) {
+        try {
+          // Determine badge/PT variant from station color mode
+          const colorMode = card.station.colorMode || 'auto';
+          const variant = colorMode === 'custom' ? 'a' : (colorMode === 'auto' ? 'a' : colorMode.charAt(0));
+          const [badgeImage, ptImage] = await Promise.all([
+            getStationImage('badge', variant),
+            getStationImage('pt', variant),
+          ]);
+          stationImages = { badgeImage, ptImage };
+        } catch (e) {
+          console.warn('Failed to load station assets for PSD export:', e);
+        }
+      }
+
+      // Load flavor bar image if card has flavor text
+      let flavorBarImage: HTMLImageElement | undefined;
+      const hasFlavorText = Object.values(card.text || {}).some(
+        (t) => t.text?.includes('{flavor}') || t.text?.includes('{divider}') || t.text?.includes('///')
+      );
+      if (hasFlavorText && card.showsFlavorBar !== false) {
+        try {
+          flavorBarImage = await loadImage('/img/manaSymbols/bar.png');
+        } catch (e) {
+          console.warn('Failed to load flavor bar image for PSD export:', e);
+        }
+      }
+
+      await exportCardAsPSD({
+        card,
+        canvasRefs: { card: canvas, bottomInfo: bottomInfoCanvasRef ?? undefined },
+        artImage,
+        setSymbolImage,
+        watermarkImage,
+        loadedPack: currentLoadedPack,
+        collectorInfoEnabled: card.showCollectorInfo ?? false,
+        artGrayscale,
+        artTransform: {
+          x: artX,
+          y: artY,
+          zoom: artZoom,
+          rotate: artRotate,
+        },
+        setSymbolTransform: {
+          x: setSymbolX,
+          y: setSymbolY,
+          zoom: setSymbolZoom,
+          rotate: setSymbolRotate,
+        },
+        setCode,
+        setRarity: rarity,
+        watermarkTransform: {
+          x: watermarkX,
+          y: watermarkY,
+          zoom: watermarkZoom,
+          opacity: watermarkOpacity,
+          left: watermarkLeft,
+          right: watermarkRight,
+        },
+        rightGradientMask,
+        renderTextToCanvas,
+        // Special card type canvases
+        specialCanvases: {
+          planeswalkerPre: planeswalkerPreCanvasRef ?? undefined,
+          planeswalkerPost: planeswalkerPostCanvasRef ?? undefined,
+          saga: sagaCanvasRef ?? undefined,
+          class: classCanvasRef ?? undefined,
+          dungeon: dungeonCanvasRef ?? undefined,
+          dungeonFX: dungeonFXCanvasRef ?? undefined,
+          stationPre: stationPreCanvasRef ?? undefined,
+          stationPost: stationPostCanvasRef ?? undefined,
+        },
+        // Special card type images (for detailed PSD layers)
+        planeswalkerImages,
+        sagaImages,
+        stationImages,
+        planeswalkerAbilityLayout: PLANESWALKER_ICON_LAYOUT,
+        // Flavor divider image
+        flavorBarImage,
+      });
+
+      toaster.create({
+        title: 'PSD exported successfully',
+        type: 'success',
+      });
+    } catch (error) {
+      console.error('PSD export failed', error);
+      toaster.create({
+        title: 'PSD export failed',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        type: 'error',
+      });
+    } finally {
+      setExportingPSD(false);
+    }
+  }, [
+    card,
+    previewCanvasRef,
+    bottomInfoCanvasRef,
+    planeswalkerPreCanvasRef,
+    planeswalkerPostCanvasRef,
+    sagaCanvasRef,
+    classCanvasRef,
+    dungeonCanvasRef,
+    dungeonFXCanvasRef,
+    stationPreCanvasRef,
+    stationPostCanvasRef,
+    artImage,
+    setSymbolImage,
+    watermarkImage,
+    loadedPack,
+    artGrayscale,
+    artX,
+    artY,
+    artZoom,
+    artRotate,
+    setSymbolX,
+    setSymbolY,
+    setSymbolZoom,
+    setSymbolRotate,
+    setCode,
+    rarity,
+    watermarkX,
+    watermarkY,
+    watermarkZoom,
+    watermarkOpacity,
+    watermarkLeft,
+    watermarkRight,
+  ]);
+
   return (
     <VStack align="stretch" gap={4}>
       <input
@@ -892,6 +1125,14 @@ const SaveImportTabComponent = () => {
           </Button>
           <Button onClick={handleExportJSON} colorPalette="green">
             Export to JSON
+          </Button>
+          <Button
+            onClick={handleExportPSD}
+            colorPalette="purple"
+            loading={exportingPSD}
+            loadingText="Exporting..."
+          >
+            Save to PSD File
           </Button>
         </Grid>
       </Box>

@@ -124,8 +124,19 @@ interface CardState {
   watermarkImage: HTMLImageElement | null;
   manaSymbolImages: { [key: string]: HTMLImageElement };
 
-  // Canvas reference (not persisted)
+  // Canvas references (not persisted)
   previewCanvasRef: HTMLCanvasElement | null;
+  bottomInfoCanvasRef: HTMLCanvasElement | null;
+
+  // Special card type canvas references (for PSD export)
+  planeswalkerPreCanvasRef: HTMLCanvasElement | null;
+  planeswalkerPostCanvasRef: HTMLCanvasElement | null;
+  sagaCanvasRef: HTMLCanvasElement | null;
+  classCanvasRef: HTMLCanvasElement | null;
+  dungeonCanvasRef: HTMLCanvasElement | null;
+  dungeonFXCanvasRef: HTMLCanvasElement | null;
+  stationPreCanvasRef: HTMLCanvasElement | null;
+  stationPostCanvasRef: HTMLCanvasElement | null;
 
   // Actions - Card Management
   updateCard: (updates: Partial<Card>) => void;
@@ -191,6 +202,17 @@ interface CardState {
 
   // Actions - Canvas Management
   setPreviewCanvasRef: (ref: HTMLCanvasElement | null) => void;
+  setBottomInfoCanvasRef: (ref: HTMLCanvasElement | null) => void;
+
+  // Actions - Special Canvas Management (for PSD export)
+  setPlaneswalkerPreCanvasRef: (ref: HTMLCanvasElement | null) => void;
+  setPlaneswalkerPostCanvasRef: (ref: HTMLCanvasElement | null) => void;
+  setSagaCanvasRef: (ref: HTMLCanvasElement | null) => void;
+  setClassCanvasRef: (ref: HTMLCanvasElement | null) => void;
+  setDungeonCanvasRef: (ref: HTMLCanvasElement | null) => void;
+  setDungeonFXCanvasRef: (ref: HTMLCanvasElement | null) => void;
+  setStationPreCanvasRef: (ref: HTMLCanvasElement | null) => void;
+  setStationPostCanvasRef: (ref: HTMLCanvasElement | null) => void;
 
   // Actions - UI Management
   setCurrentTab: (tab: string) => void;
@@ -498,6 +520,16 @@ neoBasicsColorOverrides: {},
       watermarkImage: null,
       manaSymbolImages: {},
       previewCanvasRef: null,
+      bottomInfoCanvasRef: null,
+      // Special card type canvas refs (for PSD export)
+      planeswalkerPreCanvasRef: null,
+      planeswalkerPostCanvasRef: null,
+      sagaCanvasRef: null,
+      classCanvasRef: null,
+      dungeonCanvasRef: null,
+      dungeonFXCanvasRef: null,
+      stationPreCanvasRef: null,
+      stationPostCanvasRef: null,
       showSerialNumbers: false,
       showArtBoundsDebug: false,
       customArtBounds: null,
@@ -697,6 +729,35 @@ neoBasicsColorOverrides: {},
         // Canvas Management
         setPreviewCanvasRef: (ref) => {
           set({ previewCanvasRef: ref });
+        },
+        setBottomInfoCanvasRef: (ref) => {
+          set({ bottomInfoCanvasRef: ref });
+        },
+
+        // Special Canvas Management (for PSD export)
+        setPlaneswalkerPreCanvasRef: (ref) => {
+          set({ planeswalkerPreCanvasRef: ref });
+        },
+        setPlaneswalkerPostCanvasRef: (ref) => {
+          set({ planeswalkerPostCanvasRef: ref });
+        },
+        setSagaCanvasRef: (ref) => {
+          set({ sagaCanvasRef: ref });
+        },
+        setClassCanvasRef: (ref) => {
+          set({ classCanvasRef: ref });
+        },
+        setDungeonCanvasRef: (ref) => {
+          set({ dungeonCanvasRef: ref });
+        },
+        setDungeonFXCanvasRef: (ref) => {
+          set({ dungeonFXCanvasRef: ref });
+        },
+        setStationPreCanvasRef: (ref) => {
+          set({ stationPreCanvasRef: ref });
+        },
+        setStationPostCanvasRef: (ref) => {
+          set({ stationPostCanvasRef: ref });
         },
 
         // UI Management

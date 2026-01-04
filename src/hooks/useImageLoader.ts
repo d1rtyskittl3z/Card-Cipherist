@@ -104,17 +104,10 @@ export const useImageLoader = () => {
         const img = await loadImage(proxiedSrc);
         setImage(img);
 
-        // Debug logging
-        console.log(`[useImageLoader] loadArt called for ${artSlot}`);
-        console.log('[useImageLoader] autoFitArt:', autoFitArt);
-        console.log('[useImageLoader] loadedPack:', loadedPack);
-        console.log(`[useImageLoader] ${artSlot} bounds:`, artBounds);
-
         // Apply auto-fit if enabled and artBounds are available
         if (autoFitArt && artBounds) {
           const { artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate } =
             calculateAutoFitArt(img, artBounds, card);
-          console.log('[useImageLoader] Auto-fit calculated:', { newX, newY, newZoom, newRotate });
 
           if (artSlot === 'art1') {
             updateArtFn({ artSource: src, artX: newX, artY: newY, artZoom: newZoom, artRotate: newRotate });
@@ -122,7 +115,6 @@ export const useImageLoader = () => {
             updateArtFn({ artSource2: src, artX2: newX, artY2: newY, artZoom2: newZoom, artRotate2: newRotate });
           }
         } else {
-          console.log('[useImageLoader] Auto-fit disabled or no artBounds, using defaults');
           if (artSlot === 'art1') {
             updateArtFn({ artSource: src });
           } else {
