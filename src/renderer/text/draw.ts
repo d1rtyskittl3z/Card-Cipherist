@@ -261,6 +261,46 @@ function drawSymbolSimple(
   const x = symbolData.x + CANVAS_MARGIN;
   const y = symbolData.y + CANVAS_MARGIN;
 
+  // Draw shadow if shadowX or shadowY are defined
+  const hasShadow =
+    symbolData.shadowOffsetX !== 0 ||
+    symbolData.shadowOffsetY !== 0 ||
+    symbolData.shadowBlur > 0;
+
+  if (hasShadow) {
+    // Create black shadow by drawing to offscreen canvas with color overlay
+    const shadowCanvas = document.createElement('canvas');
+    shadowCanvas.width = Math.ceil(symbolData.width) + 2;
+    shadowCanvas.height = Math.ceil(symbolData.height) + 2;
+    const shadowCtx = shadowCanvas.getContext('2d');
+
+    if (shadowCtx) {
+      // Draw main symbol (and back image if present)
+      if (backImageToUse) {
+        shadowCtx.drawImage(backImageToUse, 1, 1, symbolData.width, symbolData.height);
+      }
+      shadowCtx.drawImage(
+        imageToUse instanceof HTMLCanvasElement ? imageToUse : symbolData.symbol.image,
+        1,
+        1,
+        symbolData.width,
+        symbolData.height
+      );
+
+      // Apply shadow color overlay (typically black)
+      shadowCtx.globalCompositeOperation = 'source-in';
+      shadowCtx.fillStyle = symbolData.shadowColor || 'black';
+      shadowCtx.fillRect(0, 0, shadowCanvas.width, shadowCanvas.height);
+
+      // Draw shadow with offset
+      ctx.drawImage(
+        shadowCanvas,
+        x + symbolData.shadowOffsetX - 1,
+        y + symbolData.shadowOffsetY - 1
+      );
+    }
+  }
+
   // Draw based on mode
   if (symbolData.radius && symbolData.radius > 0) {
     // Arc mode
