@@ -9,6 +9,7 @@ const group: LegacyGroup = {
 
     { kind: 'label', label: 'Addons' },
     { kind: 'pack', label: 'Legend Crowns', id:'M15LegendCrownsNew' },
+    { kind: 'pack', label: 'Floating Legend Crowns', id:'M15LegendCrownsFloatingNew' },
     { kind: 'pack', label: 'Inner Crowns', id:'M15InnerCrownsNew' },
     { kind: 'pack', label: 'Dark Power/Toughness', id:'M15DarkPT' },
     { kind: 'pack', label: '"The List" Stamp', id:'TheList' },
@@ -20,7 +21,9 @@ const group: LegacyGroup = {
 
     {kind: 'label', label: 'Universes Beyond Frames' },
     { kind: 'pack', label: 'Universes Beyond', id:'UBNew' },
-    { kind: 'pack', label: 'Legend Crowns (Universes Beyond)', id:'UBLegendCrownsNew' }
+    { kind: 'pack', label: 'Universes Beyond (Extended Art)', id:'UBExtendedArtNew' },
+    { kind: 'pack', label: 'Legend Crowns (Universes Beyond)', id:'UBLegendCrownsNew' },
+    { kind: 'pack', label: 'Floating Legend Crowns (Universes Beyond)', id:'UBLegendCrownsFloatingNew' }
   ],
 }
 

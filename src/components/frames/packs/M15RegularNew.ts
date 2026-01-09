@@ -21,8 +21,16 @@ const frames: FrameItem[] = [
   { name: 'Multicolored Frame', src: '/img/frames/m15/new/m.png', masks },
   { name: 'Artifact Frame', src: '/img/frames/m15/new/a.png', masks },
   { name: 'Land Frame', src: '/img/frames/m15/new/l.png', masks },
-  { name: 'Eldrazi Frame', src: '/img/frames/m15/new/c.png', masks },
+  { name: 'Colorless Frame', src: '/img/frames/m15/new/c.png', masks },
   { name: 'Vehicle Frame', src: '/img/frames/m15/new/v.png', masks },
+
+  { name:'White Enchantment Frame', src:'/img/frames/m15/new/nyx/w.png', masks },
+	{ name:'Blue Enchantment Frame', src:'/img/frames/m15/new/nyx/u.png', masks },
+	{ name:'Black Enchantment Frame', src:'/img/frames/m15/new/nyx/b.png', masks },
+	{ name:'Red Enchantment Frame', src:'/img/frames/m15/new/nyx/r.png', masks },
+	{ name:'Green Enchantment Frame', src:'/img/frames/m15/new/nyx/g.png', masks },
+	{ name:'Multicolored Enchantment Frame', src:'/img/frames/m15/new/nyx/m.png', masks },
+	{ name:'Artifact Enchantment Frame', src:'/img/frames/m15/new/nyx/a.png', masks },
 
   // Power/Toughness frames
   { name: 'White Power/Toughness', src: '/img/frames/m15/regular/m15PTW.png', bounds: ptBounds },

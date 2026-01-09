@@ -22,6 +22,7 @@ import SagaCreatureUB from './SagaCreatureUB';
 import SagaLTR from './SagaLTR';
 import M15LegendCrowns from './M15LegendCrowns';
 import M15LegendCrownsFloating from './M15LegendCrownsFloating';
+import M15LegendCrownsFloatingNew from './M15LegendCrownsFloatingNew';
 import M15InnerCrowns from './M15InnerCrowns';
 import M15Nickname from './M15Nickname';
 import M15Nickname2 from './M15Nickname-2';
@@ -172,6 +173,7 @@ import JMPFront from './JMPFront';
 import UB from './UB';
 import UBFull from './UBFull';
 import UBExtendedArt from './UBExtendedArt';
+import UBExtendedArtNew from './UBExtendedArtNew';
 import UBLegendCrowns from './UBLegendCrowns';
 import TransformLegendCrownsUB from './TransformLegendCrownsUB';
 import ModalLegendCrowns from './ModalLegendCrowns';
@@ -190,6 +192,7 @@ import ModalNickname from './ModalNickname';
 import ModalShort from './ModalShort';
 import ModalShortNickname from './ModalShortNickname';
 import UBLegendCrownsFloating from './UBLegendCrownsFloating';
+import UBLegendCrownsFloatingNew from './UBLegendCrownsFloatingNew';
 import Vanguard from './Vanguard';
 import Vault from './Vault';
 import M15RegularNew from './M15RegularNew';
@@ -381,6 +384,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'NeoSamurai': NeoSamurai,
   'M15LegendCrowns': M15LegendCrowns,
   'M15LegendCrownsFloating': M15LegendCrownsFloating,
+  'M15LegendCrownsFloatingNew': M15LegendCrownsFloatingNew,
   'M15InnerCrowns': M15InnerCrowns,
   'M15Nickname': M15Nickname,
   'M15Nickname-2': M15Nickname2,
@@ -572,6 +576,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'UB': UB,
   'UBFull': UBFull,
   'UBExtendedArt': UBExtendedArt,
+  'UBExtendedArtNew': UBExtendedArtNew,
   'UBLegendCrowns': UBLegendCrowns,
   'TransformLegendCrownsUB': TransformLegendCrownsUB,
   'ModalLegendCrowns': ModalLegendCrowns,
@@ -606,6 +611,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'M15NyxNew': M15NyxNew,
   'UBNew': UBNew,
   'UBLegendCrownsNew': UBLegendCrownsNew,
+  'UBLegendCrownsFloatingNew': UBLegendCrownsFloatingNew,
   'BorderlessStellarSights': BorderlessStellarSights,
   'MiscCustom': MiscCustom,
   'MysticalArchive': MysticalArchive,
