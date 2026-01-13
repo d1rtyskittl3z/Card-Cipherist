@@ -10,6 +10,7 @@ const group: LegacyGroup = {
     { kind: 'pack', label: 'Snow (Front)', id:'M15TransformSnowFront' },
     { kind: 'pack', label: 'Universes Beyond (Front)', id:'M15TransformUBFront' },
     { kind: 'pack', label: 'Borderless (Front)', id:'TransformBorderlessFront' },
+    { kind: 'pack', label: 'Borderless Alt (Front)', id:'TransformBorderlessAltFront' },
     { kind: 'pack', label: 'Extended Art (Front)', id:'TransformExtendedFront' },
     { kind: 'pack', label: 'Sagas (Front)', id:'SagaDFC' },
     { kind: 'pack', label: 'Saga Creatures (Front)', id: 'SagaCreatureFront' },
@@ -25,13 +26,13 @@ const group: LegacyGroup = {
     { kind: 'pack', label: 'Snow (Back)', id:'M15TransformSnowBackNew' },
     { kind: 'pack', label: 'Universes Beyond (Back)', id:'M15TransformUBBackNew' },
     { kind: 'pack', label: 'Borderless (Back)', id:'TransformBorderlessBack' },
+    { kind: 'pack', label: 'Borderless Alt (Back)', id:'TransformBorderlessAltBack' },
     { kind: 'pack', label: 'Extended Art (Back)', id:'TransformExtendedBack' },
 
-
     { kind: 'label', label: 'Common Parts' },
-
     { kind: 'pack', label: 'Color Identity Pips', id:'M15CIPips' },
     { kind: 'pack', label: 'Transform Icons', id:'M15TransformTypes' },
+    { kind: 'pack', label: 'Transform Icons (Back/Right)', id:'M15TransformTypesBack' },
 
     { kind: 'label', label: 'Other frames' },
     { kind: 'pack', label: 'Regular (Back, top-left icon)', id:'M15TransformBack' },

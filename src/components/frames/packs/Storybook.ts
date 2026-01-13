@@ -32,7 +32,7 @@ const frames: FrameItem[] = [
 const template: FramePackTemplate = {
   id: 'Storybook',
   label: 'Eldraine Storybooks: Adventures (ELD)',
-  version: 'adventure',
+  version: 'storyBookAdventure',
   artBounds: { x: 0.0334, y: 0.0258, width: 0.9367, height: 0.5596 },
   setSymbolBounds: { x: 0.8854, y: 0.5929, width: 0.0494, height: 0.0353, vertical: 'center', horizontal: 'center' },
   watermarkBounds: { x: 0.72, y: 0.7681, width: 0.3867, height: 0.2358 },

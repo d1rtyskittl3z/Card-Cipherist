@@ -13,6 +13,7 @@ import EighthTransformFront from './8thTransformFront';
 import M15Regular1 from './M15Regular-1';
 import M15TransformFront from './M15TransformFront';
 import M15TransformNyxFront from './M15TransformNyxFront';
+import M15TransformTypesBack from './M15TransformTypesBack';
 import M15Nyx from './M15Nyx';
 import SagaNyx from './SagaNyx';
 import SagaRegular from './SagaRegular';
@@ -204,6 +205,8 @@ import SnowNew from './SnowNew-1';
 import M15TransformSnowFront from './M15TransformSnowFront';
 import M15TransformUBFront from './M15TransformUBFront';
 import NEONeonShort from './NEONeonShort';
+import TransformBorderlessAltBack from './TransformBorderlessAltBack';
+import TransformBorderlessAltFront from './TransformBorderlessAltFront';
 import TransformBorderlessFront from './TransformBorderlessFront';
 import TransformExtendedFront from './TransformExtendedFront';
 import SagaDFC from './SagaDFC';
@@ -691,6 +694,8 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Ravnica': Ravnica,
   'M15TransformSnowFront': M15TransformSnowFront,
   'M15TransformUBFront': M15TransformUBFront,
+  'TransformBorderlessAltBack': TransformBorderlessAltBack,
+  'TransformBorderlessAltFront': TransformBorderlessAltFront,
   'TransformBorderlessFront': TransformBorderlessFront,
   'TransformExtendedFront': TransformExtendedFront,
   'SagaDFC': SagaDFC,
@@ -705,6 +710,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'TransformBorderlessBack': TransformBorderlessBack,
   'TransformExtendedBack': TransformExtendedBack,
   'M15TransformTypes': M15TransformTypes,
+  'M15TransformTypesBack': M15TransformTypesBack,
   'M15TransformBack': M15TransformBack,
   'M15TransformNyxBack': M15TransformNyxBack,
   'M15TransformSnowBack': M15TransformSnowBack,

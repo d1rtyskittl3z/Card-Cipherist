@@ -6,6 +6,7 @@ const masks: Mask[] = [
   { src: '/img/frames/m15/regular/m15MaskTitle.png', name: 'Title' },
   { src: '/img/frames/m15/regular/m15MaskType.png', name: 'Type' },
   { src: '/img/frames/m15/regular/m15MaskRules.png', name: 'Rules' },
+  { src: '/img/frames/m15/borderless/masks/maskNoBorder.png', name: 'No Border'},
   { src: '/img/frames/m15/regular/m15MaskBorder.png', name: 'Border' }
 ];
 

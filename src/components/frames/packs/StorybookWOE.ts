@@ -42,7 +42,7 @@ const frames: FrameItem[] = [
 const template: FramePackTemplate = {
   id: 'StorybookWOE',
   label: 'Eldraine Storybooks: Adventures (WOE)',
-  version: 'adventure',
+  version: 'storyBookAdventureWOE',
   artBounds: { x: 54/1500, y: 62/2100, width: 1398/1500, height: 1157/2100 },
   setSymbolBounds: { x: 0.9213, y: 0.5910, width: 0.12, height: 0.0410, vertical: 'center', horizontal: 'right' },
   watermarkBounds: { x: 0.72, y: 0.7681, width: 0.3867, height: 0.2358 },
