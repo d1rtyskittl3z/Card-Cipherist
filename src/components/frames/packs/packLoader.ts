@@ -95,6 +95,7 @@ import FABHeroes from './FABHeroes';
 import FABLight from './FABLight';
 import FABRegular from './FABRegular';
 import FABShadow from './FABShadow';
+import FableECL from './FableECL';
 import Fang from './Fang';
 import FNM from './FNM';
 import Fuse from './Fuse';
@@ -228,7 +229,9 @@ import M15TransformUBBack from './M15TransformUBBack';
 import TransformSDCC15 from './TransformSDCC15';
 import TransformLegendCrowns from './TransformLegendCrowns';
 import TransformLegendCrownsFloating from './TransformLegendCrownsFloating';
+import TransformLegendCrownsFloatingBackRight from './TransformLegendCrownsFloatingBackRight';
 import TransformLegendCrownsNickname from './TransformLegendCrownsNickname';
+import MarginFableECL from './MarginFableECL';
 import M15NyxNew from './M15NyxNew-1';
 import UBNew from './UBNew-1';
 import UBLegendCrownsNew from './UBLegendCrownsNew-1';
@@ -498,6 +501,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'FABClasses': FABClasses,
   'FABElemental': FABElemental,
   'FABFabled': FABFabled,
+  'FableECL': FableECL,
   'FABHeroes': FABHeroes,
   'FABLight': FABLight,
   'FABRegular': FABRegular,
@@ -718,7 +722,9 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'TransformSDCC15': TransformSDCC15,
   'TransformLegendCrowns': TransformLegendCrowns,
   'TransformLegendCrownsFloating': TransformLegendCrownsFloating,
+  'TransformLegendCrownsFloatingBackRight': TransformLegendCrownsFloatingBackRight,
   'TransformLegendCrownsNickname': TransformLegendCrownsNickname,
+  'MarginFableECL': MarginFableECL,
   'Woodland': Woodland,
 };
 

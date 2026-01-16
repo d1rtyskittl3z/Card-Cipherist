@@ -26,7 +26,7 @@ const group: LegacyGroup = {
     { kind: 'pack', label: 'Snow (Back)', id:'M15TransformSnowBackNew' },
     { kind: 'pack', label: 'Universes Beyond (Back)', id:'M15TransformUBBackNew' },
     { kind: 'pack', label: 'Borderless (Back)', id:'TransformBorderlessBack' },
-    { kind: 'pack', label: 'Borderless Alt (Back)', id:'TransformBorderlessAltBack' },
+    { kind: 'pack', label: 'Borderless Alt (Back/Right)', id:'TransformBorderlessAltBack' },
     { kind: 'pack', label: 'Extended Art (Back)', id:'TransformExtendedBack' },
 
     { kind: 'label', label: 'Common Parts' },
@@ -44,6 +44,7 @@ const group: LegacyGroup = {
     { kind: 'label', label: 'Addons' },
     { kind: 'pack', label: 'Legend Crowns', id:'TransformLegendCrowns' },
     { kind: 'pack', label: 'Floating Legend Crowns', id:'TransformLegendCrownsFloating' },
+    { kind: 'pack', label: 'Floating Legend Crowns (Back/Right)', id:'TransformLegendCrownsFloatingBackRight' },
     { kind: 'pack', label: 'Nickname Legend Crowns', id:'TransformLegendCrownsNickname' },
     { kind: 'pack', label: 'Legend Crowns (Universes Beyond)', id:'TransformLegendCrownsUB' },
     { kind: 'pack', label: 'Inner Crowns', id:'M15InnerCrowns' },

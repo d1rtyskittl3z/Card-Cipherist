@@ -34,7 +34,7 @@ const frames: FrameItem[] = [
 
 const template: FramePackTemplate = {
   id: 'TransformBorderlessAltBack',
-  label: 'Borderless Alt (Back)',
+  label: 'Borderless Alt (Back/Right)',
   version: 'transformBorderlessAltBack',
   notice: 'If you intend to add the color identity pips, we recommend that you shift your Type text to the right with "{right66}".',
   artBounds: { x: 0, y: 0, width: 1, height: 0.9224 },

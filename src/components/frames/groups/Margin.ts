@@ -6,6 +6,7 @@ const group: LegacyGroup = {
   notice: 'More work need to be done for this group',
   packs: [
     { kind: 'pack', label: 'Generic Margins', id:'Margin-1' },
+    { kind: 'pack', label: 'Fable (ECL) Margins', id:'MarginFableECL' },
     { kind: 'pack', label: 'Elemental Margins (TLA)', id:'MarginElemental' },
     { kind: 'pack', label: 'Edge of Eternities Basics (EOE)', id:'MarginEOEBasics' },
     { kind: 'pack', label: 'Borderless Stellar Sights', id:'MarginBorderlessStellarSights' },
