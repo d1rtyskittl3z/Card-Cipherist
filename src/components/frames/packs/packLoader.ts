@@ -273,6 +273,7 @@ import Invention from './Invention';
 import Invocation from './Invocation';
 import InvocationMUL from './InvocationMUL';
 import Ixalan from './Ixalan';
+import IkoShort from './IkoShort';
 import LegendCrownsEtched from './LegendCrownsEtched';
 import Legends from './Legends';
 import Praetors from './Praetors';
@@ -668,6 +669,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Invocation': Invocation,
   'InvocationMUL': InvocationMUL,
   'Ixalan': Ixalan,
+  'IkoShort': IkoShort,
   'LegendCrownsEtched': LegendCrownsEtched,
   'Legends': Legends,
   'Praetors': Praetors,
