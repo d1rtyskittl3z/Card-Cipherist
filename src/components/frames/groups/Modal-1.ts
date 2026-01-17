@@ -25,6 +25,11 @@ const group: LegacyGroup = {
     { kind: 'pack', label: 'Dark Power/Toughness', id:'M15DarkPT' },
     { kind: 'pack', label: 'Colored Borders', id:'M15Borders' },
     { kind: 'pack', label: 'Color Identity Pips', id:'M15CIPips' },
+    { kind: 'pack', label: 'Transform Addon Arrows', id:'TransformAddonMDFC'},
+    { kind: 'pack', label: 'Transform Addon Arrows (UB)', id:'TransformAddonMDFCUB'},
+    { kind: 'pack', label: 'Transform Addon Arrows (Borderless)', id:'TransformAddonMDFCBorderless'},
+    { kind: 'pack', label: 'Transform Addon Arrows (Snow)', id:'TransformAddonMDFCSnow'},
+    { kind: 'pack', label: 'Transform Addon Arrows (Extended Art)', id:'TransformAddonMDFCExtended'},    
     { kind: 'pack', label: '"The List" Stamp', id:'TheList' },
 
     { kind: 'label', label: 'Misc' },

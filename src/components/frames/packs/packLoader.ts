@@ -345,6 +345,11 @@ import StoneCutterDeluxePlaneswalkerExtended from './StoneCutterDeluxePlaneswalk
 import StoneCutterDeluxePlaneswalkerTransformAddons from './StoneCutterDeluxePlaneswalkerTransformAddons';
 import StoneCutterDeluxeSaga from './StoneCutterDeluxeSaga';
 import StoneCutterDeluxeTransformAddons from './StoneCutterDeluxeTransformAddons';
+import TransformAddonMDFC from './TransformAddonMDFC';
+import TransformAddonMDFCUB from './TransformAddonMDFCUB';
+import TransformAddonMDFCBorderless from './TransformAddonMDFCBorderless';
+import TransformAddonMDFCSnow from './TransformAddonMDFCSnow';
+import TransformAddonMDFCExtended from './TransformAddonMDFCExtended';
 import MarginEOEBasics from './MarginEOEBasics';
 import MarginBorderlessStellarSights from './MarginBorderlessStellarSights';
 import MarginDraconic from './MarginDraconic';
@@ -726,6 +731,11 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'TransformLegendCrownsFloating': TransformLegendCrownsFloating,
   'TransformLegendCrownsFloatingBackRight': TransformLegendCrownsFloatingBackRight,
   'TransformLegendCrownsNickname': TransformLegendCrownsNickname,
+  'TransformAddonMDFC': TransformAddonMDFC,
+  'TransformAddonMDFCUB': TransformAddonMDFCUB,
+  'TransformAddonMDFCBorderless': TransformAddonMDFCBorderless,
+  'TransformAddonMDFCSnow': TransformAddonMDFCSnow,
+  'TransformAddonMDFCExtended': TransformAddonMDFCExtended,
   'MarginFableECL': MarginFableECL,
   'Woodland': Woodland,
 };
