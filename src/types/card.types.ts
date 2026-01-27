@@ -102,6 +102,8 @@ export interface Frame {
   visible?: boolean;
   /** If true, frame is locked from editing */
   locked?: boolean;
+  /** Available masks from frame pack (stored for easy re-application) */
+  availableMasks?: Mask[];
   /** X position override (normalized) */
   x?: number;
   /** Y position override (normalized) */

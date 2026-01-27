@@ -6,9 +6,12 @@
 import { Box, Drawer, Heading, HStack, VStack, Input, Button, Checkbox, Portal, CloseButton } from '@chakra-ui/react';
 import { Field } from './ui/field';
 import { Slider } from './ui/slider';
+import { NativeSelectRoot, NativeSelectField } from './ui/native-select';
 import { useCardStore } from '../store/cardStore';
-import { useMemo } from 'react';
-import { COLOR_BLACK, DEFAULT_OPACITY, OVERLAY_DARK_30 } from '../constants';
+import { useMemo, useState } from 'react';
+import { COLOR_BLACK, DEFAULT_OPACITY } from '../constants';
+import { createMaskObject, getUnappliedMasks, addMaskToList } from '../utils/maskHelpers';
+import type { Mask } from '../types/card.types';
 
 interface FrameLayerEditorProps {
   isOpen: boolean;
@@ -19,8 +22,82 @@ interface FrameLayerEditorProps {
 export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEditorProps) => {
   const frames = useCardStore((state) => state.card.frames);
   const updateFrame = useCardStore((state) => state.updateFrame);
+  const [selectedMaskToApply, setSelectedMaskToApply] = useState<string>('');
+  const [selectedMaskToRemove, setSelectedMaskToRemove] = useState<string>('');
 
   const frame = frameIndex !== null ? frames[frameIndex] : null;
+
+  // Get unapplied masks for the dropdown
+  const unappliedMasks = useMemo(() => {
+    if (!frame) return [];
+    return getUnappliedMasks(frame.masks, frame.availableMasks || []);
+  }, [frame]);
+
+  // Handle applying a mask to the frame
+  const handleApplyMask = () => {
+    if (!frame || frameIndex === null || !selectedMaskToApply) return;
+
+    try {
+      const maskData = JSON.parse(selectedMaskToApply);
+      const newMask = createMaskObject(maskData.name, maskData.src, maskData.noThumb);
+      
+      // Add mask to the frame
+      const updatedMasks = [...frame.masks, newMask];
+      updateFrame(frameIndex, { masks: updatedMasks });
+
+      // Update frame label to include the new mask
+      updateFrameLabel(frameIndex, updatedMasks);
+      
+      // Reset selection
+      setSelectedMaskToApply('');
+    } catch (e) {
+      console.error('Error applying mask:', e);
+    }
+  };
+
+  // Handle removing a mask from the frame
+  const handleRemoveMask = () => {
+    if (!frame || frameIndex === null || !selectedMaskToRemove) return;
+
+    const removedMask = frame.masks.find((m) => m.name === selectedMaskToRemove);
+    if (!removedMask) return;
+
+    // Filter out the removed mask
+    const updatedMasks = frame.masks.filter((m) => m.name !== selectedMaskToRemove);
+    
+    // If it's an uploaded mask (has noThumb property), add it back to availableMasks
+    if ((removedMask as any).noThumb) {
+      const updatedAvailableMasks = frame.availableMasks ? [...frame.availableMasks] : [];
+      addMaskToList(updatedAvailableMasks, { name: removedMask.name, src: removedMask.src });
+      updateFrame(frameIndex, { masks: updatedMasks, availableMasks: updatedAvailableMasks });
+    } else {
+      updateFrame(frameIndex, { masks: updatedMasks });
+    }
+
+    // Update frame label
+    updateFrameLabel(frameIndex, updatedMasks);
+    
+    // Reset selection
+    setSelectedMaskToRemove('');
+  };
+
+  // Update the frame's visible label in the frame list
+  const updateFrameLabel = (index: number, masks: Mask[]) => {
+    const targetFrame = frames[index];
+    if (!targetFrame) return;
+
+    // Build label: Frame Name + (optional Erase) + Mask Names
+    let labelParts = [targetFrame.name.split(' - ')[0]]; // Get base frame name without existing masks
+    
+    if (targetFrame.erase) {
+      labelParts.push('Erase Card');
+    }
+    
+    masks.forEach((mask) => labelParts.push(mask.name));
+    
+    const newLabel = labelParts.join(' - ');
+    updateFrame(index, { name: newLabel });
+  };
 
   // Calculate if frame is at default state
   const isAtDefaultState = useMemo(() => {
@@ -237,18 +314,30 @@ export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEdit
                     />
                   </Field>
 
-                  {/* Erase Card - Disabled for now */}
-                  <Checkbox.Root disabled>
+                  {/* Erase Card */}
+                  <Checkbox.Root
+                    checked={frame.erase ?? false}
+                    onCheckedChange={(e) => {
+                      const eraseValue = e.checked === true;
+                      updateFrame(frameIndex, { erase: eraseValue });
+                      updateFrameLabel(frameIndex, frame.masks);
+                    }}
+                  >
                     <Checkbox.HiddenInput />
                     <Checkbox.Control />
-                    <Checkbox.Label>Erase Card (Coming soon)</Checkbox.Label>
+                    <Checkbox.Label>Erase Card</Checkbox.Label>
                   </Checkbox.Root>
 
-                  {/* Preserve Alpha - Disabled for now */}
-                  <Checkbox.Root disabled>
+                  {/* Preserve Alpha */}
+                  <Checkbox.Root
+                    checked={frame.preserveAlpha ?? false}
+                    onCheckedChange={(e) => {
+                      updateFrame(frameIndex, { preserveAlpha: e.checked === true });
+                    }}
+                  >
                     <Checkbox.HiddenInput />
                     <Checkbox.Control />
-                    <Checkbox.Label>Preserve Alpha (Coming soon)</Checkbox.Label>
+                    <Checkbox.Label>Preserve Alpha</Checkbox.Label>
                   </Checkbox.Root>
 
                   {/* Color Overlay */}
@@ -278,36 +367,66 @@ export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEdit
                 </VStack>
               </HStack>
 
-              {/* Applied Masks Display */}
-              <Field label="Applied Masks">
-                <Box
-                  bg={OVERLAY_DARK_30}
-                  borderRadius="md"
-                  p={3}
-                  minH="60px"
-                >
-                  {frame.masks && frame.masks.length > 0 ? (
-                    <VStack align="stretch" gap={2}>
-                      {frame.masks.map((mask, idx) => (
-                        <Box
-                          key={idx}
-                          fontSize="sm"
-                          color="gray.300"
-                          bg="rgba(255, 255, 255, 0.05)"
-                          p={2}
-                          borderRadius="sm"
-                        >
-                          {mask.name}
-                        </Box>
-                      ))}
-                    </VStack>
-                  ) : (
-                    <Box fontSize="sm" color="gray.500" textAlign="center">
-                      No masks applied
-                    </Box>
-                  )}
-                </Box>
-              </Field>
+              {/* Mask Management Section */}
+              <VStack align="stretch" gap={4}>
+                {/* Select and Remove Masks */}
+                <Field label="Select and remove masks">
+                  <HStack gap={2}>
+                    <NativeSelectRoot flex={1}>
+                      <NativeSelectField
+                        value={selectedMaskToRemove}
+                        onChange={(e) => setSelectedMaskToRemove(e.target.value)}
+                        disabled={!frame.masks || frame.masks.length === 0}
+                      >
+                        <option value="">None Selected</option>
+                        {frame.masks?.map((mask, idx) => (
+                          <option key={idx} value={mask.name}>
+                            {mask.name}
+                          </option>
+                        ))}
+                      </NativeSelectField>
+                    </NativeSelectRoot>
+                    <Button
+                      size="sm"
+                      colorPalette="red"
+                      variant="outline"
+                      onClick={handleRemoveMask}
+                      disabled={!selectedMaskToRemove}
+                    >
+                      Remove
+                    </Button>
+                  </HStack>
+                </Field>
+
+                {/* Select and Apply Available Masks */}
+                <Field label="Select and apply available masks">
+                  <HStack gap={2}>
+                    <NativeSelectRoot flex={1}>
+                      <NativeSelectField
+                        value={selectedMaskToApply}
+                        onChange={(e) => setSelectedMaskToApply(e.target.value)}
+                        disabled={unappliedMasks.length === 0}
+                      >
+                        <option value="">Select a mask to apply</option>
+                        {unappliedMasks.map((mask, idx) => (
+                          <option key={idx} value={JSON.stringify(mask)}>
+                            {mask.name}
+                          </option>
+                        ))}
+                      </NativeSelectField>
+                    </NativeSelectRoot>
+                    <Button
+                      size="sm"
+                      colorPalette="green"
+                      variant="outline"
+                      onClick={handleApplyMask}
+                      disabled={!selectedMaskToApply}
+                    >
+                      Apply
+                    </Button>
+                  </HStack>
+                </Field>
+              </VStack>
 
               {/* Locked Checkbox */}
               <Checkbox.Root

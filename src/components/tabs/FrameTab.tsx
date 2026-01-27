@@ -1231,6 +1231,7 @@ const FrameTabComponent = () => {
         src: selectedFrame.src,
         image: frameImage,
         masks,
+        availableMasks: selectedFrame.masks ? selectedFrame.masks.map(m => ({ name: m.name, src: m.src })) : [],
         bounds: selectedFrame.bounds,
         ogBounds: selectedFrame.ogBounds || selectedFrame.bounds,
         opacity: selectedFrame.opacity ?? 100, // Use pack-defined opacity or default to 100 (0-100 scale)
