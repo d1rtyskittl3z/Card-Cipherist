@@ -4,6 +4,8 @@ const stampBounds = { x: 894 / 2010, y: 2559 / 2814, width: 216 / 2010, height: 
 
 const masks: Mask[] = [
   { src: '/img/frames/m15/room/maskRight.png', name: 'Right Side' },
+  { src:'/img/frames/m15/split/maskTopRight.png', name:'Top Right'}, 
+  { src:'/img/frames/m15/split/maskBottomLeft.png', name:'Bottom Left'},
 ];
 
 const frames: FrameItem[] = [

@@ -3,6 +3,8 @@ import type { FramePackTemplate, Mask, FrameItem } from './types';
 const masks: Mask[] = [
   { src: '/img/frames/m15/split/fuse/top.png', name: 'Top Half' },
   { src: '/img/frames/m15/split/fuse/bottom.png', name: 'Bottom Half' },
+  { src:'/img/frames/m15/split/maskTopRight.png', name:'Top Right'}, 
+  { src:'/img/frames/m15/split/maskBottomLeft.png', name:'Bottom Left'},
 ];
 
 const frames: FrameItem[] = [
