@@ -68,6 +68,7 @@ const group: LegacyGroup = {
     { kind: 'label', label: 'Generic Showcase Frames' },
     { kind: 'pack', label: 'Borderless', id:'GenericShowcase' },
     { kind: 'pack', label: 'Borderless (Alt)', id:'Borderless' },
+    { kind: 'pack', label: 'Borderless (Alt) Inner Glow', id:'BorderlessGlow' },
     { kind: 'pack', label: 'Fullart', id:'M15ClearTextboxes' },
     { kind: 'pack', label: 'Nickname ("Godzilla")', id:'M15Nickname' },
     { kind: 'pack', label: 'Extended Art (Regular)', id:'M15BoxTopper' },

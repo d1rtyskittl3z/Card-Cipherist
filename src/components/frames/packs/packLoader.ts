@@ -51,6 +51,7 @@ import Colorshifted from './Colorshifted';
 import Battle from './Battle';
 import BloomburrowBorderless from './BloomburrowBorderless';
 import Borderless from './Borderless';
+import BorderlessGlow from './BorderlessGlow';
 import Brawl from './Brawl';
 import BreakingNews from './BreakingNews';
 import BurningRevelation from './BurningRevelation';
@@ -451,6 +452,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Battle': Battle,
   'BloomburrowBorderless': BloomburrowBorderless,
   'Borderless': Borderless,
+  'BorderlessGlow': BorderlessGlow,
   'Brawl': Brawl,
   'BreakingNews': BreakingNews,
   'BurningRevelation': BurningRevelation,

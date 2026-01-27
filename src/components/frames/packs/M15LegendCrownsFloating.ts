@@ -9,17 +9,18 @@ const lowerCutoutBounds = { x: 0.0734, y: 0.1096, width: 0.8532, height: 0.0143 
 const outlineBounds = { x: 0.028, y: 0.0172, width: 0.944, height: 0.1062 };
 
 const frames: FrameItem[] = [
-  // Floating legend crowns - automatically add border cover (index 10) when no mask is selected
-  { name: 'White Legend Crown', src: '/img/frames/m15/crowns/m15CrownWFloating.png', bounds: crownBounds, complementary: 10 },
-  { name: 'Blue Legend Crown', src: '/img/frames/m15/crowns/m15CrownUFloating.png', bounds: crownBounds, complementary: 10 },
-  { name: 'Black Legend Crown', src: '/img/frames/m15/crowns/m15CrownBFloating.png', bounds: crownBounds, complementary: 10 },
-  { name: 'Red Legend Crown', src: '/img/frames/m15/crowns/m15CrownRFloating.png', bounds: crownBounds, complementary: 10 },
-  { name: 'Green Legend Crown', src: '/img/frames/m15/crowns/m15CrownGFloating.png', bounds: crownBounds, complementary: 10 },
-  { name: 'Multicolored Legend Crown', src: '/img/frames/m15/crowns/m15CrownMFloating.png', bounds: crownBounds, complementary: 10 },
-  { name: 'Artifact Legend Crown', src: '/img/frames/m15/crowns/m15CrownAFloating.png', bounds: crownBounds, complementary: 10 },
-  { name: 'Artifact Legend Crown (Alt)', src: '/img/frames/m15/crowns/m15CrownAFloatingAlt.png', bounds: crownBounds, complementary: 10 },
-  { name: 'Land Legend Crown', src: '/img/frames/m15/crowns/m15CrownLFloating.png', bounds: crownBounds, complementary: 10 },
-  { name: 'Colorless Legend Crown', src: '/img/frames/m15/crowns/m15CrownCFloating.png', bounds: crownBounds, complementary: 10 },
+  // Floating legend crowns - automatically add border cover (index 11) when no mask is selected
+  { name: 'White Legend Crown', src: '/img/frames/m15/crowns/m15CrownWFloating.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Blue Legend Crown', src: '/img/frames/m15/crowns/m15CrownUFloating.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Black Legend Crown', src: '/img/frames/m15/crowns/m15CrownBFloating.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Black Legend Crown (Alt)', src: '/img/frames/m15/crowns/m15CrownBAltFloating.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Red Legend Crown', src: '/img/frames/m15/crowns/m15CrownRFloating.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Green Legend Crown', src: '/img/frames/m15/crowns/m15CrownGFloating.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Multicolored Legend Crown', src: '/img/frames/m15/crowns/m15CrownMFloating.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Artifact Legend Crown', src: '/img/frames/m15/crowns/m15CrownAFloating.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Artifact Legend Crown (Alt)', src: '/img/frames/m15/crowns/m15CrownAFloatingAlt.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Land Legend Crown', src: '/img/frames/m15/crowns/m15CrownLFloating.png', bounds: crownBounds, complementary: 11 },
+  { name: 'Colorless Legend Crown', src: '/img/frames/m15/crowns/m15CrownCFloating.png', bounds: crownBounds, complementary: 11 },
   
   // Support elements
   { name: 'Legend Crown Border Cover', src: '/img/black.png', bounds: borderCoverBounds },
