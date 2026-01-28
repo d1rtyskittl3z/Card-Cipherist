@@ -207,6 +207,9 @@ const SetSymbolTabComponent = () => {
           'SPIRALTENTACLE',
           'TEMPLE',
           'YUG',
+          'BOS',
+          'DANDAN',
+          'DREW',
         ];
       }
 
