@@ -43,21 +43,23 @@ export function renderField(
 ): Result<void> {
   // Wrap everything in error handling
   return trySync(() => {
-    // Calculate dimensions
-    const textWidth = packMetrics.scaleWidth(fieldSpec.width);
-    const textHeight = packMetrics.scaleHeight(fieldSpec.height);
+    // Calculate dimensions (fallback to 1 = full card size for arc text or other modes without bounds)
+    const textWidth = packMetrics.scaleWidth(fieldSpec.width ?? 1);
+    const textHeight = packMetrics.scaleHeight(fieldSpec.height ?? 1);
     const startingTextSize = packMetrics.scaleHeight(fieldSpec.size);
 
     // Size temp canvases
     const arcRadius = packMetrics.scaleHeight(fieldSpec.arcRadius || 0);
     const canvasMargin = arcRadius > 0 ? CANVAS_MARGIN + arcRadius : CANVAS_MARGIN;
 
-    // When manaPlacement is active the field width/height can be 0, but symbols use
+    // When manaPlacement/manaLayout is active the field width/height can be 0, but symbols use
     // absolute card coordinates. Ensure the temp canvases are large enough so those
     // symbols are not clipped off the canvas bounds.
     const usesManaPlacement = !!(fieldSpec.manaPlacement && fieldSpec.manaPlacement.x?.length);
-    const effectiveTextWidth = usesManaPlacement ? packMetrics.cardWidth : textWidth;
-    const effectiveTextHeight = usesManaPlacement ? packMetrics.cardHeight : textHeight;
+    const usesManaLayout = !!(fieldSpec.manaLayout && fieldSpec.manaLayout.length);
+    const usesAbsolutePositioning = usesManaPlacement || usesManaLayout;
+    const effectiveTextWidth = usesAbsolutePositioning ? packMetrics.cardWidth : textWidth;
+    const effectiveTextHeight = usesAbsolutePositioning ? packMetrics.cardHeight : textHeight;
 
     tempCanvases.paragraph.width = effectiveTextWidth + 2 * canvasMargin;
     tempCanvases.paragraph.height = Math.max(effectiveTextHeight, startingTextSize) + 2 * canvasMargin;
@@ -95,8 +97,8 @@ export function renderField(
     );
 
     // Shrink-to-fit loop for bounded text
-    const bounded = usesManaPlacement ? false : (fieldSpec.bounded ?? true);
-    if (!usesManaPlacement) {
+    const bounded = usesAbsolutePositioning ? false : (fieldSpec.bounded ?? true);
+    if (!usesAbsolutePositioning) {
       while (
         layout.overflow &&
         !fieldSpec.oneLine &&
@@ -117,7 +119,7 @@ export function renderField(
     }
 
     // Single-line shrink-to-fit
-    if (!usesManaPlacement) {
+    if (!usesAbsolutePositioning) {
       while (fieldSpec.oneLine && layout.overflow && currentTextSize > 1) {
         currentTextSize -= 1;
         layout = layoutText(

@@ -305,6 +305,7 @@ import RoomUB from './RoomUB';
 import Ring from './Ring';
 import Flip from './Flip';
 import Cardback from './Cardback';
+import Cartoony from './Cartoony';
 import Case from './Case';
 import Scroll from './Scroll';
 import ShatteredGlass from './ShatteredGlass';
@@ -448,6 +449,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'Leveler': Leveler,
   'Conspiracy': Conspiracy,
   'Cardback': Cardback,
+  'Cartoony': Cartoony,
   'Case': Case,
   'Colorshifted': Colorshifted,
   'Battle': Battle,

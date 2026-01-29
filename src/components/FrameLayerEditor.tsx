@@ -66,7 +66,7 @@ export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEdit
     const updatedMasks = frame.masks.filter((m) => m.name !== selectedMaskToRemove);
     
     // If it's an uploaded mask (has noThumb property), add it back to availableMasks
-    if ((removedMask as any).noThumb) {
+    if (removedMask.noThumb) {
       const updatedAvailableMasks = frame.availableMasks ? [...frame.availableMasks] : [];
       addMaskToList(updatedAvailableMasks, { name: removedMask.name, src: removedMask.src });
       updateFrame(frameIndex, { masks: updatedMasks, availableMasks: updatedAvailableMasks });
@@ -87,7 +87,7 @@ export const FrameLayerEditor = ({ isOpen, onClose, frameIndex }: FrameLayerEdit
     if (!targetFrame) return;
 
     // Build label: Frame Name + (optional Erase) + Mask Names
-    let labelParts = [targetFrame.name.split(' - ')[0]]; // Get base frame name without existing masks
+    const labelParts = [targetFrame.name.split(' - ')[0]]; // Get base frame name without existing masks
     
     if (targetFrame.erase) {
       labelParts.push('Erase Card');

@@ -588,6 +588,12 @@ export const framePackTextConfigSchema = z.object({
     x: z.array(z.number()),
     y: z.array(z.number()),
   }).optional(),
+  // Dynamic mana positioning based on symbol count (for cartoony and similar packs)
+  manaLayout: z.array(z.object({
+    max: z.number(),
+    size: z.number(),
+    pos: z.array(z.tuple([z.number(), z.number()])),
+  })).optional(),
   noVerticalCenter: z.boolean().optional(),
   vertical: z.union([z.enum(['top', 'center', 'bottom']), z.boolean()]).optional(),
   horizontal: z.enum(['left', 'center', 'right']).optional(),
@@ -600,6 +606,11 @@ export const framePackTextConfigSchema = z.object({
   italics: z.boolean().optional(),
   bold: z.boolean().optional(),
   fontStyle: z.string().optional(),
+  // Arc text properties (for curved text like cartoony title)
+  arcRadius: z.number().optional(),
+  arcStart: z.number().optional(),
+  // Scale multiplier for mana symbol images in text (e.g., 10/7 for cartoony)
+  manaImageScale: z.number().optional(),
 });
 
 /**

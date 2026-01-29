@@ -56,6 +56,8 @@ export interface Mask {
   bounds?: CardBounds;
   /** Original bounds before any transformations */
   ogBounds?: CardBounds;
+  /** Whether this is a custom uploaded mask without a thumbnail */
+  noThumb?: boolean;
 }
 
 /**

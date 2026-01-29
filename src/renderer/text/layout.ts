@@ -18,8 +18,15 @@ import type {
 import type { SymbolAtlas } from './symbols';
 import { getDefaultTextStyle, applyFontStyle, measureText } from './measure';
 import { getRandomBackImage } from './symbols';
+import { useUIStore } from '../../store/uiStore';
 
-// const CANVAS_MARGIN = 300;
+const CANVAS_MARGIN = 300;
+
+// Manual Y offset for Cartoony Mana - adjust this value to shift symbols up (negative) or down (positive)
+const CARTOONY_MANA_LAYOUT_Y_OFFSET = -140;
+
+// Default mana image scale for Cartoony symbols when used globally (matches Cartoony pack's 10/7 scale)
+const CARTOONY_DEFAULT_MANA_IMAGE_SCALE = 10 / 7;
 
 /**
  * Layout text tokens into positioned glyphs
@@ -34,9 +41,9 @@ export function layoutText(
 ): LayoutResult {
   const ctx = tempCanvas.getContext('2d')!;
 
-  // Calculate bounds in pixels
-  const textWidth = packMetrics.scaleWidth(fieldSpec.width);
-  const textHeight = packMetrics.scaleHeight(fieldSpec.height);
+  // Calculate bounds in pixels (fallback to 1 = full card size for arc text or other modes without bounds)
+  const textWidth = packMetrics.scaleWidth(fieldSpec.width ?? 1);
+  const textHeight = packMetrics.scaleHeight(fieldSpec.height ?? 1);
   const startingTextSize = packMetrics.scaleHeight(fieldSpec.size);
 
   // Calculate default line spacing
@@ -84,6 +91,9 @@ export function layoutText(
   
   // Absolute positioned symbols (e.g. manaPlacement)
   const absoluteSymbols: SymbolGlyph[] = [];
+
+  // Pre-count mana symbols for manaLayout (needs total count to select right layout)
+  const manaSymbolCount = tokens.filter(t => t.type === 'SYMBOL').length;
 
   // Apply initial font size adjustment
   state.textSize += parseInt(fieldSpec.fontSize || '0');
@@ -136,20 +146,58 @@ export function layoutText(
         fieldSpec,
         packMetrics,
         atlas,
-        options
+        options,
+        manaSymbolCount
       );
 
       if (symbolGlyph) {
-        // Check if this symbol uses absolute positioning (manaPlacement)
+        // Check if this symbol uses absolute positioning
         if (fieldSpec.manaPlacement) {
-          // Add to absolute symbols array - these bypass the line system
+          // manaPlacement: completely absolute positioning, bypass line system
           absoluteSymbols.push(symbolGlyph);
+        } else if (fieldSpec.manaLayout) {
+          // manaLayout: each symbol gets its own line, positioned at layout Y
+          // Finalize current line if it has glyphs
+          if (currentLineGlyphs.length > 0) {
+            lines.push({
+              y: state.currentY,
+              glyphs: currentLineGlyphs,
+              width: state.currentX - state.startingCurrentX,
+              align: state.style.align,
+              arcRadius: state.arcRadius > 0 ? state.arcRadius : undefined,
+              arcStart: state.arcRadius > 0 ? state.arcStart : undefined,
+            });
+            currentLineGlyphs = [];
+          }
+          
+          // Create a single-symbol line at the layout's Y position (from state)
+          // JS draws at currentY which is scaleHeight without adding canvasMargin
+          // Apply offset only for Cartoony pack (manaPrefix 'c')
+          const isCartoony = fieldSpec.manaPrefix === 'c';
+          const lineY = (state.manaLayoutLineY ?? 0) + (isCartoony ? CARTOONY_MANA_LAYOUT_Y_OFFSET : 0);
+          lines.push({
+            y: lineY,
+            glyphs: [symbolGlyph],
+            width: symbolGlyph.width,
+            align: state.style.align,
+            arcRadius: state.arcRadius > 0 ? state.arcRadius : undefined,
+            arcStart: state.arcRadius > 0 ? state.arcStart : undefined,
+          });
+          
+          // Don't reset currentX - manaLayout uses absolute X positions
         } else {
           // Add to current line as normal
           currentLineGlyphs.push(symbolGlyph);
           // Advance by symbol width plus the spacing that was added to its position
           const manaSymbolSpacing = state.textSize * 0.1 + packMetrics.scaleWidth(fieldSpec.manaSpacing || 0);
-          state.currentX += symbolGlyph.width + manaSymbolSpacing;
+          let symbolAdvance = symbolGlyph.width + manaSymbolSpacing;
+          
+          // Apply custom symbol spacing if defined (negative = overlap for hybrid symbols)
+          if (symbolGlyph.symbol.spacing !== undefined) {
+            symbolAdvance += symbolGlyph.symbol.spacing * state.textSize;
+          }
+          
+          state.currentX += symbolAdvance;
         }
       }
       continue;
@@ -652,16 +700,33 @@ function processSymbol(
   fieldSpec: FieldSpec,
   packMetrics: PackMetrics,
   atlas: SymbolAtlas,
-  _options: RenderOptions
+  _options: RenderOptions,
+  manaSymbolCount: number
 ): SymbolGlyph | null {
   const code = token.value.replace(/\//g, '');
 
-  // Try to find symbol with optional prefix
-  // IMPORTANT: If manaPrefix is specified, try PREFIXED version FIRST, then fallback to unprefixed
+  // Symbol resolution priority:
+  // 1. Global mana prefix (from uiStore)
+  // 2. Per-field manaPrefix (from fieldSpec)
+  // 3. Default (no prefix)
   let symbol: ReturnType<typeof atlas.getSymbol>;
   
-  if (fieldSpec.manaPrefix) {
-    // Try prefixed version first when manaPrefix is specified
+  // Try global prefix first
+  const globalPrefix = useUIStore.getState().globalManaPrefix;
+  if (globalPrefix) {
+    const prefixedCode = globalPrefix + code;
+    symbol = atlas.getSymbol(prefixedCode);
+    if (symbol) {
+      // Found with global prefix
+    } else {
+      // Try reversed for hybrid mana (e.g., 'wu' vs 'uw')
+      const reversedCode = globalPrefix + code.split('').reverse().join('');
+      symbol = atlas.getSymbol(reversedCode);
+    }
+  }
+  
+  // If not found with global prefix, try field-level manaPrefix
+  if (!symbol && fieldSpec.manaPrefix) {
     const prefixedCode = fieldSpec.manaPrefix + code;
     symbol = atlas.getSymbol(prefixedCode);
     
@@ -669,8 +734,10 @@ function processSymbol(
     if (!symbol) {
       symbol = atlas.getSymbol(code);
     }
-  } else {
-    // No prefix specified, just look up the code directly
+  }
+  
+  // Fallback to default (no prefix)
+  if (!symbol) {
     symbol = atlas.getSymbol(code);
   }
 
@@ -685,12 +752,29 @@ function processSymbol(
   }
 
   // Calculate text box width for bar sizing
-  const textWidth = packMetrics.scaleWidth(fieldSpec.width);
+  const textWidth = packMetrics.scaleWidth(fieldSpec.width ?? 1);
 
   // Special handling for bar symbol (flavor text divider)
   if (code === 'bar' || code === 'whitebar') {
-    const barWidth = textWidth * 0.96; // 96% of text box width
-    const barHeight = packMetrics.scaleHeight(0.031); // Thin line
+    // Get global mana prefix for cartoony bar support
+    const globalManaPrefix = useUIStore.getState().globalManaPrefix;
+
+    // Use cflavor symbol and different dimensions for cartoony flavor bar
+    // Check field-level manaPrefix first, then fall back to global prefix
+    const isCartoonyBar = fieldSpec.manaPrefix === 'c' || globalManaPrefix === 'c';
+    let barSymbol = symbol;
+    if (isCartoonyBar) {
+      const cflavorSymbol = atlas.getSymbol('cflavor');
+      if (cflavorSymbol) {
+        barSymbol = cflavorSymbol;
+      }
+    }
+    const barWidth = isCartoonyBar
+      ? packMetrics.scaleWidth(0.8547)  // Cartoony bar width
+      : textWidth * 0.96;                // Standard: 96% of text box width
+    const barHeight = isCartoonyBar
+      ? packMetrics.scaleHeight(0.0458) // Cartoony bar height
+      : packMetrics.scaleHeight(0.031); // Standard: thin line
     const barX = (textWidth - barWidth) / 2; // Centered relative to text box
     const barY = state.textSize * 0; // Align with text baseline
 
@@ -699,7 +783,7 @@ function processSymbol(
 
     return {
       type: 'symbol',
-      symbol: symbol,
+      symbol: barSymbol,
       x: barX,
       y: barY,
       width: barWidth,
@@ -729,36 +813,64 @@ function processSymbol(
     manaSymbolY = packMetrics.scaleHeight(fieldSpec.manaPlacement.y[state.manaPlacementCounter] || 0);
     state.manaPlacementCounter++;
   } else if (fieldSpec.manaLayout) {
-    const layoutOption = 0;
+    // Find the right layout based on total symbol count
+    let layoutOption = 0;
+    while (
+      layoutOption < fieldSpec.manaLayout.length - 1 &&
+      fieldSpec.manaLayout[layoutOption].max < manaSymbolCount
+    ) {
+      layoutOption++;
+    }
 
-    if (fieldSpec.manaLayout[layoutOption]) {
-      const layout = fieldSpec.manaLayout[layoutOption];
+    const layout = fieldSpec.manaLayout[layoutOption];
+    if (layout) {
       const pos = layout.pos[state.manaPlacementCounter] || [0, 0];
       manaSymbolX = packMetrics.scaleWidth(pos[0]);
-      manaSymbolY = 0;
-      state.currentY = packMetrics.scaleHeight(pos[1]);
+      // Store the line Y position (where the line canvas will be drawn on paragraph canvas)
+      const lineYPosition = packMetrics.scaleHeight(pos[1]);
+      // Symbol Y within line canvas is exactly canvasMargin (JS: manaSymbolY = canvasMargin)
+      manaSymbolY = CANVAS_MARGIN;
+      // Now scale width and height by layout size
       manaSymbolWidth *= layout.size;
       manaSymbolHeight *= layout.size;
       state.manaPlacementCounter++;
+      
+      // Store the line Y for later use
+      state.manaLayoutLineY = lineYPosition;
     }
   }
 
   // Image scale adjustment
-  if (fieldSpec.manaImageScale) {
-    state.currentX -= (fieldSpec.manaImageScale - 1) * manaSymbolWidth;
-    manaSymbolX -= ((fieldSpec.manaImageScale - 1) / 2) * manaSymbolWidth;
-    manaSymbolY -= ((fieldSpec.manaImageScale - 1) / 2) * manaSymbolHeight;
-    manaSymbolWidth *= fieldSpec.manaImageScale;
-    manaSymbolHeight *= fieldSpec.manaImageScale;
+  // Apply field-defined manaImageScale OR Cartoony default when using global 'c' prefix
+  // Only skip for manaLayout/manaPlacement fields which have their own size settings
+  let effectiveManaImageScale = fieldSpec.manaImageScale;
+  if (!effectiveManaImageScale && globalPrefix === 'c' && !fieldSpec.manaLayout && !fieldSpec.manaPlacement) {
+    // When using Cartoony symbols globally (in rules text, inline mana cost, etc.), apply the default scale
+    effectiveManaImageScale = CARTOONY_DEFAULT_MANA_IMAGE_SCALE;
+  }
+  
+  if (effectiveManaImageScale) {
+    state.currentX -= (effectiveManaImageScale - 1) * manaSymbolWidth;
+    manaSymbolX -= ((effectiveManaImageScale - 1) / 2) * manaSymbolWidth;
+    manaSymbolY -= ((effectiveManaImageScale - 1) / 2) * manaSymbolHeight;
+    manaSymbolWidth *= effectiveManaImageScale;
+    manaSymbolHeight *= effectiveManaImageScale;
   }
 
   // Apply symbol yOffset if defined
-  if (symbol.yOffset) {
+  // Note: yOffset is only applied for manaLayout/manaPlacement fields
+  // For inline text (rules text, etc.), symbols should align with the text baseline
+  const usesSpecialPlacement = fieldSpec.manaLayout || fieldSpec.manaPlacement;
+  if (symbol.yOffset && usesSpecialPlacement) {
     manaSymbolY += state.textSize * symbol.yOffset;
   }
 
   // Get back image if available
   const backImage = getRandomBackImage(symbol, atlas);
+
+  // For inline mana symbols (not manaLayout/manaPlacement), disable outlines
+  // as they look too prominent when mixed with text
+  const applyOutline = !!usesSpecialPlacement && state.style.outlineWidth > 0;
 
   const glyph: SymbolGlyph = {
     type: 'symbol',
@@ -768,12 +880,12 @@ function processSymbol(
     width: manaSymbolWidth,
     height: manaSymbolHeight,
     color: symbolColor ?? undefined,
-    hasOutline: state.style.outlineWidth > 0,
+    hasOutline: applyOutline,
     backImage: backImage ?? undefined,
     radius: state.arcRadius > 0 ? state.arcRadius : undefined,
     arcStart: state.arcRadius > 0 ? state.arcStart : undefined,
     currentX: state.arcRadius > 0 ? state.currentX : undefined,
-    outlineWidth: state.style.outlineWidth,
+    outlineWidth: applyOutline ? state.style.outlineWidth : 0,
     outlineColor: state.style.outlineColor,
     shadowColor: state.style.shadowColor,
     shadowOffsetX: state.style.shadowOffsetX,
@@ -820,6 +932,8 @@ function finishLine(
     y: state.currentY,
     width: lineWidth,
     align: state.style.align,
+    arcRadius: state.arcRadius > 0 ? state.arcRadius : undefined,
+    arcStart: state.arcRadius > 0 ? state.arcStart : undefined,
   });
 
   // Move to next line

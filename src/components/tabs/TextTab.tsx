@@ -6,7 +6,7 @@
 import { memo } from 'react';
 import { Box, Heading, Textarea, VStack, Tabs, Button, HStack, Table, DrawerRoot, DrawerBackdrop, DrawerContent, DrawerHeader, DrawerBody, DrawerCloseTrigger, Input } from '@chakra-ui/react';
 import { Field } from '../ui/field';
-import { LabeledInput } from '../ui';
+import { LabeledInput, LabeledSelect } from '../ui';
 import { useCardStore } from '../../store/cardStore';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { convertTypedQuote } from '../../utils/smartQuotes';
@@ -16,6 +16,7 @@ import { formatTextRenderError } from '../../utils/textRenderErrors';
 import { useDebouncedCallback } from '../../hooks/useDebounce';
 import { TEXT_INPUT_DEBOUNCE_MS, SLIDER_DEBOUNCE_MS } from '../../constants/canvas';
 import { generateDungeonTextFields } from '../../utils/dungeonHelpers';
+import { BUILT_IN_MANA_SETS, processCustomManaFiles } from '../../constants/manaSets';
 
 /**
  * Standard field display order and labels
@@ -97,6 +98,20 @@ const TextTabComponent = () => {
   const [editBoundsOpen, setEditBoundsOpen] = useState(false);
   const [codeReferenceOpen, setCodeReferenceOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Mana style state from uiStore
+  const globalManaPrefix = useUIStore((s) => s.globalManaPrefix);
+  const selectBuiltInManaSet = useUIStore((s) => s.selectBuiltInManaSet);
+  const registerCustomManaSymbols = useUIStore((s) => s.registerCustomManaSymbols);
+  const customManaSetLabel = useUIStore((s) => s.customManaSetLabel);
+  const selectCustomManaSet = useUIStore((s) => s.selectCustomManaSet);
+  const clearCustomManaSymbols = useUIStore((s) => s.clearCustomManaSymbols);
+  const customManaSymbols = useUIStore((s) => s.customManaSymbols);
+
+  // Custom mana upload state
+  const [isUploadingMana, setIsUploadingMana] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Text render errors from UI store
   const textRenderErrors = useUIStore((state) => state.textRenderErrors);
@@ -353,6 +368,73 @@ const TextTabComponent = () => {
   };
 
   /**
+   * Handle custom mana folder upload
+   * Processes uploaded image files and extracts symbol names from filenames
+   */
+  const handleCustomManaUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    setIsUploadingMana(true);
+    setUploadError(null);
+
+    try {
+      const { symbols, unmatched } = await processCustomManaFiles(files);
+
+      const symbolCount = Object.keys(symbols).length;
+
+      if (symbolCount === 0) {
+        setUploadError(
+          'No valid mana symbols found. Files should be named after symbols (e.g., w.png, wu.svg, 10.png).'
+        );
+        return;
+      }
+
+      // Generate a label from the first file's directory or use a generic name
+      const firstFile = files[0];
+      let setLabel = 'Custom Set';
+
+      // Try to extract folder name from webkitRelativePath if available
+      if (firstFile.webkitRelativePath) {
+        const parts = firstFile.webkitRelativePath.split('/');
+        if (parts.length > 1) {
+          setLabel = parts[0];
+        }
+      }
+
+      // Register the symbols
+      registerCustomManaSymbols(symbols, setLabel);
+
+      // Log unmatched files for debugging
+      if (unmatched.length > 0) {
+        console.log('Unmatched files:', unmatched);
+      }
+    } catch (error) {
+      console.error('Error processing custom mana files:', error);
+      setUploadError('Failed to process uploaded files.');
+    } finally {
+      setIsUploadingMana(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  /**
+   * Handle mana style selection change
+   * Handles both built-in sets and custom set
+   */
+  const handleManaStyleChange = (value: string) => {
+    if (value === 'custom') {
+      // Select the already-uploaded custom set
+      selectCustomManaSet();
+    } else {
+      // Select a built-in set (or default if empty)
+      selectBuiltInManaSet(value);
+    }
+  };
+
+  /**
    * Handle text change with smart quote conversion for rules field
    * Uses local state for immediate feedback, debounced store update
    *
@@ -550,6 +632,77 @@ const TextTabComponent = () => {
           </Tabs.Content>
         ))}
       </Tabs.Root>
+
+      {/* Mana Symbol Style Select */}
+      <VStack align="stretch" gap={2}>
+        <LabeledSelect
+          label="Mana Symbol Style"
+          value={globalManaPrefix}
+          onChange={handleManaStyleChange}
+          items={[
+            { label: 'Default (Standard)', value: '' },
+            ...BUILT_IN_MANA_SETS.map((set) => ({
+              label: set.name,
+              value: set.prefix,
+            })),
+            // Only show custom option if symbols have been uploaded
+            ...(Object.keys(customManaSymbols).length > 0
+              ? [{ label: `Custom: ${customManaSetLabel}`, value: 'custom' }]
+              : []),
+          ]}
+        />
+
+        {/* Custom Mana Upload */}
+        <Box>
+          <HStack gap={2}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              // @ts-expect-error - webkitdirectory is a non-standard attribute
+              webkitdirectory=""
+              style={{ display: 'none' }}
+              onChange={(e) => handleCustomManaUpload(e.target.files)}
+            />
+            <Button
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingMana}
+              border="2px solid"
+              borderColor="transparent"
+              borderRadius="md"
+              bg="rgba(0, 0, 0, 0.3)"
+              color="white"
+            >
+              {isUploadingMana ? 'Processing...' : 'Upload Custom Mana Folder'}
+            </Button>
+            {Object.keys(customManaSymbols).length > 0 && (
+              <Button
+                size="sm"
+                onClick={clearCustomManaSymbols}
+                border="2px solid"
+                borderColor="transparent"
+                borderRadius="md"
+                bg="rgba(120, 0, 0, 0.3)"
+                color="white"
+              >
+                Clear Custom
+              </Button>
+            )}
+          </HStack>
+          {uploadError && (
+            <Box color="red.300" fontSize="sm" mt={1}>
+              {uploadError}
+            </Box>
+          )}
+          {Object.keys(customManaSymbols).length > 0 && !uploadError && (
+            <Box color="green.300" fontSize="sm" mt={1}>
+              {Object.keys(customManaSymbols).length} custom symbols loaded
+            </Box>
+          )}
+        </Box>
+      </VStack>
 
       {/* Edit Bounds Drawer */}
       <DrawerRoot open={editBoundsOpen} onOpenChange={(e) => setEditBoundsOpen(e.open)} placement="end" size="md">

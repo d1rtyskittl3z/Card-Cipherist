@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import type { Card } from '../types/card.types';
 import type { FramePackTemplate } from '../components/frames/packs/types';
 import type { PackMetrics, RenderOptions, TextCanvasRefs } from '../renderer/text/types';
-import { SymbolAtlas, createStandardManaAtlas } from '../renderer/text/symbols';
+import { SymbolAtlas, createStandardManaAtlas, registerCustomManaSymbols } from '../renderer/text/symbols';
 import { renderField, createTempCanvases } from '../renderer/text/textRenderer';
 import { useUIStore } from '../store/uiStore';
 
@@ -29,6 +29,10 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
   // Error handling from UI store
   const setTextRenderError = useUIStore((state) => state.setTextRenderError);
   const clearTextRenderError = useUIStore((state) => state.clearTextRenderError);
+
+  // Custom mana symbol state for dynamic registration
+  const customManaSymbols = useUIStore((state) => state.customManaSymbols);
+  const customSymbolsVersion = useUIStore((state) => state.customSymbolsVersion);
 
   // Initialize symbol atlas on mount
   useEffect(() => {
@@ -55,6 +59,34 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
       cancelled = true;
     };
   }, []);
+
+  // Register custom mana symbols when they change
+  useEffect(() => {
+    if (!symbolAtlas) return;
+    if (Object.keys(customManaSymbols).length === 0) return;
+
+    let cancelled = false;
+
+    const registerSymbols = async () => {
+      try {
+        await registerCustomManaSymbols(symbolAtlas, customManaSymbols);
+        // Force re-render by creating a new reference
+        if (!cancelled) {
+          // The atlas is mutated in place, but we need to trigger a re-render
+          // by updating something that causes text to re-render
+          setSymbolAtlas(symbolAtlas);
+        }
+      } catch (error) {
+        console.error('Failed to register custom mana symbols:', error);
+      }
+    };
+
+    registerSymbols();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [symbolAtlas, customManaSymbols, customSymbolsVersion]);
 
   // Create temp canvases when card dimensions change
   useEffect(() => {
@@ -235,11 +267,19 @@ export function useTextFieldRenderer(card: Card, pack: FramePackTemplate | null)
       };
 
       // Validate required fields exist
-      // NOTE: For manaPlacement fields, width/height/y can be 0, so check for undefined/null instead
-      if (!fieldSpec.name || fieldSpec.y === undefined || fieldSpec.y === null ||
-          fieldSpec.width === undefined || fieldSpec.width === null ||
-          fieldSpec.height === undefined || fieldSpec.height === null ||
-          !fieldSpec.size) {
+      // NOTE: For manaPlacement/manaLayout fields, width/height can be 0 so check for undefined/null
+      // NOTE: For arcRadius fields (curved text), width/height are optional (defaults to full card size)
+      const usesAbsolutePositioning = !!(fieldSpec.manaPlacement || fieldSpec.manaLayout);
+      const usesArcText = !!(fieldSpec.arcRadius && fieldSpec.arcRadius > 0);
+      const needsBounds = !usesAbsolutePositioning && !usesArcText;
+      
+      if (!fieldSpec.name || fieldSpec.y === undefined || fieldSpec.y === null || !fieldSpec.size) {
+        return;
+      }
+      
+      // Only require width/height for fields that need bounded positioning
+      if (needsBounds && (fieldSpec.width === undefined || fieldSpec.width === null ||
+          fieldSpec.height === undefined || fieldSpec.height === null)) {
         return;
       }
 

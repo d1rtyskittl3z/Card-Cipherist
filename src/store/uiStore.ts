@@ -102,6 +102,39 @@ interface UIState {
   /** Whether to always use Nyx style for enchantments (not just creatures/artifacts) */
   autoFrameAlwaysNyx: boolean;
 
+  // ===== Custom Mana State =====
+
+  /**
+   * Global mana prefix applied to all text fields.
+   * When set, symbol lookup will try prefix+code before falling back to standard.
+   * Empty string means no global prefix (use default symbols).
+   */
+  globalManaPrefix: string;
+
+  /**
+   * Currently selected mana set identifier.
+   * Format: 'builtin:prefix' for built-in sets, or 'custom:name' for uploaded sets.
+   */
+  customManaSetName: string;
+
+  /**
+   * Map of uploaded custom mana symbols.
+   * Key: symbol name (e.g., 'w', 'u', 'b', 'wu'), Value: data URL of the image.
+   * These are loaded dynamically when a custom set is selected.
+   */
+  customManaSymbols: Record<string, string>;
+
+  /**
+   * Name/label of the currently uploaded custom mana set.
+   * Used for display in the UI.
+   */
+  customManaSetLabel: string;
+
+  /**
+   * Incremented whenever custom symbols are registered to trigger atlas refresh.
+   */
+  customSymbolsVersion: number;
+
   /**
    * Set the currently active tab
    * @param tab - Tab identifier (e.g., 'frame', 'text', 'art')
@@ -223,6 +256,44 @@ interface UIState {
    * @param value - True to always use Nyx, false for standard behavior
    */
   setAutoFrameAlwaysNyx: (value: boolean) => void;
+
+  // ===== Custom Mana Actions =====
+
+  /**
+   * Set the global mana prefix applied to all text fields
+   * @param prefix - Prefix string (empty string for default symbols)
+   */
+  setGlobalManaPrefix: (prefix: string) => void;
+
+  /**
+   * Set the currently selected mana set name
+   * @param setName - Set identifier ('builtin:prefix' or custom name)
+   */
+  setCustomManaSetName: (setName: string) => void;
+
+  /**
+   * Select a built-in mana set by prefix, updating both prefix and set name
+   * @param prefix - Built-in set prefix (empty string to clear)
+   */
+  selectBuiltInManaSet: (prefix: string) => void;
+
+  /**
+   * Register custom mana symbols from uploaded files.
+   * Stores the data URLs and updates the custom set name/label.
+   * @param symbols - Map of symbol names to data URLs
+   * @param setLabel - Display name for the custom set
+   */
+  registerCustomManaSymbols: (symbols: Record<string, string>, setLabel: string) => void;
+
+  /**
+   * Select the uploaded custom mana set, updating prefix and set name
+   */
+  selectCustomManaSet: () => void;
+
+  /**
+   * Clear the custom mana symbols and reset to default
+   */
+  clearCustomManaSymbols: () => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -249,6 +320,13 @@ export const useUIStore = create<UIState>()(
       autoFrameEnabled: false,
       autoFrameType: null,
       autoFrameAlwaysNyx: false,
+
+      // Custom Mana State
+      globalManaPrefix: '',
+      customManaSetName: '',
+      customManaSymbols: {},
+      customManaSetLabel: '',
+      customSymbolsVersion: 0,
 
       // Tab Management
       setCurrentTab: (tab) =>
@@ -348,6 +426,49 @@ export const useUIStore = create<UIState>()(
       setAutoFrameAlwaysNyx: (value) =>
         set((draft) => {
           draft.autoFrameAlwaysNyx = value;
+        }),
+
+      // Custom Mana Actions
+      setGlobalManaPrefix: (prefix) =>
+        set((draft) => {
+          draft.globalManaPrefix = prefix;
+        }),
+      setCustomManaSetName: (setName) =>
+        set((draft) => {
+          draft.customManaSetName = setName;
+        }),
+      selectBuiltInManaSet: (prefix) =>
+        set((draft) => {
+          draft.globalManaPrefix = prefix;
+          draft.customManaSetName = prefix ? `builtin:${prefix}` : '';
+        }),
+      registerCustomManaSymbols: (symbols, setLabel) =>
+        set((draft) => {
+          // Store the custom symbols and label
+          draft.customManaSymbols = symbols;
+          draft.customManaSetLabel = setLabel;
+          // Increment version to trigger atlas refresh
+          draft.customSymbolsVersion += 1;
+          // Auto-select the custom set
+          draft.globalManaPrefix = 'custom';
+          draft.customManaSetName = `custom:${setLabel}`;
+        }),
+      selectCustomManaSet: () =>
+        set((draft) => {
+          if (Object.keys(draft.customManaSymbols).length > 0) {
+            draft.globalManaPrefix = 'custom';
+            draft.customManaSetName = `custom:${draft.customManaSetLabel}`;
+          }
+        }),
+      clearCustomManaSymbols: () =>
+        set((draft) => {
+          draft.customManaSymbols = {};
+          draft.customManaSetLabel = '';
+          // If currently using custom set, reset to default
+          if (draft.globalManaPrefix === 'custom') {
+            draft.globalManaPrefix = '';
+            draft.customManaSetName = '';
+          }
         }),
     })),
     { name: 'UIStore' }

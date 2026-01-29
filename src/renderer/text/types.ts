@@ -56,8 +56,8 @@ export interface FieldSpec {
   // Position (fractional 0-1)
   x?: number;  // Optional for centered text (defaults to 0)
   y: number;
-  width: number;
-  height: number;
+  width?: number;  // Optional for arc text or absolute positioning (defaults to 1 = full width)
+  height?: number;  // Optional for arc text or absolute positioning (defaults to 1 = full height)
 
   // Typography
   size: number;               // Base size (fractional)
@@ -147,6 +147,7 @@ export interface SymbolInfo {
   width: number;             // Size multiplier
   height: number;            // Size multiplier
   yOffset?: number;          // Vertical offset multiplier (fractional)
+  spacing?: number;          // Custom spacing multiplier (negative = overlap)
   matchColor: boolean;       // Should match text color
   back?: string;             // Randomized back image pattern
   backs?: number;            // Number of back variants
@@ -192,6 +193,8 @@ export interface Line {
   y: number;                 // Relative to field top
   width: number;
   align: 'left' | 'center' | 'right';
+  arcRadius?: number;        // Arc radius for curved text (0 = normal)
+  arcStart?: number;         // Arc start angle for curved text
 }
 
 /**
@@ -306,6 +309,7 @@ export interface LayoutState {
   // Mana
   manaPlacementCounter: number;
   manaSymbolColor: string | null;
+  manaLayoutLineY?: number; // Y position for manaLayout line rendering
 
   // Arc
   arcRadius: number;

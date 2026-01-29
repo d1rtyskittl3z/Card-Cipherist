@@ -59,6 +59,7 @@ export interface TextConfig {
   manaPrefix?: string; // Alternative mana symbol directory (e.g., 'oilslick' → /img/manaSymbols/oilslick/oilslickw.svg)
   manaSymbolColor?: string; // Color override for mana symbols (e.g., '#24150E', 'white')
   manaPlacement?: { x: number[]; y: number[] }; // Manual positioning for each mana symbol (manaCost only, max 6 symbols)
+  manaLayout?: Array<{ max: number; size: number; pos: Array<[number, number]> }>; // Dynamic mana positioning based on symbol count
   noVerticalCenter?: boolean; // When used with manaPlacement, don't center align (used for custom layouts)
   vertical?: 'top' | 'center' | 'bottom' | boolean;
   horizontal?: 'left' | 'center' | 'right';
@@ -71,6 +72,9 @@ export interface TextConfig {
   italics?: boolean; // Render text in italic style
   bold?: boolean; // Render text in bold style
   fontStyle?: string; // CSS font-style prefix (e.g., 'bold', 'italic', 'italic bold')
+  arcRadius?: number; // Curved text arc radius (fractional, e.g., 2 for cartoony title)
+  arcStart?: number; // Arc starting position for curved text
+  manaImageScale?: number; // Scale multiplier for mana symbol images in text (e.g., 10/7 for cartoony)
 }
 
 export interface SagaPackConfig {

@@ -15,11 +15,13 @@ export interface StoredCard {
   card: Card;            // Full card data
   thumbnail?: string;    // Optional base64 thumbnail
   artImageData?: string; // Optional base64 art image
+  globalManaPrefix?: string; // Optional mana symbol style prefix
 }
 
 export interface LoadedCardData {
   card: Card;
   artImageData?: string;
+  globalManaPrefix?: string;
 }
 
 /**
@@ -96,13 +98,15 @@ function stripImageObjects(card: Card): Card {
  * @param customName - Optional custom name (falls back to card title)
  * @param thumbnail - Optional base64 thumbnail image
  * @param artImageData - Optional base64 art image
+ * @param globalManaPrefix - Optional mana symbol style prefix
  * @returns The ID of the saved card
  */
 export async function saveCard(
   card: Card,
   customName?: string,
   thumbnail?: string,
-  artImageData?: string
+  artImageData?: string,
+  globalManaPrefix?: string
 ): Promise<string> {
   const db = await initDB();
 
@@ -124,6 +128,7 @@ export async function saveCard(
       card: cleanCard,
       thumbnail,
       artImageData,
+      globalManaPrefix,
     };
 
     const request = objectStore.add(storedCard);
@@ -163,6 +168,7 @@ export async function loadCard(id: string): Promise<LoadedCardData | null> {
         resolve({
           card: storedCard.card,
           artImageData: storedCard.artImageData,
+          globalManaPrefix: storedCard.globalManaPrefix,
         });
       }
     };

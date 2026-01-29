@@ -41,7 +41,7 @@ export function createMaskObject(
 
   // Mark custom uploaded masks
   if (noThumb) {
-    (mask as any).noThumb = true;
+    mask.noThumb = true;
   }
 
   // Configure image loading

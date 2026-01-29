@@ -34,7 +34,7 @@ export function drawLayout(
 ): void {
   const textX = packMetrics.scaleX(fieldSpec.x ?? 0);
   const textY = packMetrics.scaleY(fieldSpec.y);
-  const textWidth = packMetrics.scaleWidth(fieldSpec.width);
+  const textWidth = packMetrics.scaleWidth(fieldSpec.width ?? 1);
 
   const paragraphCtx = tempCanvases.paragraph.getContext('2d')!;
   const lineCtx = tempCanvases.line.getContext('2d')!;
@@ -79,9 +79,20 @@ export function drawLayout(
     // Render glyphs to line canvas
     const symbolGlyphs: SymbolGlyph[] = [];
 
+    // Check if this line uses arc rendering
+    const isArcLine = line.arcRadius && line.arcRadius > 0;
+    
+    // Calculate card center X for arc text centering
+    const cardCenterX = packMetrics.cardWidth / 2;
+
     for (const glyph of line.glyphs) {
       if (glyph.type === 'text') {
-        drawTextGlyph(lineCtx, glyph as TextGlyph);
+        if (isArcLine) {
+          // Draw arc text
+          drawArcTextGlyph(lineCtx, glyph as TextGlyph, line.arcRadius!, line.arcStart ?? 0, cardCenterX);
+        } else {
+          drawTextGlyph(lineCtx, glyph as TextGlyph);
+        }
       } else if (glyph.type === 'symbol') {
         // Collect symbols for later rendering
         symbolGlyphs.push(glyph as SymbolGlyph);
@@ -163,6 +174,44 @@ function drawTextGlyph(ctx: CanvasRenderingContext2D, glyph: TextGlyph): void {
 }
 
 /**
+ * Draw a text glyph along an arc to canvas
+ * @param cardCenterX - Center X position of the card in pixels (for centering arc text)
+ */
+function drawArcTextGlyph(
+  ctx: CanvasRenderingContext2D,
+  glyph: TextGlyph,
+  arcRadius: number,
+  arcStart: number,
+  cardCenterX: number
+): void {
+  applyFontStyle(ctx, glyph.style);
+
+  const x = glyph.x + CANVAS_MARGIN;
+  const y = CANVAS_MARGIN + glyph.style.size * TEXT_FONT_HEIGHT_RATIO + glyph.y;
+
+  // Ensure shadow is disabled if offsets and blur are zero
+  const hasShadow = glyph.style.shadowOffsetX !== 0 ||
+                    glyph.style.shadowOffsetY !== 0 ||
+                    glyph.style.shadowBlur > 0;
+  if (!hasShadow) {
+    ctx.shadowColor = 'transparent';
+  }
+
+  // Use fillTextArc for curved text rendering
+  fillTextArc(
+    ctx,
+    glyph.text,
+    x,
+    y,
+    arcRadius,
+    arcStart,
+    glyph.x,  // distance from arc start (use glyph.x, not including margin)
+    glyph.style.outlineWidth,
+    cardCenterX
+  );
+}
+
+/**
  * Render mana symbols with outline support
  * Uses multi-pass rendering for outlines
  */
@@ -213,8 +262,9 @@ function renderManaSymbols(
     // Use the outline color from the symbol glyph (respects {outlinecolor...} command)
     outlineCtx.fillStyle = symbolData.outlineColor || 'black';
     outlineCtx.beginPath();
-    const centerX = symbolData.x + symbolData.width / 2;
-    const centerY = symbolData.y + symbolData.height / 2;
+    // Add CANVAS_MARGIN to match the symbol drawing position
+    const centerX = symbolData.x + CANVAS_MARGIN + symbolData.width / 2;
+    const centerY = symbolData.y + CANVAS_MARGIN + symbolData.height / 2;
     const baseRadius = Math.max(symbolData.width, symbolData.height) / 2;
     const outlineRadius = baseRadius + (symbolData.outlineWidth || 0) / 2;
     outlineCtx.arc(centerX, centerY + (symbolData.radius ?? 0), outlineRadius, 0, 2 * Math.PI);
@@ -247,11 +297,14 @@ function drawSymbolSimple(
   let imageToUse: HTMLImageElement | HTMLCanvasElement = symbolData.symbol.image;
   let backImageToUse = symbolData.backImage;
 
-  // Safari SVG shadow workaround: combine images first
-  if (
-    isSafari &&
-    (symbolData.symbol.image.src?.includes('.svg') || backImageToUse?.src?.includes('.svg'))
-  ) {
+  // Safari SVG shadow workaround OR cartoony symbols: combine images first
+  // Cartoony symbols need combined canvas because they have back images (splash backgrounds)
+  // that must be composited with the main symbol before shadows are applied
+  const isSvgSymbol =
+    symbolData.symbol.image.src?.includes('.svg') || backImageToUse?.src?.includes('.svg');
+  const isCartoonySymbol = symbolData.symbol.path?.includes('cartoony/');
+
+  if ((isSafari && isSvgSymbol) || isCartoonySymbol) {
     const combined = createCombinedSymbol(symbolData);
     imageToUse = combined;
     backImageToUse = undefined;
@@ -439,6 +492,7 @@ function pinlineColors(color: string): string {
 
 /**
  * Draw text along an arc
+ * @param cardCenterX - Center X position of the card in pixels (for centering arc text)
  */
 export function fillTextArc(
   ctx: CanvasRenderingContext2D,
@@ -448,10 +502,13 @@ export function fillTextArc(
   radius: number,
   startRotation: number,
   distance = 0,
-  outlineWidth = 0
+  outlineWidth = 0,
+  cardCenterX = 0
 ): void {
   ctx.save();
-  ctx.translate(x - distance + 0.5, y + radius);
+  // Center the arc text on the card by translating to cardCenterX
+  // Legacy code: this.translate(x - distance + scaleWidth(0.5), y + radius)
+  ctx.translate(x - distance + cardCenterX, y + radius);
   ctx.rotate(startRotation + widthToAngle(distance, radius));
 
   for (let i = 0; i < text.length; i++) {

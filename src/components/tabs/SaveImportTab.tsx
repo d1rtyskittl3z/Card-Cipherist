@@ -691,6 +691,7 @@ const SaveImportTabComponent = () => {
       const name = customSaveName.trim() || getCardName(card);
       const mediaSnapshot = useMediaStore.getState();
       const cardWithTransforms = mergeMediaTransformsIntoCard(card, mediaSnapshot);
+      const globalManaPrefix = useUIStore.getState().globalManaPrefix;
 
       // Update the card's artSource to use the base64 data
       // This ensures the art loads correctly when the card is reopened
@@ -698,7 +699,7 @@ const SaveImportTabComponent = () => {
         ? { ...cardWithTransforms, artSource: artImageData }
         : cardWithTransforms;
 
-      await saveCard(cardToSave, name, thumbnail, artImageData);
+      await saveCard(cardToSave, name, thumbnail, artImageData, globalManaPrefix);
 
       toaster.create({
         title: 'Card saved!',
@@ -731,9 +732,14 @@ const SaveImportTabComponent = () => {
           return;
         }
 
-        const { card: loadedCard, artImageData } = loadedData;
+        const { card: loadedCard, artImageData, globalManaPrefix } = loadedData;
         const hydratedCard = await hydrateImportedCard(JSON.stringify(loadedCard));
         setJsonText(JSON.stringify(hydratedCard, null, 2));
+
+        // Restore the mana symbol style if saved
+        if (globalManaPrefix) {
+          useUIStore.getState().setGlobalManaPrefix(globalManaPrefix);
+        }
 
         // Restore the art image if available
         let artImageForAutoFit: HTMLImageElement | null = useMediaStore.getState().artImage;
