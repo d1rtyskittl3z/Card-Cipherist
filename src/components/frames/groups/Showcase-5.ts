@@ -5,6 +5,7 @@ const group: LegacyGroup = {
   label: 'Showcase Frames',
   packs: [
     { kind: 'label', label: 'Set Showcase Frames (Chronological)' },
+    { kind: 'pack', label: 'Mystical Archive (SOA)', id:'MysticalArchiveSOA' },
     { kind: 'pack', label: 'Fable (ECL)', id:'FableECL' },
     { kind: 'pack', label: 'Neon Ink (TLA)', id:'NeonInk' },
     { kind: 'pack', label: 'Avatar Elemental (TLA)', id:'Elemental' },

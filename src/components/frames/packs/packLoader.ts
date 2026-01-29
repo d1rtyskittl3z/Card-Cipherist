@@ -241,6 +241,7 @@ import MiscCustom from './MiscCustom';
 import MysticalArchive from './MysticalArchive';
 import MysticalArchiveJP from './MysticalArchiveJP';
 import MysticalArchiveJPHorizontal from './MysticalArchiveJPHorizontal';
+import MysticalArchiveSOA from './MysticalArchiveSOA';
 import NeoBasics from './NeoBasics';
 import NeoNeon from './NeoNeon';
 import NeoNinja from './NeoNinja';
@@ -632,6 +633,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'MysticalArchive': MysticalArchive,
   'MysticalArchiveJP': MysticalArchiveJP,
   'MysticalArchiveJPHorizontal': MysticalArchiveJPHorizontal,
+  'MysticalArchiveSOA': MysticalArchiveSOA,
   'NEONeonShort': NEONeonShort,
   'NeonInk': NeonInk,
   'NeonInkTextless': NeonInkTextless,
