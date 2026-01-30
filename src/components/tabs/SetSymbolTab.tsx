@@ -210,6 +210,7 @@ const SetSymbolTabComponent = () => {
           'BOS',
           'DANDAN',
           'DREW',
+          'PYRAMID',
         ];
       }
 

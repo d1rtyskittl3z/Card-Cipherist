@@ -6,6 +6,7 @@ import { createError, ErrorType, logError, type Result, Ok, Err } from '../../..
 import ABU from './ABU';
 import Eighth from './8th';
 import EighthColorshifted from './8thColorshifted';
+import EighthLegendCrowns from './8thLegendCrowns';
 import EighthPlaytest from './8thPlaytest';
 import EighthSnow from './8thSnow';
 import EighthTransformBack from './8thTransformBack';
@@ -379,6 +380,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'ABU': ABU,
   '8th': Eighth,
   '8thColorshifted': EighthColorshifted,
+  '8thLegendCrowns': EighthLegendCrowns,
   '8thPlaytest': EighthPlaytest,
   '8thSnow': EighthSnow,
   '8thTransformBack': EighthTransformBack,
