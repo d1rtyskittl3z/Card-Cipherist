@@ -26,10 +26,19 @@ const frames: FrameItem[] = [
   { name: 'White Inner Crown (Companion)', src: '/img/frames/8th/crowns/inner/companion/w.png', bounds: innerBounds },
   { name: 'Blue Inner Crown (Companion)', src: '/img/frames/8th/crowns/inner/companion/u.png', bounds: innerBounds },
   { name: 'Black Inner Crown (Companion)', src: '/img/frames/8th/crowns/inner/companion/b.png', bounds: innerBounds },
-//   { name: 'Red Inner Crown (Companion)', src: '/img/frames/8th/crowns/inner/nycompanionx/r.png', bounds: innerBounds }, //MISSING
+  { name: 'Red Inner Crown (Companion)', src: '/img/frames/8th/crowns/inner/companion/r.png', bounds: innerBounds },
   { name: 'Green Inner Crown (Companion)', src: '/img/frames/8th/crowns/inner/companion/g.png', bounds: innerBounds },
   { name: 'Multicolored Inner Crown (Companion)', src: '/img/frames/8th/crowns/inner/companion/m.png', bounds: innerBounds },
   { name: 'Artifact Inner Crown (Companion)', src: '/img/frames/8th/crowns/inner/companion/a.png', bounds: innerBounds },
+  { name:'White Transform Legend Crown', src: '/img/frames/8th/crowns/transform/w.png', bounds, complementary:'Legend Crown Border Cover'},
+	{ name:'Blue Transform Legend Crown', src: '/img/frames/8th/crowns/transform/u.png', bounds, complementary:'Legend Crown Border Cover'},
+	{ name:'Black Transform Legend Crown', src: '/img/frames/8th/crowns/transform/b.png', bounds, complementary:'Legend Crown Border Cover'},
+	{ name:'Red Transform Legend Crown', src: '/img/frames/8th/crowns/transform/r.png', bounds, complementary:'Legend Crown Border Cover'},
+	{ name:'Green Transform Legend Crown', src: '/img/frames/8th/crowns/transform/g.png', bounds, complementary:'Legend Crown Border Cover'},
+	{ name:'Multicolored Transform Legend Crown', src: '/img/frames/8th/crowns/transform/m.png', bounds, complementary:'Legend Crown Border Cover'},
+	{ name:'Artifact Transform Legend Crown', src: '/img/frames/8th/crowns/transform/a.png', bounds, complementary:'Legend Crown Border Cover'},
+	{ name:'Land Transform Legend Crown', src: '/img/frames/8th/crowns/transform/l.png', bounds, complementary:'Legend Crown Border Cover'},
+	// { name:'Colorless Transform Legend Crown', src: '/img/frames/8th/crowns/transform/c.png', bounds, complementary:'Legend Crown Border Cover'}, //MISSING 
 ];
 
 // Template
