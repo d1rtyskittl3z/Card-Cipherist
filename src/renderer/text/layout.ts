@@ -869,8 +869,9 @@ function processSymbol(
   const backImage = getRandomBackImage(symbol, atlas);
 
   // For inline mana symbols (not manaLayout/manaPlacement), disable outlines
-  // as they look too prominent when mixed with text
-  const applyOutline = !!usesSpecialPlacement && state.style.outlineWidth > 0;
+  // as they look too prominent when mixed with text.
+  // Exception: dedicated manaCost fields (the whole field is mana, not mixed) do get outlines.
+  const applyOutline = (!!usesSpecialPlacement || !!fieldSpec.manaCost) && state.style.outlineWidth > 0;
 
   const glyph: SymbolGlyph = {
     type: 'symbol',

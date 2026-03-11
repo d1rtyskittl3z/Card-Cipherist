@@ -1309,13 +1309,12 @@ const FrameTabComponent = () => {
         applyNeoBasicsAdjustments();
       }
 
-      // Handle packs with nickname layouts: add nickname field once so swap logic can stay transparent
-      const nicknamePackName = `${loadedPack?.id ?? ''}${loadedPack?.label ?? ''}`.toLowerCase();
-      if (nicknamePackName.includes('nickname') && loadedPack?.text?.nickname) {
+      // Handle packs with nickname layouts: add nickname field once so swap logic can stay transparent.
+      // Triggers for any pack that defines text.nickname (not just packs with "nickname" in their name).
+      if (loadedPack?.text?.nickname) {
         const currentText = useCardStore.getState().card.text;
         if (currentText && !currentText.nickname) {
-          // Add the nickname text field from the pack's configuration
-          // Convert TextConfig to TextObject (fill in required fields with defaults)
+          // Add the nickname text field, seeding it with the existing title text
           const nicknameConfig = loadedPack.text.nickname;
           const nicknameField = {
             name: nicknameConfig.name,
@@ -1331,6 +1330,27 @@ const FrameTabComponent = () => {
             oneLine: nicknameConfig.oneLine,
           };
           useCardStore.getState().updateText('nickname', nicknameField);
+
+          // If the pack defines a repositioned title for use with nickname (e.g. FCA),
+          // update the title field to the subtitle position while preserving its text.
+          if (loadedPack.text.titleWithNickname) {
+            const twn = loadedPack.text.titleWithNickname;
+            useCardStore.getState().updateText('title', {
+              name: twn.name,
+              text: currentText.title?.text ?? '',
+              x: twn.x ?? 0,
+              y: twn.y,
+              width: twn.width,
+              height: twn.height,
+              size: twn.size,
+              font: twn.font,
+              color: twn.color,
+              align: twn.align,
+              oneLine: twn.oneLine,
+              outlineWidth: twn.outlineWidth,
+              outlineColor: twn.outlineColor,
+            });
+          }
         }
       }
 

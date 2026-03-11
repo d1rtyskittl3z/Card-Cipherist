@@ -97,6 +97,7 @@ import FABHeroes from './FABHeroes';
 import FABLight from './FABLight';
 import FABRegular from './FABRegular';
 import FABShadow from './FABShadow';
+import FCA from './FCA';
 import FableECL from './FableECL';
 import Fang from './Fang';
 import FNM from './FNM';
@@ -522,6 +523,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'FABLight': FABLight,
   'FABRegular': FABRegular,
   'FABShadow': FABShadow,
+  'FCA': FCA,
   'Fang': Fang,
   'FNM': FNM,
   'Fuse': Fuse,

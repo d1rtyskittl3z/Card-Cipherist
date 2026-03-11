@@ -566,7 +566,7 @@ const TextTabComponent = () => {
                     setSelectionEnd(target.selectionEnd);
                   }}
                   rows={6}
-                  placeholder="Enter text..."
+                  placeholder={loadedPack?.text?.[field.key]?.placeholder ?? 'Enter text...'}
                   css={{
                     textTransform: loadedPack?.text?.[field.key]?.allCaps ? 'uppercase' : 'none',
                   }}

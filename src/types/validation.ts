@@ -600,6 +600,7 @@ export const framePackTextConfigSchema = z.object({
   shadowColor: z.string().optional(),
   conditionalColor: z.string().optional(),
   rotation: z.number().optional(),
+  placeholder: z.string().optional(),
   allCaps: z.boolean().optional(),
   kerning: z.number().optional(),
   lineSpacing: z.number().optional(),

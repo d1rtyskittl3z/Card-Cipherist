@@ -66,6 +66,7 @@ export interface TextConfig {
   shadowColor?: string;
   conditionalColor?: string; // Color adjustments based on frame/mask selections (e.g., '(Back):white' or 'Frame1,Frame2:black')
   rotation?: number;
+  placeholder?: string; // Custom placeholder text shown in the text editor when the field is empty
   allCaps?: boolean; // Render text in all uppercase
   kerning?: number; // Letter spacing adjustment
   lineSpacing?: number; // Line spacing adjustment (fractional multiplier of text size)
