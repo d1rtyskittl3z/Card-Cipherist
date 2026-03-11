@@ -299,6 +299,7 @@ import PlaneswalkerTransformFrontDBL from './PlaneswalkerTransformFrontDBL';
 import PlaneswalkerTransformBackDBL from './PlaneswalkerTransformBackDBL';
 import PlaneswalkerTransformIcons from './PlaneswalkerTransformIcons';
 import Pipboy from './Pipboy';
+import PixelTMT from './PixelTMT';
 import Playtest from './Playtest';
 import Ravnica from './Ravnica';
 import Room from './Room';
@@ -709,6 +710,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'PlaneswalkerTransformBackDBL': PlaneswalkerTransformBackDBL,
   'PlaneswalkerTransformIcons': PlaneswalkerTransformIcons,
   'Pipboy': Pipboy,
+  'PixelTMT': PixelTMT,
   'Playtest': Playtest,
   'Ravnica': Ravnica,
   'M15TransformSnowFront': M15TransformSnowFront,

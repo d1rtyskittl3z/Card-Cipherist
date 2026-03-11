@@ -294,6 +294,10 @@ const PACK_PREFIX_CONFIGS: Record<string, PrefixConfig> = {
     codes: ['w', 'u', 'b', 'r', 'g', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'x'],
     extensions: ['.png', '.svg'], // PNG first since dm21 files are PNG
   },
+  pixel: {
+    codes: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'b', 'c', 'g', 'r', 't', 'u', 'w', 'x'],
+    extensions: ['.svg'],
+  },
 };
 
 async function loadPrefixedManaSymbols(

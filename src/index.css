@@ -309,6 +309,13 @@
 }
 
 @font-face {
+  font-family: 'pixelfont';
+  src: url('/fonts/PixelFont-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
   font-family: 'plantinmtprobold';
   src: url('/fonts/PlantinMTProBold.woff2') format('woff2');
   font-weight: normal;

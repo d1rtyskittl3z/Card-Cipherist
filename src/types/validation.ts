@@ -674,7 +674,7 @@ export const framePackTemplateSchema = z.object({
   saga: sagaPackConfigSchema.optional(),
   planeswalker: planeswalkerPackConfigSchema.optional(),
   qrCode: qrCodePackConfigSchema.optional(), // Optional QR code configuration for deck cover packs
-  replacementMasks: z.record(z.string(), z.string()).optional(),
+  replacementMasks: z.record(z.string(), z.union([z.string(), z.object({ src: z.string(), preserveAlpha: z.boolean().optional() })])).optional(),
   collectorInfoScale: z.number().optional(), // Scale multiplier for standard collector info
   collectorInfoOffsets: z.record(z.string(), z.object({ x: z.number(), y: z.number() })).optional(), // Position offsets for standard collector info fields
   frames: z.array(framePackFrameItemSchema).min(1, 'Frame pack must have at least one frame'),

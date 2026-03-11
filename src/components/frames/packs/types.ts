@@ -128,7 +128,7 @@ export interface FramePackTemplate {
   planeswalker?: PlaneswalkerPackConfig; // Optional Planeswalker configuration (loyalty layout defaults)
   class?: ClassPackConfig; // Optional Class configuration (level layout defaults)
   qrCode?: QRCodePackConfig; // Optional QR code configuration for deck cover packs
-  replacementMasks?: Record<string, string>; // Optional position mask overrides (e.g., 'Right Half': '/img/custom/mask.png')
+  replacementMasks?: Record<string, string | { src: string; preserveAlpha?: boolean }>; // Optional position mask overrides (e.g., 'Right Half': '/img/custom/mask.png' or { src: '...', preserveAlpha: true })
   collectorInfoScale?: number; // Optional scale multiplier for standard collector info text (default: 1.0)
   collectorInfoOffsets?: Record<string, { x: number; y: number }>; // Optional position offsets for standard collector info fields (normalized coordinates)
   frames: FrameItem[];

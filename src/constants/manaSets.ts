@@ -40,6 +40,7 @@ export const BUILT_IN_MANA_SETS: readonly ManaSetDefinition[] = [
   { name: 'Outline', prefix: 'outline', description: 'Outlined symbols' },
   { name: 'Outline Alt', prefix: 'outlineAlt', description: 'Alternative outlined symbols' },
   { name: 'Wanted', prefix: 'wanted', description: 'Western wanted poster style' },
+  { name: 'Pixel', prefix: 'pixel', description: 'TMNT Pixel style' },
 ] as const;
 
 /**
