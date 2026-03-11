@@ -26,7 +26,8 @@ Whenever the next full moon aligns with `npm run build` and succeeds three times
 
 #### Here is a list of currently supported Frame Packs: 
 
-* As of December 30, 2025 all frames with the exception of Planchase, Borderless Source Material, Cartoony and Pokemon are currently ported.
+* As of March 11, 2026 all frames with the exception of Pokemon are currently ported. In all honesty I might leave this one untill someone asks for it...
+* Overall, this port is about 95%-ish the same as CC. Yes, there are some functionalities that are missing and I will get to them. I have also added many of the PR's that have not been merged yet from CC and corrected know issues from the repo. You can check the commits...
 * ***NOTE:*** Further testing is needed to verify complete functionality. There are known issues that will be addressed in the future...
 
 ---
