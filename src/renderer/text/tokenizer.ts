@@ -200,7 +200,7 @@ function isSymbolCode(code: string): boolean {
   }
 
   // Special symbols
-  if (['h', 'chaos', 'planeswalker', 'tk', 'inf', 'alchemy'].includes(cleaned)) {
+  if (['h', 'chaos', 'planechase', 'planeswalker', 'tk', 'inf', 'alchemy'].includes(cleaned)) {
     return true;
   }
 

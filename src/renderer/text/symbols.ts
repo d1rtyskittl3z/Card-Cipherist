@@ -422,6 +422,10 @@ export async function createStandardManaAtlas(): Promise<SymbolAtlas> {
   );
   chaosSymbols.forEach(s => atlas.registerSymbol(s));
 
+  // Planechase (large chaos symbol — same image as {chaos} but 1.8× taller)
+  const planeSymbol = await loadManaSymbol('planechase', 'chaos.svg', { matchColor: true, width: 1.8, height: 1.8 });
+  atlas.registerSymbol(planeSymbol);
+
   // Token
   const tokenSymbols = await loadManaSymbols(
     ['tk'],
