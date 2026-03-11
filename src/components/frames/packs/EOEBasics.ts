@@ -1,5 +1,7 @@
 import type { FramePackTemplate, Mask, FrameItem } from './types';
 
+const bounds2 = {x: 46/2010, y: 55/2814, width: 1916/2010, height: 2151/2814};
+
 const masks: Mask[] = [
   { src: '/img/frames/textless/eoe/masks/maskPinlines.png', name: 'Pinlines' },
   { src: '/img/frames/textless/eoe/masks/maskSymbol.png', name: 'Mana Symbol' },
@@ -23,6 +25,9 @@ const frames: FrameItem[] = [
   { name: 'Colorless Frame', src: '/img/frames/textless/eoe/a.png', masks },
   { name: 'Waste Frame', src: '/img/frames/textless/eoe/L.png', masks },
   { name: 'Black (Alt) Frame', src: '/img/frames/textless/eoe/bAlt.png', masks },
+
+  { name: 'Dragon Overlay', src:'/img/frames/textless/eoe/dragonOverlay.svg', bounds:bounds2},
+
   { name: 'Plains Symbol', src: '/img/frames/textless/eoe/symbols/plains.png', masks: masks2 },
   { name: 'Island Symbol', src: '/img/frames/textless/eoe/symbols/island.png', masks: masks2 },
   { name: 'Swamp Symbol', src: '/img/frames/textless/eoe/symbols/swamp.png', masks: masks2 },
