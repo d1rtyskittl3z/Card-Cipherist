@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import electron from 'vite-plugin-electron/simple'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const enableElectron = process.env.ELECTRON !== 'false'
 
 // https://vitejs.dev/config/
