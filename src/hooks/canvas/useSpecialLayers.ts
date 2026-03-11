@@ -295,8 +295,8 @@ export const useSpecialLayers = ({
         serialX: card.serialX,
         serialY: card.serialY,
         serialScale: card.serialScale,
-        scaleX: (n) => n * frameCanvas.width,
-        scaleY: (n) => n * frameCanvas.height,
+        scaleX: (n) => Math.round((n + card.marginX) * card.width),
+        scaleY: (n) => Math.round((n + card.marginY) * card.height),
         writeText: (spec, ctx) => {
           ctx.save();
           let kerning = 0;
@@ -307,14 +307,14 @@ export const useSpecialLayers = ({
             text = text.replace(/^\{kerning\d+\}/, '');
           }
 
-          const xPx = (n: number) => n * frameCanvas.width;
-          const yPx = (n: number) => n * frameCanvas.height;
+          const xPx = (n: number) => Math.round((n + card.marginX) * card.width);
+          const yPx = (n: number) => Math.round((n + card.marginY) * card.height);
           const pxX = xPx(spec.x);
           const pxY = yPx(spec.y);
           const pxW = Math.max(1, Math.round(xPx(spec.x + spec.width) - pxX));
           const pxH = Math.max(1, Math.round(yPx(spec.y + spec.height) - pxY));
 
-          const fontPx = Math.max(1, Math.round(yPx(spec.size)));
+          const fontPx = Math.max(1, Math.round(spec.size * card.height));
           ctx.font = `${fontPx}px ${spec.font}`;
           ctx.fillStyle = spec.color;
           ctx.textBaseline = 'middle';
