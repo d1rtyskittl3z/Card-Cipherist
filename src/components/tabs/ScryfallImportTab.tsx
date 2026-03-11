@@ -13,6 +13,8 @@ import { useMediaStore } from '../../store/mediaStore';
 import { useImageLoader } from '../../hooks/useImageLoader';
 import { useState, useMemo, useEffect } from 'react';
 import { convertToSmartQuotes } from '../../utils/smartQuotes';
+import { autoSizePlaneswalkerAbilities } from '../../utils/planeswalkerHelpers';
+import { isPlaneswalkerVersion } from '../../constants/cardVersions';
 import {
   retryAsync,
   isNetworkError,
@@ -98,6 +100,7 @@ const ScryfallImportTabComponent = () => {
   const updateText = useCardStore((state) => state.updateText);
   const updateSetSymbol = useCardStore((state) => state.updateSetSymbol);
   const setSetCode = useCardStore((state) => state.setSetCode);
+  const setPlaneswalkerInfo = useCardStore((state) => state.setPlaneswalkerInfo);
   const setRarity = useCardStore((state) => state.setRarity);
   const setCollectorSetCode = useCardStore((state) => state.setCollectorSetCode);
   const setCollectorLanguage = useCardStore((state) => state.setCollectorLanguage);
@@ -174,6 +177,98 @@ const ScryfallImportTabComponent = () => {
     // Update the rules text field if we have any text
     if (rulesText) {
       updateText(TEXT_FIELDS.RULES, { text: rulesText });
+    }
+
+    // Hydrate planeswalker abilities if this is a planeswalker card
+    const currentVersion = useCardStore.getState().card.version;
+    if (isPlaneswalkerVersion(currentVersion) && card.oracle_text) {
+      // Clear rules text — planeswalker oracle text goes into ability fields, not rules
+      updateText(TEXT_FIELDS.RULES, { text: '' });
+
+      // Set loyalty
+      const loyalty = card.loyalty as string | undefined;
+      if (loyalty) {
+        updateText(TEXT_FIELDS.PW_LOYALTY, { text: loyalty });
+      }
+
+      // Parse abilities from oracle text
+      const rawAbilities = card.oracle_text.split('\n');
+
+      // Combine lines at the beginning that don't have loyalty costs into the first ability
+      const processedAbilities: string[] = [];
+      const staticAbility: string[] = [];
+      for (const line of rawAbilities) {
+        const trimmed = line.trim();
+        const hasLoyaltyCost =
+          /^[+\-\u2212 0][\dX]*\s*:/.test(trimmed) ||
+          /^\[[+\-\u2212 0][\dX]*\]/.test(trimmed);
+
+        if (hasLoyaltyCost) {
+          if (staticAbility.length > 0) {
+            processedAbilities.push(staticAbility.join('\n'));
+            staticAbility.length = 0;
+          }
+          processedAbilities.push(line);
+        } else {
+          staticAbility.push(line);
+        }
+      }
+      if (staticAbility.length > 0) {
+        processedAbilities.push(staticAbility.join('\n'));
+      }
+
+      // Replace loyalty ability brackets with curly brackets and extract costs
+      const abilities: [string, string, string, string] = ['', '', '', ''];
+      const abilityHeights: number[] = [0, 0, 0, 0];
+      const isTall =
+        currentVersion?.includes('planeswalkerTall') ||
+        currentVersion?.includes('planeswalkerCompleated');
+      const defaultBoxHeight = isTall ? 0.3572 : 0.2915;
+
+      for (let i = 0; i < Math.min(processedAbilities.length, 4); i++) {
+        let abilityText = processedAbilities[i]
+          .replace(/\[([+\-\u2212][\dX]+)\]/g, (_match, num: string) => {
+            return '{' + num.replace('\u2212', '-') + '}';
+          });
+
+        // Extract loyalty cost from beginning of line
+        let loyaltyCost = '';
+        const costMatch = abilityText.match(/^([+\-\u22120][\dX]*)\s*:\s*/);
+        if (costMatch) {
+          loyaltyCost = costMatch[1].replace('\u2212', '-');
+          abilityText = abilityText.substring(costMatch[0].length);
+        }
+
+        // Format reminder text as italic
+        abilityText = abilityText.replace('(', '{i}(').replace(')', '){/i}');
+
+        updateText(`ability${i}`, {
+          text: abilityText,
+          height: defaultBoxHeight / processedAbilities.length,
+        });
+        abilities[i] = loyaltyCost;
+        abilityHeights[i] = defaultBoxHeight / processedAbilities.length;
+      }
+
+      // Clear unused ability slots
+      for (let i = processedAbilities.length; i < 4; i++) {
+        updateText(`ability${i}`, { text: '', height: 0 });
+      }
+
+      setPlaneswalkerInfo({
+        abilities,
+        count: Math.min(processedAbilities.length, 4),
+      });
+
+      // Auto-size ability heights based on word count
+      const updatedCard = useCardStore.getState().card;
+      const autoSized = autoSizePlaneswalkerAbilities(updatedCard);
+      if (autoSized) {
+        for (const [key, textObj] of Object.entries(autoSized.text)) {
+          updateText(key, { y: textObj.y, height: textObj.height, size: textObj.size });
+        }
+        setPlaneswalkerInfo({ count: autoSized.count });
+      }
     }
 
     // Update the set symbol automatically using Card Cipherist source
