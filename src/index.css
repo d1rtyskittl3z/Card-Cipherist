@@ -357,6 +357,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'sewertmt-ccrumble';
+  src: url('/fonts/SewerTMT-CCRumble.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

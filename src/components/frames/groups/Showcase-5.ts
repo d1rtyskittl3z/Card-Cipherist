@@ -6,6 +6,7 @@ const group: LegacyGroup = {
   packs: [
     { kind: 'label', label: 'Set Showcase Frames (Chronological)' },
     { kind: 'pack', label: 'Pixel (TMT)', id:'PixelTMT' },
+    { kind: 'pack', label: 'Sewer (TMT)', id:'SewerTMT' },
     { kind: 'pack', label: 'Mystical Archive (SOA)', id:'MysticalArchiveSOA' },
     { kind: 'pack', label: 'Fable (ECL)', id:'FableECL' },
     { kind: 'pack', label: 'Neon Ink (TLA)', id:'NeonInk' },
