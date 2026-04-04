@@ -281,6 +281,7 @@ import IkoShort from './IkoShort';
 import LegendCrownsEtched from './LegendCrownsEtched';
 import Legends from './Legends';
 import Praetors from './Praetors';
+import Prepare from './Prepare';
 import FullText from './FullText';
 import FullTextAlt from './FullTextAlt';
 import StoneCutterDeluxe from './StoneCutterDeluxe';
@@ -692,6 +693,7 @@ const PACK_REGISTRY: Record<string, FramePackTemplate> = {
   'LegendCrownsEtched': LegendCrownsEtched,
   'Legends': Legends,
   'Praetors': Praetors,
+  'Prepare': Prepare,
   'FullText': FullText,
   'FullTextAlt': FullTextAlt,
   'Classicshifted': Classicshifted,

@@ -20,6 +20,7 @@ const group: LegacyGroup = {
     { kind: 'pack', label: 'Color Identity Pips', id: 'M15CIPips' },
     { kind: 'pack', label: '"The List" Stamp', id: 'TheList' },
     { kind: 'pack', label: 'Lands', id: 'M15Lands' },
+    { kind: 'pack', label: 'Prepare (Secrets of Strixhaven)', id: 'Prepare' },
     { kind: 'pack', label: 'Stations', id: 'StationRegular' },
     { kind: 'pack', label: 'Borderless Stations', id: 'StationBorderless' },
 

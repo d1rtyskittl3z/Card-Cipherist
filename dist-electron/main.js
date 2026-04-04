@@ -1,39 +1,55 @@
-import { app as n, BrowserWindow as i, ipcMain as d } from "electron";
-import { fileURLToPath as m } from "node:url";
-import e from "node:path";
-import p from "node:fs/promises";
-const c = e.dirname(m(import.meta.url));
-process.env.APP_ROOT = e.join(c, "..");
-const t = process.env.VITE_DEV_SERVER_URL, T = e.join(process.env.APP_ROOT, "dist-electron"), l = e.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = t ? e.join(process.env.APP_ROOT, "public") : l;
-let o;
-function a() {
-  o = new i({
-    icon: e.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+import { app, BrowserWindow, ipcMain } from "electron";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import fs from "node:fs/promises";
+const __dirname$1 = path.dirname(fileURLToPath(import.meta.url));
+process.env.APP_ROOT = path.join(__dirname$1, "..");
+const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
+const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+let win;
+function createWindow() {
+  win = new BrowserWindow({
+    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
-      preload: e.join(c, "preload.mjs")
+      preload: path.join(__dirname$1, "preload.mjs")
     }
-  }), o.webContents.on("did-finish-load", () => {
-    o == null || o.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
-  }), t ? o.loadURL(t) : o.loadFile(e.join(l, "index.html"));
+  });
+  win.webContents.on("did-finish-load", () => {
+    win?.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+  });
+  if (VITE_DEV_SERVER_URL) {
+    win.loadURL(VITE_DEV_SERVER_URL);
+  } else {
+    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+  }
 }
-n.on("window-all-closed", () => {
-  process.platform !== "darwin" && (n.quit(), o = null);
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+    win = null;
+  }
 });
-n.on("activate", () => {
-  i.getAllWindows().length === 0 && a();
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
 });
-n.whenReady().then(a);
-d.handle("read-custom-symbol-folders", async () => {
+app.whenReady().then(createWindow);
+ipcMain.handle("read-custom-symbol-folders", async () => {
   try {
-    const r = e.join(process.env.VITE_PUBLIC || "", "img", "setSymbols", "custom");
-    return (await p.readdir(r, { withFileTypes: !0 })).filter((s) => s.isDirectory()).map((s) => s.name);
-  } catch (r) {
-    return console.error("Error reading custom symbol folders:", r), [];
+    const customSymbolsPath = path.join(process.env.VITE_PUBLIC || "", "img", "setSymbols", "custom");
+    const entries = await fs.readdir(customSymbolsPath, { withFileTypes: true });
+    const folders = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+    return folders;
+  } catch (error) {
+    console.error("Error reading custom symbol folders:", error);
+    return [];
   }
 });
 export {
-  T as MAIN_DIST,
-  l as RENDERER_DIST,
-  t as VITE_DEV_SERVER_URL
+  MAIN_DIST,
+  RENDERER_DIST,
+  VITE_DEV_SERVER_URL
 };
